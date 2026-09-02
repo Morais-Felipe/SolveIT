@@ -132,8 +132,8 @@ Segredos de banco, JWT e SMTP deverão vir do ambiente ou de um cofre de segredo
 O back-end será um único deploy modular em Spring Boot. A separação por responsabilidade manterá regras de negócio nos serviços, contratos HTTP nos controllers e persistência nos repositories:
 
 ```text
-backend/
-└── src/main/java/.../solveit/
+solveit-api/
+└── src/main/java/com/solveit/
     ├── config/
     ├── controller/
     ├── dto/
