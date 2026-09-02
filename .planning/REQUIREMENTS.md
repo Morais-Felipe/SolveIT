@@ -113,16 +113,69 @@
 
 ## Traceability
 
-Preenchida durante a criação do roadmap.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| DATA-01 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-04 | Phase 1 | Pending |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Pending |
+| AUTH-06 | Phase 2 | Pending |
+| ADMN-01 | Phase 3 | Pending |
+| ADMN-02 | Phase 3 | Pending |
+| ADMN-03 | Phase 3 | Pending |
+| ADMN-04 | Phase 3 | Pending |
+| ADMN-05 | Phase 3 | Pending |
+| ADMN-06 | Phase 3 | Pending |
+| TICK-01 | Phase 3 | Pending |
+| TICK-02 | Phase 3 | Pending |
+| TICK-03 | Phase 3 | Pending |
+| TICK-04 | Phase 3 | Pending |
+| TICK-05 | Phase 3 | Pending |
+| TICK-06 | Phase 3 | Pending |
+| TICK-07 | Phase 3 | Pending |
+| TICK-08 | Phase 3 | Pending |
+| TICK-09 | Phase 3 | Pending |
+| TICK-10 | Phase 3 | Pending |
+| TICK-11 | Phase 3 | Pending |
+| TICK-12 | Phase 3 | Pending |
+| COLL-01 | Phase 3 | Pending |
+| COLL-02 | Phase 3 | Pending |
+| COLL-03 | Phase 3 | Pending |
+| COLL-04 | Phase 3 | Pending |
+| MAIL-01 | Phase 4 | Pending |
+| MAIL-02 | Phase 4 | Pending |
+| MAIL-03 | Phase 4 | Pending |
+| MAIL-04 | Phase 4 | Pending |
+| MAIL-05 | Phase 4 | Pending |
+| MAIL-06 | Phase 4 | Pending |
+| DASH-01 | Phase 5 | Pending |
+| DASH-02 | Phase 5 | Pending |
+| DASH-03 | Phase 5 | Pending |
+| DASH-04 | Phase 5 | Pending |
+| DASH-05 | Phase 5 | Pending |
+| WEB-01 | Phase 6 | Pending |
+| WEB-02 | Phase 6 | Pending |
+| WEB-03 | Phase 6 | Pending |
+| WEB-04 | Phase 6 | Pending |
+| WEB-05 | Phase 6 | Pending |
+| WEB-06 | Phase 7 | Pending |
+| WEB-07 | Phase 7 | Pending |
+| QUAL-01 | Phase 7 | Pending |
+| QUAL-02 | Phase 7 | Pending |
+| QUAL-03 | Phase 7 | Pending |
+| QUAL-04 | Phase 7 | Pending |
+| QUAL-05 | Phase 7 | Pending |
 
 **Coverage:**
-- v1 requirements: 53 total
-- Mapped to phases: 0
-- Unmapped: 53
+- v1 requirements: 55 total
+- Mapped to phases: 55
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-09-02*
-*Last updated: 2026-09-02 after initial definition*
+*Last updated: 2026-09-02 after roadmap creation*
