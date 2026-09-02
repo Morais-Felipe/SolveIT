@@ -44,6 +44,7 @@ Permitir que um chamado percorra seu fluxo completo com autorização correta, h
 - Toda mudança de status deve ser atômica com a criação do respectivo histórico.
 - O documento de origem define as rotas REST, notificações, estrutura do back-end e uma ordem inicial de desenvolvimento.
 - A direção visual do front-end está registrada em `docs/design/SOLVEIT-UI-REFERENCE.md`: tema escuro, destaque laranja, navegação lateral e telas densas baseadas em cards, tabelas e gráficos.
+- O fluxo de versionamento está registrado em `docs/GIT-WORKFLOW.md`: uma branch por ticket, commits atômicos, push após validação e integração na `main` somente com aprovação.
 
 ## Constraints
 
@@ -68,6 +69,7 @@ Permitir que um chamado percorra seu fluxo completo com autorização correta, h
 | Front-end React responsivo com Tailwind | Entregar experiências específicas por perfil em uma aplicação web única | — Pending |
 | Desenvolvimento incremental e explicativo | O objetivo principal inclui compreensão, não apenas entrega | — Pending |
 | Usar `docs/design/SOLVEIT-UI-REFERENCE.md` como contrato visual da Fase 6 | Preservar a aparência aprovada sem transformar elementos ilustrativos em novos requisitos | — Pending |
+| Adotar branch e push por ticket conforme `docs/GIT-WORKFLOW.md` | Permitir revisão, rollback e continuidade segura entre computadores sem levar trabalho incompleto à `main` | — Pending |
 
 ## Evolution
 
@@ -87,4 +89,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-02 after visual reference registration*
+*Last updated: 2026-09-02 after Git workflow definition*

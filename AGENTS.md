@@ -220,6 +220,15 @@ Use these entry points:
 Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
 <!-- GSD:workflow-end -->
 
+## Git e GitHub por ticket
+
+- A política obrigatória está em `docs/GIT-WORKFLOW.md` e deve ser lida antes de iniciar qualquer ticket.
+- Use uma branch `ticket/NN-descricao-curta`; não implemente tickets diretamente na `main`.
+- Planeje e obtenha aprovação antes de escrever código.
+- Faça commits atômicos durante o ticket e push da branch após testes, resumo e aprovação.
+- Integre na `main` somente após confirmação explícita do usuário.
+- Para continuar em outra máquina no meio de um ticket, registre um checkpoint e faça push da branch sem integrá-la.
+
 <!-- GSD:profile-start -->
 
 ## Developer Profile
