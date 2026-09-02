@@ -43,6 +43,7 @@ Permitir que um chamado percorra seu fluxo completo com autorização correta, h
 - O fluxo permitido é ABERTO → EM_ANDAMENTO → RESOLVIDO → FECHADO, com cancelamento de ABERTO pelo solicitante e de EM_ANDAMENTO pelo administrador.
 - Toda mudança de status deve ser atômica com a criação do respectivo histórico.
 - O documento de origem define as rotas REST, notificações, estrutura do back-end e uma ordem inicial de desenvolvimento.
+- A direção visual do front-end está registrada em `docs/design/SOLVEIT-UI-REFERENCE.md`: tema escuro, destaque laranja, navegação lateral e telas densas baseadas em cards, tabelas e gráficos.
 
 ## Constraints
 
@@ -66,6 +67,7 @@ Permitir que um chamado percorra seu fluxo completo com autorização correta, h
 | Regras de transição concentradas na camada de serviço | Manter invariantes do domínio fora dos controllers e permitir testes unitários | — Pending |
 | Front-end React responsivo com Tailwind | Entregar experiências específicas por perfil em uma aplicação web única | — Pending |
 | Desenvolvimento incremental e explicativo | O objetivo principal inclui compreensão, não apenas entrega | — Pending |
+| Usar `docs/design/SOLVEIT-UI-REFERENCE.md` como contrato visual da Fase 6 | Preservar a aparência aprovada sem transformar elementos ilustrativos em novos requisitos | — Pending |
 
 ## Evolution
 
@@ -85,4 +87,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-02 after initialization*
+*Last updated: 2026-09-02 after visual reference registration*
