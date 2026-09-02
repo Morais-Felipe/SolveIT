@@ -1,0 +1,13 @@
+# Local Codex/GSD runtime installation
+.codex/
+
+# Local-only environment and secret files
+.env
+.env.*
+!.env.example
+
+# IDE and OS metadata
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
