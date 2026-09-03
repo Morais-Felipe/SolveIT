@@ -4,10 +4,10 @@ current_phase: 01
 current_phase_name: Base do Projeto
 status: executing
 stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-09-03T16:23:33.466Z"
+last_updated: "2026-09-03T16:46:52.811Z"
 last_activity: 2026-09-03
 last_activity_desc: Ticket 02 implementado e validado localmente; aguardando autorização para publicação.
-state_head: 77072a3c23326ea0f1b9617f39c019dffb3d6e76
+state_head: 6c3266c203df1c2bbdd0fd351bc68e8bc37aa9ce
 progress:
   total_phases: 7
   completed_phases: 0
@@ -90,6 +90,7 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260902-et2 | Criar README completo do SolveIT inspirado na organização do README do GSD Core | 2026-09-02 | 6cf0155 | [260902-et2-criar-readme-completo-do-solveit-inspira](./quick/260902-et2-criar-readme-completo-do-solveit-inspira/) |
+| 2 | Adicionar modo pedagógico obrigatório ao AGENTS.md | 2026-09-03 | 6c3266c | — |
 
 ## Deferred Items
 
