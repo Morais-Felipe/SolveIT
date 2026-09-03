@@ -26,13 +26,14 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   2. Um banco vazio recebe todas as entidades, relações, restrições e índices ao executar as migrações Flyway.
   3. A aplicação valida a correspondência entre esquema Flyway e modelo JPA sem criar tabelas automaticamente.
   4. Dados persistidos respeitam enums, relações, nulabilidade e unicidade do domínio.
+
 **Plans**: 5 planos sequenciais
 
 **Wave 1**
 - [x] `01-01-PLAN.md` — Bootstrap Spring Boot/Maven e configuração MySQL
 
 **Wave 2** *(bloqueada pela conclusão e integração da Wave 1)*
-- [ ] `01-02-PLAN.md` — Enums canônicos do domínio
+- [x] `01-02-PLAN.md` — Enums canônicos do domínio
 
 **Wave 3** *(bloqueada pela conclusão e integração da Wave 2)*
 - [ ] `01-03-PLAN.md` — Entidades e mapeamentos JPA
@@ -126,7 +127,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Base do Projeto | 1/5 | In Progress | - |
+| 1. Base do Projeto | 2/5 | In Progress | - |
 | 2. Autenticação | 0/TBD | Not started | - |
 | 3. Core de Chamados | 0/TBD | Not started | - |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |

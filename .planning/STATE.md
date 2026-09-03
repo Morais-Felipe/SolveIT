@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 current_phase: 01
 current_phase_name: Base do Projeto
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-09-03T10:54:29.994Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-09-03T16:23:33.466Z"
 last_activity: 2026-09-03
-last_activity_desc: Ticket 01 implementado e validado localmente; aguardando autorização para publicação.
-state_head: 57f1eaa4fa50b0b6a8b02b452a9c4006734c1b69
+last_activity_desc: Ticket 02 implementado e validado localmente; aguardando autorização para publicação.
+state_head: 77072a3c23326ea0f1b9617f39c019dffb3d6e76
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
-  percent: 20
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 ## Current Position
 
 Phase: 01 (Base do Projeto) — IN PROGRESS
-Plan: 1 of 5 in current phase
-Status: Ticket 01 complete locally; awaiting publication approval
-Last activity: 2026-09-03 — Ticket 01 implemented and validated locally.
+Plan: 2 of 5 in current phase
+Status: Ticket 02 complete locally; awaiting publication approval
+Last activity: 2026-09-03 — Ticket 02 implemented and validated locally.
 
-Progress: [██░░░░░░░░] 20%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [██░░░░░░░░] 20%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 01 P01 | 12 min | 1 tasks | 8 files |
+| Phase 01 P02 | 3 min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 01]: Maven Wrapper 3.3.4 usa only-script, Maven 3.9.16 fixo e checksum SHA-256 da distribuição.
 - [Phase 01]: Credenciais MySQL do perfil dev são fornecidas somente por DB_USERNAME e DB_PASSWORD.
 - [Phase 01]: Flyway é a única autoridade DDL; Hibernate permanece em ddl-auto=validate.
+- [Phase 01]: Enums de domínio permanecem mínimos e sem regras de autorização, transição ou apresentação.
+- [Phase 01]: Enums serão persistidos por nome com EnumType.STRING; reordenação não altera dados, renomeação exige migração.
 
 ### Pending Todos
 
@@ -96,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-03T10:54:29.956Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-09-03T16:23:33.418Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None
