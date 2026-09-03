@@ -29,7 +29,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 **Plans**: 5 planos sequenciais
 
 **Wave 1**
-- [ ] `01-01-PLAN.md` — Bootstrap Spring Boot/Maven e configuração MySQL
+- [x] `01-01-PLAN.md` — Bootstrap Spring Boot/Maven e configuração MySQL
 
 **Wave 2** *(bloqueada pela conclusão e integração da Wave 1)*
 - [ ] `01-02-PLAN.md` — Enums canônicos do domínio
@@ -126,7 +126,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Base do Projeto | 0/TBD | Not started | - |
+| 1. Base do Projeto | 1/5 | In Progress | - |
 | 2. Autenticação | 0/TBD | Not started | - |
 | 3. Core de Chamados | 0/TBD | Not started | - |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
