@@ -1,0 +1,48 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": null,
+  "phases": [
+    {
+      "number": "1",
+      "name": "Base do Projeto",
+      "status": "pending"
+    },
+    {
+      "number": "2",
+      "name": "Autenticação",
+      "status": "pending"
+    },
+    {
+      "number": "3",
+      "name": "Core de Chamados",
+      "status": "pending"
+    },
+    {
+      "number": "4",
+      "name": "Notificações por E-mail",
+      "status": "pending"
+    },
+    {
+      "number": "5",
+      "name": "Dashboard",
+      "status": "pending"
+    },
+    {
+      "number": "6",
+      "name": "Front-end (React + Tailwind)",
+      "status": "pending"
+    },
+    {
+      "number": "7",
+      "name": "Polimento e Qualidade",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 1 of 7 · 0% · executing"
+  },
+  "updated_at": "2026-09-03T10:29:05.703Z"
+}
