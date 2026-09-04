@@ -30,6 +30,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -320,7 +321,8 @@ class PersistenceIntegrationTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
         assertThatThrownBy(() -> insertUser(
                 "Perfil inválido", uniqueEmail("perfil-invalido"), "SUPER_USUARIO"))
-                .isInstanceOf(DataIntegrityViolationException.class);
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_usuario_perfil");
         assertThatThrownBy(() -> jdbcTemplate.update("""
                 INSERT INTO chamado (
                     titulo, descricao, status, prioridade, solicitante_id, atendente_id,
@@ -434,20 +436,19 @@ class PersistenceIntegrationTest {
     private ConfigurableApplicationContext startIsolatedContext() {
         return new SpringApplicationBuilder(SolveItApplication.class)
                 .web(WebApplicationType.NONE)
-                .properties(
-                        "spring.profiles.active=test",
-                        "spring.datasource.url=" + MYSQL.getJdbcUrl(),
-                        "spring.datasource.username=" + MYSQL.getUsername(),
-                        "spring.datasource.password=" + MYSQL.getPassword(),
-                        "spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver",
-                        "spring.datasource.hikari.maximum-pool-size=2",
-                        "spring.flyway.enabled=true",
-                        "spring.flyway.locations=classpath:db/migration",
-                        "spring.jpa.open-in-view=false",
-                        "spring.jpa.hibernate.ddl-auto=validate",
-                        "spring.jpa.properties.hibernate.jdbc.time_zone=UTC",
-                        "spring.main.banner-mode=off")
-                .run();
+                .run(
+                        "--spring.profiles.active=test",
+                        "--spring.datasource.url=" + MYSQL.getJdbcUrl(),
+                        "--spring.datasource.username=" + MYSQL.getUsername(),
+                        "--spring.datasource.password=" + MYSQL.getPassword(),
+                        "--spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver",
+                        "--spring.datasource.hikari.maximum-pool-size=2",
+                        "--spring.flyway.enabled=true",
+                        "--spring.flyway.locations=classpath:db/migration",
+                        "--spring.jpa.open-in-view=false",
+                        "--spring.jpa.hibernate.ddl-auto=validate",
+                        "--spring.jpa.properties.hibernate.jdbc.time_zone=UTC",
+                        "--spring.main.banner-mode=off");
     }
 
     private List<String> successfulMigrationVersions() {
