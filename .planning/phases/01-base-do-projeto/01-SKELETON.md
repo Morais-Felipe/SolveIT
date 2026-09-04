@@ -38,7 +38,7 @@ O “usuário” desta história é o desenvolvedor do SolveIT. O fluxo observá
 
 O template genérico de Phase 1 sugere rota e UI. Essa sugestão entra em conflito com as fontes canônicas do SolveIT, que fixam a ordem dos cinco tickets de backend/banco e reservam frontend para a Fase 6. A decisão de maior autoridade é preservar a ordem `setup → enums → entidades → repositories → migrations/teste`. Portanto, o tracer do projeto nesta fase é a persistência observável pelo desenvolvedor; UI e routing de negócio são proibidos no escopo da Fase 1.
 
-Os cinco PLANs formam uma única coluna vertebral sequencial, ativada de ponta a ponta no Ticket 05. Eles não autorizam execução automática da fase inteira. O contrato do orquestrador em `01-EXECUTION-PROTOCOL.md` despacha um PLAN por vez: a aprovação pré-código ocorre antes do despacho; o executor implementa, valida, cria e commita o SUMMARY e retorna; depois o orquestrador conduz aprovação de push/PR, aprovação humana separada de merge e prova em `origin/main` antes do próximo ticket. Esse fluxo pós-SUMMARY fica deliberadamente fora do XML das tasks.
+Os cinco PLANs formam uma única coluna vertebral sequencial, ativada de ponta a ponta no Ticket 05. Eles não autorizam execução automática da fase inteira. O contrato do orquestrador em `01-EXECUTION-PROTOCOL.md` despacha um PLAN por vez: a aprovação pré-código ocorre antes do despacho; o executor implementa, valida, cria e commita o SUMMARY e retorna; depois o orquestrador conduz autorizações independentes para push, criação ou atualização do PR e merge, seguidas da prova em `origin/main` antes do próximo ticket. Esse fluxo pós-SUMMARY fica deliberadamente fora do XML das tasks.
 
 ## Physical Contract
 

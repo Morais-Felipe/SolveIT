@@ -92,8 +92,8 @@ Based on the combined research, use seven phases. Each phase should remain expla
 
 ### Phase 1: Data and API Foundation
 
-**Rationale:** Every feature depends on relational invariants, migrations, DTO boundaries, errors, and concurrency metadata. Retrofitting these after endpoints exist is expensive and risky.
-**Delivers:** Spring Boot skeleton, MySQL 8.4/Flyway setup, enums/entities/repositories, numbered schema with constraints/indexes, DTO/error envelope, clean-schema integration test, and chosen optimistic-lock field.
+**Rationale:** Every feature depends on relational invariants, migrations, entity boundaries, and concurrency metadata. Retrofitting these after endpoints exist is expensive and risky.
+**Delivers:** Spring Boot skeleton, MySQL 8.4/Flyway setup, enums/entities/repositories, numbered schema with constraints/indexes, clean-schema integration test, and chosen optimistic-lock field. DTOs and the HTTP error envelope begin with the endpoint-bearing phases, not Phase 1.
 **Addresses:** Core data model and reproducible persistence foundation.
 **Avoids:** Flyway/Hibernate drift, entity serialization, enum ordinals, missing constraints, and late concurrency retrofits.
 
@@ -179,7 +179,7 @@ Phases with standard patterns (skip research-phase unless requirements change):
 - **Concurrency policy:** Confirm `@Version` as the default and identify any assignment operation that warrants a pessimistic lock through tests.
 - **Notification durability:** Obtain explicit acceptance of best-effort after-commit delivery or plan an outbox; define retry count, deduplication key, and failure visibility.
 - **Dashboard scope and metric definitions:** Clarify global versus assigned-only attendant data and the exact status set used for “active” totals.
-- **Pagination scope discrepancy:** Research recommends all ticket lists be bounded and stable, while feature notes describe broad pagination as potentially v1.x; requirements should make safe bounded pagination part of v1 for operational endpoints.
+- **Pagination scope resolved:** v1 operational lists use bounded page sizes, allowlisted sort keys and a deterministic tiebreaker; refinements beyond that baseline require later validation.
 - **Deployment/security context:** Production origin, HTTPS termination, secret storage, SMTP provider, and browser support are not yet defined; validate before deployment work.
 - **Product validation:** No SolveIT user interviews or usage data exist. Treat every post-v1 feature as a hypothesis, not roadmap commitment.
 

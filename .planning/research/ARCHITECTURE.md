@@ -234,7 +234,7 @@ Microservices add network failure, distributed transactions, duplicated authoriz
 
 ## Sensible Build Order
 
-1. **Schema and domain foundation:** enums, Flyway tables/constraints/indexes, entities, repositories, DTO/error envelope. Add the concurrency field/strategy now because retrofitting it after workflows exist is riskier.
+1. **Schema and domain foundation:** enums, Flyway tables/constraints/indexes, entities and repositories. Add the concurrency field/strategy now because retrofitting it after workflows exist is riskier; introduce DTOs and the HTTP error envelope with the first endpoint-bearing phases.
 2. **Authentication and authorization skeleton:** JWT, BCrypt, active-user loading, security configuration, authenticated principal, service authorization helpers, and endpoint-security tests.
 3. **Reference administration:** categories and users. These provide valid actors/categories for ticket workflows.
 4. **Vertical ticket core:** open/list/detail first, then edit; all responses use DTOs and all lists are scoped/paged.

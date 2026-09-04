@@ -99,7 +99,7 @@ Fluxos completos ──> testes críticos e revisão de segurança
 - [ ] Perfis `SOLICITANTE`, `ATENDENTE` e `ADMIN` com autorização server-side por papel e relação.
 - [ ] Administração de usuários e categorias por Admin, com ativação/desativação.
 - [ ] Abertura de chamado com categoria e prioridade.
-- [ ] Listagem por perfil, filtros previstos e detalhe completo.
+- [ ] Listagem por perfil com paginação limitada, ordenação determinística, filtros previstos e detalhe completo.
 - [ ] Edição de título/descrição somente quando `ABERTO` e pelo dono ou Admin.
 - [ ] Atribuição de atendente com transição automática para `EM_ANDAMENTO`.
 - [ ] Todas as transições e cancelamentos do fluxo definido, sem reabertura.
@@ -112,7 +112,6 @@ Fluxos completos ──> testes críticos e revisão de segurança
 
 ### Add After Validation (v1.x, Only With Explicit Scope Decision)
 
-- [ ] Paginação consistente em filas de chamados — adicionar se volume real tornar listas lentas ou difíceis de navegar.
 - [ ] Recuperação de senha — adicionar quando houver SMTP de produção e fluxo de token seguro; é uma lacuna operacional comum, mas não está nas rotas de v1.
 - [ ] Preferências/registro de entrega de notificações — adicionar se falhas ou excesso de e-mails aparecerem na validação.
 - [ ] Exportação simples de indicadores — adicionar apenas se administradores demonstrarem uma necessidade recorrente de análise externa.

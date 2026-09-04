@@ -173,12 +173,12 @@ Exact npm patches should be captured by the lockfile. Re-check versions and rele
 
 - Use JavaScript/JSX unless the project explicitly chooses TypeScript before front-end scaffolding.
 - Keep the back end a single deployable modular monolith and the front end a separate Vite application.
-- Send email synchronously only behind an `EmailService` boundary at first, with finite timeouts and explicit failure behavior; do not add Kafka/RabbitMQ.
+- Keep SMTP behind an `EmailService` boundary with finite timeouts, and dispatch only after the ticket transaction commits; Phase 4 must explicitly choose best-effort delivery or a durable outbox. Do not add Kafka/RabbitMQ by default.
 - Use JJWT for self-issued short-lived access tokens and Spring Security for all authorization decisions.
 
 **When production reliability requirements become explicit:**
 
-- Add an outbox/job mechanism for reliable asynchronous email rather than sending SMTP inside the database transaction.
+- Add an outbox/job mechanism when Phase 4 requires durable asynchronous delivery; never send SMTP inside the database transaction.
 - Add Actuator health/readiness and structured logging before adding a full observability stack.
 - Add refresh-token rotation only with a documented revocation/storage design; do not casually turn access JWTs into long-lived credentials.
 

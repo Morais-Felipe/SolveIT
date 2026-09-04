@@ -4,7 +4,7 @@
 
 ### Chamados de suporte com autorização correta, histórico auditável e comunicação clara
 
-![Status: Planejamento](https://img.shields.io/badge/status-planejamento-6b7280)
+![Status: Fase 1 concluída](https://img.shields.io/badge/status-fase%201%20conclu%C3%ADda-22c55e)
 ![Abordagem: Build to Learn](https://img.shields.io/badge/abordagem-Build%20to%20Learn-f97316)
 ![Java 17](https://img.shields.io/badge/Java-17-007396)
 ![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3-6DB33F)
@@ -14,11 +14,11 @@
 </div>
 
 > [!IMPORTANT]
-> **Projeto em planejamento.** Nenhuma das sete fases foi implementada: o progresso atual é 0%, com a Fase 1 — Base do Projeto — pronta para ser planejada. Ainda não existem aplicação executável, comandos de instalação ou execução, endpoints disponíveis, build publicado ou deploy. As seções abaixo descrevem contratos e decisões planejados para o produto.
+> **Fase 1 concluída e verificada.** A base Spring Boot, o modelo JPA, os repositories, as migrações Flyway e o teste integrado em MySQL 8.4 estão implementados: 1 de 7 fases (14%). A Fase 2 — Autenticação — é o próximo foco, ainda sem plano iniciado. Ainda não existem endpoints de negócio, telas, build publicado ou deploy; as seções correspondentes continuam descrevendo contratos planejados.
 
 ## O que é o SolveIT
 
-O SolveIT será um sistema web para abertura e gerenciamento de chamados de suporte técnico. Solicitantes poderão registrar e acompanhar problemas, atendentes conduzirão o atendimento e administradores gerenciarão a operação, os usuários, as categorias e os indicadores.
+O SolveIT é um sistema web em construção para abertura e gerenciamento de chamados de suporte técnico. Solicitantes poderão registrar e acompanhar problemas, atendentes conduzirão o atendimento e administradores gerenciarão a operação, os usuários, as categorias e os indicadores.
 
 O projeto nasce como uma aplicação educacional construída do zero. Seu valor central é permitir que um chamado percorra todo o ciclo com autorização validada no servidor, comunicação entre os envolvidos e uma trilha de auditoria que explique cada mudança de status.
 
@@ -34,14 +34,14 @@ O objetivo não é apenas chegar a uma aplicação funcional. A abordagem **Buil
 
 | Item | Situação |
 | --- | --- |
-| Estado do repositório | Planejamento |
-| Fases implementadas | 0 de 7 |
-| Progresso | 0% |
-| Foco atual | Fase 1 — Base do Projeto |
-| Aplicação executável | Não existe ainda |
+| Estado do repositório | Fase 1 concluída e verificada |
+| Fases implementadas | 1 de 7 |
+| Progresso do milestone | 14% |
+| Foco atual | Fase 2 — Autenticação, pronta para discussão e planejamento |
+| Aplicação executável | Base Spring Boot disponível; execução local exige MySQL configurado |
 | API e telas disponíveis | Não existem ainda |
 
-Stack, arquitetura, endpoints, telas e fases descritos neste README são **contratos planejados**, não evidência de implementação concluída.
+A base de persistência descrita neste README está implementada e verificada. Autenticação, regras de negócio, endpoints, notificações, dashboard e telas permanecem **contratos planejados**, não capacidades já disponíveis.
 
 ## Como acompanhar o projeto
 
@@ -51,6 +51,28 @@ Stack, arquitetura, endpoints, telas e fases descritos neste README são **contr
 - Leia o [fluxo Git por ticket](docs/GIT-WORKFLOW.md) antes de iniciar uma mudança.
 
 O andamento só deve ser considerado entregue quando os artefatos de planejamento, os testes proporcionais e o histórico Git confirmarem a conclusão. O texto deste README deve evoluir junto com o estado real do repositório.
+
+## Como verificar a base atual
+
+Para compilar e executar os testes da Fase 1 no Windows, tenha Java 17 e Docker Desktop com o engine Linux ativo. O Maven Wrapper fixa a versão do Maven do projeto, e o Testcontainers cria um MySQL 8.4 temporário durante o teste — `DB_USERNAME` e `DB_PASSWORD` não são necessários nesse caminho.
+
+```powershell
+Set-Location solveit-api
+.\mvnw.cmd clean verify
+```
+
+Em Linux ou macOS, use `./mvnw clean verify`. O resultado esperado é `BUILD SUCCESS`, com o teste de integração validando migrações, constraints, entidades e repositories contra MySQL real.
+
+Para iniciar a aplicação localmente, crie antes o database `solveit` em uma instância MySQL e forneça as credenciais pelo ambiente. O Flyway cria e versiona as tabelas, mas deliberadamente não cria o database nem armazena credenciais no repositório.
+
+```powershell
+$env:DB_USERNAME = '<usuario-local>'
+$env:DB_PASSWORD = '<senha-local>'
+Set-Location solveit-api
+.\mvnw.cmd spring-boot:run
+```
+
+`DB_URL` é opcional e, quando omitida, usa `jdbc:mysql://localhost:3306/solveit` com Unicode e UTC. Ainda não há `docker-compose.yml`; Docker é usado automaticamente pelos testes de integração, não pelos testes unitários puros.
 
 ## Como funciona
 
@@ -111,9 +133,9 @@ Qualquer transição que não apareça no diagrama deverá ser rejeitada com uma
 
 Os envios deverão ocorrer somente após a confirmação da transação. Uma falha de SMTP não poderá desfazer uma alteração válida do chamado; a estratégia definitiva de entrega será decidida no planejamento da Fase 4.
 
-## Stack planejada
+## Stack do projeto
 
-Nada nesta tabela está implementado no repositório ainda.
+A base de back-end, persistência, migrações e testes da Fase 1 já está implementada. Segurança, notificações e front-end continuam planejados para as fases seguintes.
 
 | Camada | Tecnologias planejadas | Papel no projeto |
 | --- | --- | --- |
@@ -127,9 +149,9 @@ Nada nesta tabela está implementado no repositório ainda.
 
 Segredos de banco, JWT e SMTP deverão vir do ambiente ou de um cofre de segredos; não serão versionados em arquivos de configuração.
 
-## Arquitetura planejada
+## Arquitetura do projeto
 
-O back-end será um único deploy modular em Spring Boot. A separação por responsabilidade manterá regras de negócio nos serviços, contratos HTTP nos controllers e persistência nos repositories:
+O back-end é uma aplicação modular única em Spring Boot. A Fase 1 já criou a raiz da aplicação, `entity`, `enums` e `repository`; os demais packages serão adicionados quando tiverem implementação real, sem placeholders. A separação por responsabilidade manterá regras de negócio nos services, contratos HTTP nos controllers e persistência nos repositories:
 
 ```text
 solveit-api/
@@ -189,11 +211,11 @@ Respostas nunca deverão expor senhas, entidades JPA, segredos ou stack traces. 
 
 ## Roadmap
 
-As sete fases são incrementos planejados e permanecem pendentes. A ordem é deliberada: primeiro a base reproduzível, depois identidade, fluxo de negócio, comunicação, leitura operacional, experiência web e validação integrada.
+As sete fases são incrementos sequenciais. A base reproduzível foi concluída; a ordem seguinte preserva identidade, fluxo de negócio, comunicação, leitura operacional, experiência web e validação integrada.
 
 | Fase | Entrega planejada | Estado |
 | --- | --- | --- |
-| 1 — Base do Projeto | API inicial sobre esquema MySQL completo, versionado por Flyway e validado pelo JPA | Pendente |
+| 1 — Base do Projeto | Aplicação Spring inicial sobre esquema MySQL completo, versionado por Flyway e validado pelo JPA | Concluída e verificada |
 | 2 — Autenticação | Cadastro de solicitante, login JWT e autorização por perfil e relação | Pendente |
 | 3 — Core de Chamados | Administração, ciclo completo do chamado, comentários e histórico auditável | Pendente |
 | 4 — Notificações por E-mail | Comunicação dos eventos confirmados aos envolvidos corretos | Pendente |
@@ -201,7 +223,7 @@ As sete fases são incrementos planejados e permanecem pendentes. A ordem é del
 | 6 — Front-end (React + Tailwind) | Jornadas principais dos três perfis na SPA responsiva | Pendente |
 | 7 — Polimento e Qualidade | Estados de interface, responsividade, testes e revisão de segurança | Pendente |
 
-Metas, dependências, critérios de sucesso e rastreabilidade estão no [roadmap completo](.planning/ROADMAP.md). Nenhuma linha da tabela representa uma entrega já implementada.
+Metas, dependências, critérios de sucesso e rastreabilidade estão no [roadmap completo](.planning/ROADMAP.md). Apenas a Fase 1 representa entrega implementada; as demais linhas continuam planejadas.
 
 ## Referência visual
 
@@ -215,7 +237,7 @@ Consulte o [contrato da referência visual](docs/design/SOLVEIT-UI-REFERENCE.md)
 
 Cada ticket deve ser desenvolvido em branch própria, depois de planejamento e aprovação antes da escrita de código. Durante o trabalho, mudanças verificáveis recebem commits atômicos no padrão Conventional Commits.
 
-Após testes e resumo, a branch é enviada ao repositório remoto para revisão. A integração na `main` só ocorre com confirmação explícita do usuário; trabalho parcial pode receber um checkpoint e ser publicado na branch sem ser integrado. O procedimento completo está em [Fluxo Git por ticket](docs/GIT-WORKFLOW.md).
+Após testes e resumo, há três gates independentes: autorização para fazer push da branch, autorização posterior para abrir ou atualizar o pull request e autorização posterior para fazer merge. Uma aprovação não implica as seguintes. Trabalho parcial pode receber um checkpoint e, após autorização específica, ser publicado na branch sem ser integrado. O procedimento completo está em [Fluxo Git por ticket](docs/GIT-WORKFLOW.md).
 
 ## Segurança e auditoria
 
