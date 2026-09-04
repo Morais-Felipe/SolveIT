@@ -29,7 +29,13 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   3. A aplicação valida a correspondência entre esquema Flyway e modelo JPA sem criar tabelas automaticamente.
   4. Dados persistidos respeitam enums, relações, nulabilidade e unicidade do domínio.
 
-**Plans**: 5 planos sequenciais
+**Plans**: 5/5 planos sequenciais executados localmente
+
+- [x] 01-01-PLAN.md
+- [x] 01-02-PLAN.md
+- [x] 01-03-PLAN.md
+- [x] 01-04-PLAN.md
+- [x] 01-05-PLAN.md
 
 **Wave 1**
 
@@ -152,7 +158,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Base do Projeto | 4/5 | In Progress | - |
+| 1. Base do Projeto | 5/5 | In Progress | - |
 | 2. Autenticação | 0/TBD | Not started | - |
 | 3. Core de Chamados | 0/TBD | Not started | - |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |

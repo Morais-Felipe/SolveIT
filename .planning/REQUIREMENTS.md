@@ -7,10 +7,10 @@
 
 ### Fundação de Dados
 
-- [ ] **DATA-01**: O desenvolvedor pode iniciar a API Java 17/Spring Boot 3 com configuração de desenvolvimento para MySQL 8.
-- [ ] **DATA-02**: O sistema representa usuários, categorias, chamados, comentários e históricos com os campos, relações, nulabilidade e enums definidos.
-- [ ] **DATA-03**: O banco pode ser criado do zero por migrações Flyway versionadas, com chaves estrangeiras, unicidade e índices coerentes com as consultas.
-- [ ] **DATA-04**: A aplicação valida que o esquema gerenciado pelo Flyway corresponde ao mapeamento JPA sem gerar tabelas automaticamente.
+- [x] **DATA-01**: O desenvolvedor pode iniciar a API Java 17/Spring Boot 3 com configuração de desenvolvimento para MySQL 8.
+- [x] **DATA-02**: O sistema representa usuários, categorias, chamados, comentários e históricos com os campos, relações, nulabilidade e enums definidos.
+- [x] **DATA-03**: O banco pode ser criado do zero por migrações Flyway versionadas, com chaves estrangeiras, unicidade e índices coerentes com as consultas.
+- [x] **DATA-04**: A aplicação valida que o esquema gerenciado pelo Flyway corresponde ao mapeamento JPA sem gerar tabelas automaticamente.
 
 ### Autenticação e Acesso
 
@@ -115,10 +115,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
+| DATA-04 | Phase 1 | Complete |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |
