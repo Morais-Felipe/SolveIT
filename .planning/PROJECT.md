@@ -12,7 +12,10 @@ Permitir que um chamado percorra seu fluxo completo com autorização correta, h
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ A API Java 17/Spring Boot 3 compila e é empacotada pelo Maven Wrapper — Phase 1
+- ✓ O modelo JPA representa Usuario, Categoria, Chamado, Comentario e HistoricoStatus com enums e relações canônicas — Phase 1
+- ✓ Um MySQL 8.4 vazio recebe V1..V5 pelo Flyway com constraints e índices versionados — Phase 1
+- ✓ Hibernate valida o schema gerenciado pelo Flyway sem gerar DDL — Phase 1
 
 ### Active
 
@@ -62,20 +65,24 @@ Permitir que um chamado percorra seu fluxo completo com autorização correta, h
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| API REST em Spring Boot 3 sobre Java 17 | Stack escolhida para aprendizado e implementação do domínio | — Pending |
-| MySQL 8 com migrações Flyway numeradas | Garantir esquema reproduzível e ensinar evolução de banco | — Pending |
+| API REST em Spring Boot 3 sobre Java 17 | Stack escolhida para aprendizado e implementação do domínio | ✓ Validated — Phase 1 |
+| MySQL 8 com migrações Flyway numeradas | Garantir esquema reproduzível e ensinar evolução de banco | ✓ Validated — Phase 1 |
 | JWT e BCrypt para autenticação | Separar autenticação stateless de armazenamento seguro de senha | — Pending |
 | Regras de transição concentradas na camada de serviço | Manter invariantes do domínio fora dos controllers e permitir testes unitários | — Pending |
 | Front-end React responsivo com Tailwind | Entregar experiências específicas por perfil em uma aplicação web única | — Pending |
 | Desenvolvimento incremental e explicativo | O objetivo principal inclui compreensão, não apenas entrega | — Pending |
 | Usar `docs/design/SOLVEIT-UI-REFERENCE.md` como contrato visual da Fase 6 | Preservar a aparência aprovada sem transformar elementos ilustrativos em novos requisitos | — Pending |
 | Adotar branch e push por ticket conforme `docs/GIT-WORKFLOW.md` | Permitir revisão, rollback e continuidade segura entre computadores sem levar trabalho incompleto à `main` | — Pending |
+| Fixar Maven 3.9.16 via Wrapper com checksum SHA-256 | Reproduzir o build sem depender de Maven global e proteger a distribuição baixada | ✓ Validated — Phase 1 |
+| Manter Flyway como única autoridade DDL e Hibernate em `validate` | Evitar schema implícito e detectar divergência entre SQL e JPA | ✓ Validated — Phase 1 |
+| Persistir enums por nome e usar `@Version` em Chamado | Preservar semântica dos dados e rejeitar lost updates concorrentes | ✓ Validated — Phase 1 |
+| Usar FKs `RESTRICT` e superfície append-only para registros auditáveis | Impedir exclusões em cascata e preparar enforcement nos services futuros | ✓ Validated — Phase 1 |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
-**After each phase transition** (via `$gsd-transition`):
+**After each phase transition** (internal GSD step after `$gsd-execute-phase`):
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
@@ -89,4 +96,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-02 after Git workflow definition*
+*Last updated: 2026-09-04 after Phase 1 verification*

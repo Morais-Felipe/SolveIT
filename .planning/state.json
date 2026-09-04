@@ -6,7 +6,7 @@
     {
       "number": "1",
       "name": "Base do Projeto",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "2",
@@ -41,8 +41,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 1 of 7 · 100% · executing"
+    "label": "Advance to the next step (plan phase 2)",
+    "reason": "Phase 2 of 7 — needs a plan"
   },
-  "updated_at": "2026-09-04T12:52:09.746Z"
+  "updated_at": "2026-09-04T17:20:10.945Z"
 }

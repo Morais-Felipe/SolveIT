@@ -6,7 +6,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 ## Phases
 
-- [ ] **Phase 1: Base do Projeto** - A API inicia sobre um esquema MySQL reproduzível e validado.
+- [x] **Phase 1: Base do Projeto** - A API inicia sobre um esquema MySQL reproduzível e validado. (completed 2026-09-04)
 - [ ] **Phase 2: Autenticação** - Usuários obtêm identidade segura e acesso autorizado.
 - [ ] **Phase 3: Core de Chamados** - Os três perfis operam o ciclo auditável completo do chamado.
 - [ ] **Phase 4: Notificações por E-mail** - Eventos confirmados comunicam os envolvidos corretos.
@@ -55,7 +55,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 **Wave 5** *(bloqueada pela conclusão e integração da Wave 4)*
 
-- [ ] `01-05-PLAN.md` — Migrações Flyway e validação integrada em MySQL
+- [x] `01-05-PLAN.md` — Migrações Flyway e validação integrada em MySQL
 
 ### Phase 2: Autenticação
 
@@ -158,7 +158,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Base do Projeto | 5/5 | In Progress | - |
+| 1. Base do Projeto | 5/5 | Complete    | 2026-09-04 |
 | 2. Autenticação | 0/TBD | Not started | - |
 | 3. Core de Chamados | 0/TBD | Not started | - |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
