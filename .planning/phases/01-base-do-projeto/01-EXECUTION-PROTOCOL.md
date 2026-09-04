@@ -120,16 +120,35 @@ if (-not [string]::IsNullOrWhiteSpace(($worktreeState | Out-String))) { throw 'W
 
 If any check fails, stop. Do not push, create a PR, merge, create the next branch, or dispatch the next PLAN.
 
-## Gate 3 — user approval for push and PR
+## Gate 3 — separate user approval for push
 
-After local evidence passes, the orchestrator presents the ticket summary, validation results, scoped diff, and commits to the user. It explicitly asks whether to push the branch and create or update its PR. No command in this section runs before that approval.
+After local evidence passes, the orchestrator presents the ticket summary, validation results, scoped diff, and commits to the user. It explicitly asks only whether to push the branch. Approval to execute locally does not authorize this gate, and approval here does not authorize a PR.
 
-After explicit approval only:
+After explicit push approval only:
 
 ```powershell
 & git push -u origin $Branch
 if ($LASTEXITCODE -ne 0) { throw "git push failed: $Branch" }
 
+& git fetch origin $Branch
+if ($LASTEXITCODE -ne 0) { throw "Could not fetch remote ticket branch: $Branch" }
+$remoteTicketSummary = & git show "origin/$($Branch):$Summary"
+if ($LASTEXITCODE -ne 0) { throw "SUMMARY is absent from remote ticket branch: $Summary" }
+foreach ($hash in $ticketHashes) {
+    & git merge-base --is-ancestor $hash "origin/$Branch"
+    if ($LASTEXITCODE -ne 0) { throw "Ticket commit is absent from remote branch: $hash" }
+}
+```
+
+Successful push does not authorize PR creation or update.
+
+## Gate 4 — separate user approval for PR
+
+After the remote branch proof succeeds, the orchestrator presents it and explicitly asks whether to create or update the pull request. No `gh pr create` or `gh pr edit` command runs before this new approval.
+
+After explicit PR approval only:
+
+```powershell
 $prNumberLines = & gh pr list --head $Branch --base main --state open --json number --jq '.[0].number'
 if ($LASTEXITCODE -ne 0) { throw 'Could not query the pull request' }
 $PrNumber = ($prNumberLines | Out-String).Trim()
@@ -148,20 +167,11 @@ if ([string]::IsNullOrWhiteSpace($PrNumber)) {
     $PrUrl = ($prUrlLines | Out-String).Trim()
 }
 if ([string]::IsNullOrWhiteSpace($PrNumber)) { throw 'Pull request number is empty' }
-
-& git fetch origin $Branch
-if ($LASTEXITCODE -ne 0) { throw "Could not fetch remote ticket branch: $Branch" }
-$remoteTicketSummary = & git show "origin/$($Branch):$Summary"
-if ($LASTEXITCODE -ne 0) { throw "SUMMARY is absent from remote ticket branch: $Summary" }
-foreach ($hash in $ticketHashes) {
-    & git merge-base --is-ancestor $hash "origin/$Branch"
-    if ($LASTEXITCODE -ne 0) { throw "Ticket commit is absent from remote branch: $hash" }
-}
 ```
 
-Successful push/PR does not authorize merge.
+Successful PR creation or update does not authorize merge.
 
-## Gate 4 — separate human approval for merge
+## Gate 5 — separate human approval for merge
 
 After the PR exists, the orchestrator asks a separate question: authorize merge or keep the PR open. Keeping it open blocks the next ticket. No merge command runs without a distinct explicit authorization.
 
@@ -182,7 +192,7 @@ foreach ($hash in $ticketHashes) {
 }
 ```
 
-Only after every proof above succeeds may the orchestrator request pre-code approval for the next PLAN. The next ticket's Gate 1 is the sole owner of switching to `main`, synchronizing it by fast-forward only, and creating the approved branch before dispatch. Gate 4 deliberately performs no branch switch or branch creation. After `01-05`, the remote proof closes Phase 01; it never starts Phase 02 automatically.
+Only after every proof above succeeds may the orchestrator request pre-code approval for the next PLAN. The next ticket's Gate 1 is the sole owner of switching to `main`, synchronizing it by fast-forward only, and creating the approved branch before dispatch. Gate 5 deliberately performs no branch switch or branch creation. After `01-05`, the remote proof closes Phase 01; it never starts Phase 02 automatically.
 
 ## Failure behavior
 

@@ -113,7 +113,7 @@ DATA_Q9D2L5FS_END
 
 [VERIFIED: SolveIT_GSD_SystemPrompt.md:213-220]
 
-O planner deve produzir exatamente essa ordem e não fundir tickets. Cada PLAN termina quando o executor implementa, valida, cria e commita seu SUMMARY. Depois do retorno, o gate externo do orquestrador apresenta o resumo e conduz aprovação para push/PR, aprovação humana separada para merge, prova dos commits e do SUMMARY em `origin/main` e somente então libera o próximo PLAN. O Ticket 5 também contém a validação de integração, pois é quando o esquema completo finalmente existe.
+O planner deve produzir exatamente essa ordem e não fundir tickets. Cada PLAN termina quando o executor implementa, valida, cria e commita seu SUMMARY. Depois do retorno, o gate externo do orquestrador apresenta o resumo e conduz autorizações independentes para push, criação ou atualização do PR e merge, prova os commits e o SUMMARY em `origin/main` e somente então libera o próximo PLAN. O Ticket 5 também contém a validação de integração, pois é quando o esquema completo finalmente existe.
 
 ## Standard Stack
 
