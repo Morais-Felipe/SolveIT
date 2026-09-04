@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 current_phase: 01
 current_phase_name: Base do Projeto
 status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-09-03T17:14:42.122Z"
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-09-03T17:54:03Z"
 last_activity: 2026-09-03
-last_activity_desc: Ticket 03 implementado e validado localmente; aguardando autorização para publicação.
-state_head: f8293adf1be6c07dba3daf3a4df72531c351dc11
+last_activity_desc: Ticket 04 implementado e validado localmente; aguardando autorização para publicação.
+state_head: 6358841
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
-  percent: 60
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State
@@ -28,30 +28,30 @@ See: .planning/PROJECT.md (updated 2026-09-02)
 ## Current Position
 
 Phase: 01 (Base do Projeto) — IN PROGRESS
-Plan: 3 of 5 in current phase
-Status: Ticket 03 complete locally; awaiting publication approval
-Last activity: 2026-09-03 — Ticket 03 implemented and validated locally.
+Plan: 4 of 5 in current phase
+Status: Ticket 04 complete locally; awaiting publication approval
+Last activity: 2026-09-03 — Ticket 04 implemented and validated locally.
 
-Progress: [██████░░░░] 60%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0.0 hours
+- Total plans completed: 4
+- Average duration: 12.5 min
+- Total execution time: 0.8 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| Phase 01 | 4 | 50 min | 12.5 min |
 
 **Recent Trend:**
 
-- Last 5 plans: -
-- Trend: -
+- Last 4 plans: 12 min, 3 min, 6 min, 31 min
+- Trend: variável; Ticket 04 incluiu revisão pedagógica e validações de protocolo
 
 **Per-Plan Metrics:**
 
@@ -60,6 +60,7 @@ Progress: [██████░░░░] 60%
 | Phase 01 P01 | 12 min | 1 tasks | 8 files |
 | Phase 01 P02 | 3 min | 1 tasks | 3 files |
 | Phase 01 P03 | 6 min | 1 tasks | 5 files |
+| Phase 01 P04 | 31 min | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 01]: Flyway é a única autoridade DDL; Hibernate permanece em ddl-auto=validate.
 - [Phase 01]: Enums de domínio permanecem mínimos e sem regras de autorização, transição ou apresentação.
 - [Phase 01]: Enums serão persistidos por nome com EnumType.STRING; reordenação não altera dados, renomeação exige migração.
+
+- [Phase 01]: Repositories permanecem mínimos; somente identidade e unicidade justificam métodos derivados no Ticket 04.
+- [Phase 01]: Ordenação será sempre explícita nas consultas consumidoras; Comentario/HistoricoStatus permanecem append-only nos services futuros.
 
 ### Pending Todos
 
@@ -101,6 +105,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-03T17:14:42.041Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-09-03T17:54:03Z
+Stopped at: Completed 01-04-PLAN.md
 Resume file: None

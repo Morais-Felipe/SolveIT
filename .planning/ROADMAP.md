@@ -45,7 +45,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 **Wave 4** *(bloqueada pela conclusão e integração da Wave 3)*
 
-- [ ] `01-04-PLAN.md` — Repositórios Spring Data JPA
+- [x] `01-04-PLAN.md` — Repositórios Spring Data JPA
 
 **Wave 5** *(bloqueada pela conclusão e integração da Wave 4)*
 
@@ -152,7 +152,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Base do Projeto | 3/5 | In Progress | - |
+| 1. Base do Projeto | 4/5 | In Progress | - |
 | 2. Autenticação | 0/TBD | Not started | - |
 | 3. Core de Chamados | 0/TBD | Not started | - |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
