@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 02
 current_phase_name: Autenticação
 status: executing
-stopped_at: Phase 2 planned and verified; awaiting its ticket branch
-last_updated: "2026-09-05T13:09:23.586Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-09-05T19:07:01.442Z"
 last_activity: 2026-09-05
-last_activity_desc: Planned and independently verified Phase 2 authentication in 8 executable plans
-state_head: f8ee2ca152b0db076b9bfceedfe771f75f38b434
+last_activity_desc: Completed Phase 02 Plan 01 public registration tracer
+state_head: cb7a08836e89926b589ec92334b11de451fb4255
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 13
-  completed_plans: 5
+  completed_plans: 6
   percent: 14
 ---
 
@@ -23,35 +23,36 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-04)
 
 **Core value:** Permitir que um chamado percorra seu fluxo completo com autorização correta, histórico auditável e comunicação clara entre todos os envolvidos.
-**Current focus:** Phase 2 — Autenticação
+**Current focus:** Phase 02 — Autenticação
 
 ## Current Position
 
-Phase: 02 (Autenticação) — READY TO EXECUTE
-Plan: Not started
+Phase: 02 (Autenticação) — EXECUTING
+Plan: 2 of 8
 Status: Ready to execute
-Last activity: 2026-09-05 — Planned and independently verified Phase 2 authentication in 8 executable plans
+Last activity: 2026-09-05 — Phase 02 execution started
 
 Progress by phase: [███░░░░░░░░░░░░░░░░░] 1/7 phases (14%)
-Plan progress: 5/13 known plans complete (38%); Phase 2 has 8 plans not started
+Plan progress: 6/13 known plans complete (46%); Phase 2 has 1/8 plans complete (13%)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 5
-- Average duration: 13.2 min
-- Total execution time: 1.1 hours
+- Total plans completed: 6
+- Average duration: 13.0 min
+- Total execution time: 1.3 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 01 | 5 | 66 min | 13.2 min |
+| Phase 02 | 1 | 12 min | 12.0 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 12 min, 3 min, 6 min, 31 min, 16 min
+- Last 5 plans: 3 min, 6 min, 31 min, 16 min, 12 min
 - Trend: variável; Ticket 05 incluiu três ciclos MySQL/Testcontainers para RED e correções do harness
 
 **Per-Plan Metrics:**
@@ -63,6 +64,7 @@ Plan progress: 5/13 known plans complete (38%); Phase 2 has 8 plans not started
 | Phase 01 P03 | 6 min | 1 tasks | 5 files |
 | Phase 01 P04 | 31 min | 1 tasks | 5 files |
 | Phase 01 P05 | 16 min | 1 tasks | 6 files |
+| Phase 02 P01 | 12 min | 1 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -83,6 +85,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 01]: Flyway é a única autoridade DDL; V1..V5 não usam IF NOT EXISTS e Hibernate apenas valida o schema.
 - [Phase 01]: Contextos de integração recebem perfil e datasource por argumentos de run para prevalecer sobre application-dev.yml.
 - [Phase 01]: FKs usam RESTRICT e nenhuma relação auditável possui delete cascade.
+- [Phase 02]: BCrypt strength 12 é o padrão externalizável após medir 10, 11 e 12 no hardware alvo.
+- [Phase 02]: Somente POST /api/auth/register é público; qualquer outra requisição permanece protegida por padrão.
+- [Phase 02]: E-mail é normalizado no service e senha é entregue intacta ao PasswordEncoder.
 
 ### Pending Todos
 
@@ -112,6 +117,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T03:24:58.295Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-autentica-o/02-CONTEXT.md
+Last session: 2026-09-05T19:07:01.260Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None

@@ -73,6 +73,15 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 **Plans**: TBD
 
+- [x] 02-01-PLAN.md
+- [ ] 02-02-PLAN.md
+- [ ] 02-03-PLAN.md
+- [ ] 02-04-PLAN.md
+- [ ] 02-05-PLAN.md
+- [ ] 02-06-PLAN.md
+- [ ] 02-07-PLAN.md
+- [ ] 02-08-PLAN.md
+
 ### Phase 3: Core de Chamados
 
 **Goal**: Solicitantes, atendentes e administradores conduzem o chamado pelo fluxo permitido com colaboração e auditoria íntegras.
@@ -159,7 +168,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Base do Projeto | 5/5 | Complete    | 2026-09-04 |
-| 2. Autenticação | 0/TBD | Not started | - |
+| 2. Autenticação | 1/8 | In Progress|  |
 | 3. Core de Chamados | 0/TBD | Not started | - |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
 | 5. Dashboard | 0/TBD | Not started | - |
