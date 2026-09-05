@@ -4,9 +4,9 @@ current_phase: 2
 current_phase_name: Autenticação
 status: planning
 stopped_at: Phase 1 complete, ready to plan Phase 2
-last_updated: "2026-09-04T17:39:15.027Z"
+last_updated: "2026-09-05T01:23:00.000Z"
 last_activity: 2026-09-04
-last_activity_desc: "Completed quick task 260904-k6p: aligned Phase 1 documentation and local Git identity"
+last_activity_desc: "Completed machine/project check-up and repaired local GSD context-monitor hooks"
 state_head: be215357e58df634a8032dcf411f81684083734c
 progress:
   total_phases: 7
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 Phase: 2 — Autenticação
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-09-04 — Completed quick task 260904-k6p: aligned Phase 1 documentation and local Git identity
+Last activity: 2026-09-04 — Completed machine/project check-up and repaired local GSD context-monitor hooks
 
 Progress: [████████████████████] 5/5 plans (100%)
 
@@ -106,11 +106,11 @@ None yet.
 
 | Category | Item | Status | Deferred At | Milestone |
 |----------|------|--------|-------------|-----------|
-| GSD | Reparar `.codex/hooks/lib/hook-exit.js` para restaurar `gsd-context-monitor` | Pending | Phase 01 Ticket 05 | v1 |
-| GSD | Investigar `init.execute-phase` reportando runtime `claude` durante sessão Codex | Pending | Phase 01 Ticket 05 | v1 |
+| GSD | Reparar `.codex/hooks/lib/hook-exit.js` para restaurar `gsd-context-monitor` | Resolved — helpers restaurados; registro `Stop` incompatível removido e reinício validado | Phase 01 Ticket 05 | v1 |
+| GSD | Investigar `init.execute-phase` reportando runtime `claude` durante sessão Codex | Resolved — `init.execute-phase 2` reportou `agent_runtime: codex` | Phase 01 Ticket 05 | v1 |
 
 ## Session Continuity
 
-Last session: 2026-09-04T17:20:49Z
-Stopped at: Phase 1 complete, ready to plan Phase 2
+Last session: 2026-09-05T01:23:00Z
+Stopped at: Environment and GSD hooks verified after restart, ready to discuss Phase 2
 Resume file: None
