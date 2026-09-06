@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solveit.entity.Usuario;
 import com.solveit.enums.PerfilUsuario;
 import com.solveit.repository.UsuarioRepository;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,5 +130,79 @@ class AuthRegistrationIntegrationTest {
         assertThat(protectedGet.getRequest().getSession(false)).isNull();
         assertThat(protectedPost.getRequest().getSession(false)).isNull();
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+    }
+
+    @Test
+    void rejectsPasswordWithFewerThanFifteenUnicodeCodePoints() throws Exception {
+        String password = "🔐".repeat(14);
+
+        assertThat(password.codePointCount(0, password.length())).isEqualTo(14);
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                "Senha curta",
+                                "curta@example.com",
+                                password))))
+                .andExpect(status().isBadRequest());
+
+        assertThat(usuarioRepository.count()).isZero();
+    }
+
+    @Test
+    void acceptsExactlyFifteenUnicodeCodePointsIncludingEmoji() throws Exception {
+        String password = "🔐".repeat(15);
+
+        assertThat(password.codePointCount(0, password.length())).isEqualTo(15);
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                "Senha Unicode",
+                                "unicode@example.com",
+                                password))))
+                .andExpect(status().isCreated());
+
+        Usuario persisted = usuarioRepository.findByEmail("unicode@example.com").orElseThrow();
+        assertThat(new BCryptPasswordEncoder().matches(password, persisted.getSenha())).isTrue();
+    }
+
+    @Test
+    void acceptsPasswordWithExactlySeventyTwoUtf8Bytes() throws Exception {
+        String password = "a".repeat(72);
+
+        assertThat(password.getBytes(StandardCharsets.UTF_8)).hasSize(72);
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                "Senha no limite",
+                                "limite@example.com",
+                                password))))
+                .andExpect(status().isCreated());
+
+        Usuario persisted = usuarioRepository.findByEmail("limite@example.com").orElseThrow();
+        assertThat(new BCryptPasswordEncoder().matches(password, persisted.getSenha())).isTrue();
+    }
+
+    @Test
+    void rejectsPasswordWithSeventyThreeUtf8Bytes() throws Exception {
+        String password = "a".repeat(71) + "é";
+
+        assertThat(password.codePointCount(0, password.length())).isEqualTo(72);
+        assertThat(password.getBytes(StandardCharsets.UTF_8)).hasSize(73);
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                "Senha longa",
+                                "longa@example.com",
+                                password))))
+                .andExpect(status().isBadRequest());
+
+        assertThat(usuarioRepository.count()).isZero();
+    }
+
+    private record RegisterPayload(String nome, String email, String senha) {
     }
 }
