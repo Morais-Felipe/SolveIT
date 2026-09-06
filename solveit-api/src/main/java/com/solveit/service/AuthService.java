@@ -4,6 +4,7 @@ import com.solveit.dto.auth.RegisterRequest;
 import com.solveit.dto.auth.UsuarioResponse;
 import com.solveit.entity.Usuario;
 import com.solveit.enums.PerfilUsuario;
+import com.solveit.exception.EmailAlreadyRegisteredException;
 import com.solveit.repository.UsuarioRepository;
 import java.util.Locale;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +27,11 @@ public class AuthService {
     @Transactional
     public UsuarioResponse register(RegisterRequest request) {
         String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
+
+        if (usuarioRepository.existsByEmail(normalizedEmail)) {
+            throw new EmailAlreadyRegisteredException();
+        }
+
         String passwordHash = passwordEncoder.encode(request.senha());
 
         Usuario usuario = new Usuario(
