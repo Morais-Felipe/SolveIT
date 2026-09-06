@@ -4,6 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -14,6 +17,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public final class GlobalExceptionHandler {
+
+    private static final Logger SAFE_ERROR_LOG = LoggerFactory.getLogger("com.solveit.error");
 
     private final ProblemDetailFactory problemDetailFactory;
 
@@ -52,6 +57,22 @@ public final class GlobalExceptionHandler {
                 null);
 
         return problemResponse(HttpStatus.CONFLICT, problem);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ProblemDetail> handleDataIntegrityViolation(
+            HttpServletRequest request) {
+        SAFE_ERROR_LOG.error("Request failed with code {}", ApiErrorCode.INTERNAL_ERROR);
+
+        ProblemDetail problem = problemDetailFactory.create(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ApiErrorCode.INTERNAL_ERROR,
+                "Erro interno",
+                "Não foi possível concluir a operação.",
+                requestUri(request),
+                null);
+
+        return problemResponse(HttpStatus.INTERNAL_SERVER_ERROR, problem);
     }
 
     private static URI requestUri(HttpServletRequest request) {
