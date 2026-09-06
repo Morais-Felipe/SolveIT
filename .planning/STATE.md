@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 02
 current_phase_name: Autenticação
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-09-05T19:07:01.442Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-09-06T15:55:09.570Z"
 last_activity: 2026-09-05
 last_activity_desc: Completed Phase 02 Plan 01 public registration tracer
-state_head: cb7a08836e89926b589ec92334b11de451fb4255
+state_head: c4d2398b2046e2bd61732f19cc6a826d9ca93a82
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 13
-  completed_plans: 6
+  completed_plans: 7
   percent: 14
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 02 (Autenticação) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-09-05 — Phase 02 execution started
 
@@ -65,6 +65,7 @@ Plan progress: 6/13 known plans complete (46%); Phase 2 has 1/8 plans complete (
 | Phase 01 P04 | 31 min | 1 tasks | 5 files |
 | Phase 01 P05 | 16 min | 1 tasks | 6 files |
 | Phase 02 P01 | 12 min | 1 tasks | 9 files |
+| Phase 02 P02 | 24m | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 02]: BCrypt strength 12 é o padrão externalizável após medir 10, 11 e 12 no hardware alvo.
 - [Phase 02]: Somente POST /api/auth/register é público; qualquer outra requisição permanece protegida por padrão.
 - [Phase 02]: E-mail é normalizado no service e senha é entregue intacta ao PasswordEncoder.
+- [Phase 02]: Senhas são validadas por code points Unicode e bytes UTF-8 sem trim ou normalização. — Preserva o texto exato da credencial e respeita o limite de 72 bytes do BCrypt.
+- [Phase 02]: existsByEmail é pré-checagem; uk_usuario_email no MySQL é a autoridade final sob concorrência. — Duas requisições podem passar simultaneamente pela consulta, então saveAndFlush classifica somente a constraint específica.
+- [Phase 02]: Problem Details de cadastro usa textos controlados e nunca deriva detail de exceções JDBC. — Evita vazamento de senha, SQL, constraint, stack trace ou classes internas.
 
 ### Pending Todos
 
@@ -117,6 +121,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-05T19:07:01.260Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-09-06T15:54:29.555Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
