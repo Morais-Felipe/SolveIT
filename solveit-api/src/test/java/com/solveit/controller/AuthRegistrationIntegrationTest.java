@@ -3,6 +3,7 @@ package com.solveit.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -201,6 +202,77 @@ class AuthRegistrationIntegrationTest {
                 .andExpect(status().isBadRequest());
 
         assertThat(usuarioRepository.count()).isZero();
+    }
+
+    @Test
+    void returnsProblemDetailsForInvalidRegistrationFields() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                "Senha inválida",
+                                "invalida@example.com",
+                                "curta"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.type").value("urn:solveit:error:validation-error"))
+                .andExpect(jsonPath("$.title").value("Requisição inválida"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.detail").value("Um ou mais campos estão inválidos."))
+                .andExpect(jsonPath("$.instance").value("/api/auth/register"))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.senha").value(
+                        "A senha deve ter no mínimo 15 caracteres e no máximo 72 bytes UTF-8"))
+                .andReturn();
+
+        assertSafeErrorBody(result, "curta");
+    }
+
+    @Test
+    void returnsConflictProblemDetailsForSequentialDuplicateEmail() throws Exception {
+        String password = "senha segura duplicada 123!";
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                "Primeira pessoa",
+                                "duplicada@example.com",
+                                password))))
+                .andExpect(status().isCreated());
+
+        MvcResult duplicate = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                "Segunda pessoa",
+                                "  DUPLICADA@EXAMPLE.COM  ",
+                                password))))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.type").value("urn:solveit:error:email-already-registered"))
+                .andExpect(jsonPath("$.title").value("Conflito de cadastro"))
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.detail").value("E-mail já cadastrado"))
+                .andExpect(jsonPath("$.instance").value("/api/auth/register"))
+                .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_REGISTERED"))
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andReturn();
+
+        assertThat(usuarioRepository.count()).isEqualTo(1);
+        assertSafeErrorBody(duplicate, password);
+    }
+
+    private static void assertSafeErrorBody(MvcResult result, String sensitiveValue)
+            throws Exception {
+        assertThat(result.getResponse().getContentAsString())
+                .doesNotContain(
+                        sensitiveValue,
+                        "$2",
+                        "Exception",
+                        "java.",
+                        "org.",
+                        "SELECT ",
+                        "INSERT ",
+                        "uk_usuario_email",
+                        "stackTrace");
     }
 
     private record RegisterPayload(String nome, String email, String senha) {
