@@ -1,5 +1,6 @@
 package com.solveit.config;
 
+import java.time.Clock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,11 @@ import org.springframework.security.web.savedrequest.NullRequestCache;
 
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
+
+    @Bean
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder(

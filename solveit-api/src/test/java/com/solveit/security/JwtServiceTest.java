@@ -34,6 +34,7 @@ class JwtServiceTest {
         Claims claims = jwtService.parse(token);
         Jws<Claims> signedClaims = Jwts.parser()
                 .verifyWith(signingKey(SIGNING_MATERIAL))
+                .clock(() -> Date.from(NOW))
                 .build()
                 .parseSignedClaims(token);
 
