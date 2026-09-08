@@ -14,7 +14,7 @@
 </div>
 
 > [!IMPORTANT]
-> **Fase 1 concluída e verificada.** A base Spring Boot, o modelo JPA, os repositories, as migrações Flyway e o teste integrado em MySQL 8.4 estão implementados: 1 de 7 fases (14%). A Fase 2 — Autenticação — é o próximo foco, ainda sem plano iniciado. Ainda não existem endpoints de negócio, telas, build publicado ou deploy; as seções correspondentes continuam descrevendo contratos planejados.
+> **Fase 2 em execução.** A base da Fase 1 permanece concluída e verificada, e 2 dos 8 planos de autenticação estão prontos. `POST /api/auth/register` já cadastra somente solicitantes com BCrypt, validação, erros seguros e proteção contra e-mail duplicado; o próximo passo é o Plano 02-03, que inicia a fundação criptográfica do JWT. Login, `/api/auth/me`, demais endpoints, telas, build publicado e deploy continuam planejados.
 
 ## O que é o SolveIT
 
@@ -34,14 +34,14 @@ O objetivo não é apenas chegar a uma aplicação funcional. A abordagem **Buil
 
 | Item | Situação |
 | --- | --- |
-| Estado do repositório | Fase 1 concluída e verificada |
-| Fases implementadas | 1 de 7 |
-| Progresso do milestone | 14% |
-| Foco atual | Fase 2 — Autenticação, pronta para discussão e planejamento |
+| Estado do repositório | Fase 1 concluída; Fase 2 em execução |
+| Fases implementadas | 1 concluída; Fase 2 com 2 de 8 planos completos |
+| Progresso do milestone | 14% por fases; 7 de 13 planos conhecidos completos (54%) |
+| Foco atual | Fase 2 — Plano 02-03, fundação criptográfica JWT |
 | Aplicação executável | Base Spring Boot disponível; execução local exige MySQL configurado |
-| API e telas disponíveis | Não existem ainda |
+| API e telas disponíveis | `POST /api/auth/register` disponível; demais endpoints e telas planejados |
 
-A base de persistência descrita neste README está implementada e verificada. Autenticação, regras de negócio, endpoints, notificações, dashboard e telas permanecem **contratos planejados**, não capacidades já disponíveis.
+A base de persistência e o cadastro público descritos neste README estão implementados e verificados. Login, JWT, autorização completa, regras de chamados, notificações, dashboard e telas permanecem **contratos planejados**, não capacidades já disponíveis.
 
 ## Como acompanhar o projeto
 
@@ -52,16 +52,16 @@ A base de persistência descrita neste README está implementada e verificada. A
 
 O andamento só deve ser considerado entregue quando os artefatos de planejamento, os testes proporcionais e o histórico Git confirmarem a conclusão. O texto deste README deve evoluir junto com o estado real do repositório.
 
-## Como verificar a base atual
+## Como verificar o back-end atual
 
-Para compilar e executar os testes da Fase 1 no Windows, tenha Java 17 e Docker Desktop com o engine Linux ativo. O Maven Wrapper fixa a versão do Maven do projeto, e o Testcontainers cria um MySQL 8.4 temporário durante o teste — `DB_USERNAME` e `DB_PASSWORD` não são necessários nesse caminho.
+Para compilar e executar os testes das entregas atuais no Windows, tenha Java 17 e Docker Desktop com o engine Linux ativo. O Maven Wrapper fixa a versão do Maven do projeto, e o Testcontainers cria bancos MySQL 8.4 temporários para validar persistência, migrações, segurança e cadastro — `DB_USERNAME` e `DB_PASSWORD` não são necessários nesse caminho.
 
 ```powershell
 Set-Location solveit-api
 .\mvnw.cmd clean verify
 ```
 
-Em Linux ou macOS, use `./mvnw clean verify`. O resultado esperado é `BUILD SUCCESS`, com o teste de integração validando migrações, constraints, entidades e repositories contra MySQL real.
+Em Linux ou macOS, use `./mvnw clean verify`. O resultado esperado é `BUILD SUCCESS`; a suíte atual possui 18 testes e valida migrações, constraints, entidades, repositories, cadastro, erros seguros e concorrência contra MySQL real.
 
 Para iniciar a aplicação localmente, crie antes o database `solveit` em uma instância MySQL e forneça as credenciais pelo ambiente. O Flyway cria e versiona as tabelas, mas deliberadamente não cria o database nem armazena credenciais no repositório.
 
@@ -135,7 +135,7 @@ Os envios deverão ocorrer somente após a confirmação da transação. Uma fal
 
 ## Stack do projeto
 
-A base de back-end, persistência, migrações e testes da Fase 1 já está implementada. Segurança, notificações e front-end continuam planejados para as fases seguintes.
+A base de back-end, persistência, migrações e testes da Fase 1 já está implementada. A Fase 2 também entregou a baseline stateless do Spring Security, cadastro público, BCrypt, validação e Problem Details; login, JWT, autorização completa, notificações e front-end continuam planejados.
 
 | Camada | Tecnologias planejadas | Papel no projeto |
 | --- | --- | --- |
@@ -151,7 +151,7 @@ Segredos de banco, JWT e SMTP deverão vir do ambiente ou de um cofre de segredo
 
 ## Arquitetura do projeto
 
-O back-end é uma aplicação modular única em Spring Boot. A Fase 1 já criou a raiz da aplicação, `entity`, `enums` e `repository`; os demais packages serão adicionados quando tiverem implementação real, sem placeholders. A separação por responsabilidade manterá regras de negócio nos services, contratos HTTP nos controllers e persistência nos repositories:
+O back-end é uma aplicação modular única em Spring Boot. A Fase 1 criou a raiz da aplicação, `entity`, `enums` e `repository`; os dois primeiros planos da Fase 2 adicionaram `config`, `controller`, `dto`, `exception` e `service`. A árvore abaixo representa a organização alvo, e `security` será criado quando a implementação de JWT exigir esse package. A separação por responsabilidade mantém regras de negócio nos services, contratos HTTP nos controllers e persistência nos repositories:
 
 ```text
 solveit-api/
@@ -180,7 +180,7 @@ O front-end será uma SPA React separada, consumindo a API por uma instância Ax
 
 ## Contrato de API planejado
 
-> **Endpoints ainda não disponíveis.** A tabela documenta o contrato pretendido e não pode ser usada como guia de execução da aplicação atual.
+> **Disponibilidade parcial.** Apenas `POST /api/auth/register` está implementado neste momento. As demais linhas documentam contratos pretendidos e ainda não podem ser usadas como guia de execução da aplicação atual.
 
 | Grupo | Método e rota planejados | Acesso e finalidade |
 | --- | --- | --- |
@@ -216,14 +216,14 @@ As sete fases são incrementos sequenciais. A base reproduzível foi concluída;
 | Fase | Entrega planejada | Estado |
 | --- | --- | --- |
 | 1 — Base do Projeto | Aplicação Spring inicial sobre esquema MySQL completo, versionado por Flyway e validado pelo JPA | Concluída e verificada |
-| 2 — Autenticação | Cadastro de solicitante, login JWT e autorização por perfil e relação | Pendente |
+| 2 — Autenticação | Cadastro de solicitante, login JWT e autorização por perfil e relação | Em execução — 2/8 planos |
 | 3 — Core de Chamados | Administração, ciclo completo do chamado, comentários e histórico auditável | Pendente |
 | 4 — Notificações por E-mail | Comunicação dos eventos confirmados aos envolvidos corretos | Pendente |
 | 5 — Dashboard | Indicadores autorizados para administradores e atendentes | Pendente |
 | 6 — Front-end (React + Tailwind) | Jornadas principais dos três perfis na SPA responsiva | Pendente |
 | 7 — Polimento e Qualidade | Estados de interface, responsividade, testes e revisão de segurança | Pendente |
 
-Metas, dependências, critérios de sucesso e rastreabilidade estão no [roadmap completo](.planning/ROADMAP.md). Apenas a Fase 1 representa entrega implementada; as demais linhas continuam planejadas.
+Metas, dependências, critérios de sucesso e rastreabilidade estão no [roadmap completo](.planning/ROADMAP.md). A Fase 1 está concluída e a Fase 2 possui uma entrega parcial implementada; as fases seguintes continuam planejadas.
 
 ## Referência visual
 
@@ -241,7 +241,7 @@ Após testes e resumo, há três gates independentes: autorização para fazer p
 
 ## Segurança e auditoria
 
-- Senhas serão armazenadas apenas como hash BCrypt e nunca aparecerão em respostas ou logs.
+- Senhas cadastradas são armazenadas apenas como hash BCrypt e não aparecem em respostas ou logs.
 - JWTs deverão ser temporários; tokens ausentes, inválidos, expirados ou ligados a usuários inativos serão rejeitados.
 - Toda operação protegida verificará perfil e relação com o recurso no servidor.
 - O cadastro público não poderá criar `ATENDENTE` nem `ADMIN`.

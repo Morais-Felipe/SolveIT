@@ -71,7 +71,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   4. Operações negam acesso quando perfil ou relação com o recurso não é permitido.
   5. Senhas ficam exclusivamente em hash BCrypt e não aparecem em respostas ou logs.
 
-**Plans**: TBD
+**Plans**: 8 planos sequenciais
 
 - [x] 02-01-PLAN.md
 - [x] 02-02-PLAN.md
