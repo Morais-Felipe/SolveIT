@@ -4,9 +4,9 @@ current_phase: 02
 current_phase_name: Autenticação
 status: executing
 stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-09-06T15:55:09.570Z"
-last_activity: 2026-09-06
-last_activity_desc: Completed Phase 02 Plan 02 secure registration errors
+last_updated: "2026-09-08T14:52:11.786Z"
+last_activity: 2026-09-08
+last_activity_desc: Completed quick task 260908-g6x path and authentication documentation correction
 state_head: c4d2398b2046e2bd61732f19cc6a826d9ca93a82
 progress:
   total_phases: 7
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 Phase: 02 (Autenticação) — EXECUTING
 Plan: 3 of 8
 Status: Ready to execute
-Last activity: 2026-09-06 — Phase 02 Plan 02 secure registration errors completed
+Last activity: 2026-09-08 — Completed quick task 260908-g6x: normalized C:/SolveIT and synchronized Phase 2 documentation
 
 Progress by phase: [███░░░░░░░░░░░░░░░░░] 1/7 phases (14%)
 Plan progress: 7/13 known plans complete (54%); Phase 2 has 2/8 plans complete (25%)
@@ -111,12 +111,13 @@ None yet.
 | 260902-et2 | Criar README completo do SolveIT inspirado na organização do README do GSD Core | 2026-09-02 | 6cf0155 | [260902-et2-criar-readme-completo-do-solveit-inspira](./quick/260902-et2-criar-readme-completo-do-solveit-inspira/) |
 | 2 | Adicionar modo pedagógico obrigatório ao AGENTS.md | 2026-09-03 | 6c3266c | — |
 | 260904-k6p | Atualizar a documentação após a verificação da Fase 1, alinhar as aprovações Git e corrigir a identidade local dos commits | 2026-09-04 | be21535 | [260904-k6p-atualizar-a-documentacao-apos-a-verifica](./quick/260904-k6p-atualizar-a-documentacao-apos-a-verifica/) |
+| 260908-g6x | Corrigir configuração local após renomear a raiz para C:/SolveIT e atualizar a documentação da Fase 2 | 2026-09-08 | 8bd8dce | [260908-g6x-corrigir-configura-o-local-ap-s-renomear](./quick/260908-g6x-corrigir-configura-o-local-ap-s-renomear/) |
 
 ## Deferred Items
 
 | Category | Item | Status | Deferred At | Milestone |
 |----------|------|--------|-------------|-----------|
-| GSD | Reparar `.codex/hooks/lib/hook-exit.js` para restaurar `gsd-context-monitor` | Resolved — helpers restaurados; registro `Stop` incompatível removido e reinício validado | Phase 01 Ticket 05 | v1 |
+| GSD | Reparar `.codex/hooks/lib/hook-exit.js` para restaurar `gsd-context-monitor` | Resolved localmente em C:/SolveIT — helpers oficiais 1.12.0 restaurados; como `.codex` não é versionado, verificar a instalação ao trocar de máquina ou raiz | Phase 02 quick 260908-g6x | v1 |
 | GSD | Investigar `init.execute-phase` reportando runtime `claude` durante sessão Codex | Resolved — `init.execute-phase 2` reportou `agent_runtime: codex` | Phase 01 Ticket 05 | v1 |
 
 ## Session Continuity
