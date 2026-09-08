@@ -71,11 +71,11 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   4. Operações negam acesso quando perfil ou relação com o recurso não é permitido.
   5. Senhas ficam exclusivamente em hash BCrypt e não aparecem em respostas ou logs.
 
-**Plans**: 8 planos sequenciais
+**Plans**: 3/8 plans executedos sequenciais
 
 - [x] 02-01-PLAN.md
 - [x] 02-02-PLAN.md
-- [ ] 02-03-PLAN.md
+- [x] 02-03-PLAN.md
 - [ ] 02-04-PLAN.md
 - [ ] 02-05-PLAN.md
 - [ ] 02-06-PLAN.md
@@ -168,7 +168,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Base do Projeto | 5/5 | Complete    | 2026-09-04 |
-| 2. Autenticação | 2/8 | In Progress|  |
+| 2. Autenticação | 3/8 | In Progress|  |
 | 3. Core de Chamados | 0/TBD | Not started | - |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
 | 5. Dashboard | 0/TBD | Not started | - |
