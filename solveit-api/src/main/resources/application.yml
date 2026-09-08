@@ -12,3 +12,8 @@ solveit:
   security:
     bcrypt:
       strength: ${SOLVEIT_BCRYPT_STRENGTH:12}
+    jwt:
+      secret: ${SOLVEIT_JWT_SECRET}
+      issuer: ${SOLVEIT_JWT_ISSUER:solveit-api}
+      audience: ${SOLVEIT_JWT_AUDIENCE:solveit-api}
+      access-token-ttl: ${SOLVEIT_JWT_ACCESS_TOKEN_TTL:1h}
