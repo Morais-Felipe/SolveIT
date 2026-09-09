@@ -38,7 +38,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.crypto.SecretKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -51,8 +54,10 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.FilterChainProxy;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.containers.MySQLContainer;
@@ -67,6 +72,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 })
 @AutoConfigureMockMvc
 @Import(AuthSecurityIntegrationTest.TestClockConfiguration.class)
+@ExtendWith(OutputCaptureExtension.class)
 class AuthSecurityIntegrationTest {
 
     private static final Instant NOW = Instant.parse("2026-09-09T18:00:00Z");
@@ -99,6 +105,9 @@ class AuthSecurityIntegrationTest {
 
     @Autowired
     private MutableClock clock;
+
+    @Autowired(required = false)
+    private AccessDeniedHandler restAccessDeniedHandler;
 
     @BeforeEach
     void resetState() {
@@ -301,6 +310,115 @@ class AuthSecurityIntegrationTest {
         assertThat(result.getRequest().getSession(false)).isNull();
     }
 
+    @Test
+    void returnsProblemDetailsWhenBearerIsMissing() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        assertProblemDetails(
+                result.getResponse(),
+                401,
+                "AUTH_TOKEN_MISSING",
+                "Autenticação necessária",
+                "Autenticação necessária.",
+                "/api/auth/me");
+    }
+
+    @Test
+    void returnsInvalidProblemDetailsWithoutLeakingBearerInternals(CapturedOutput output)
+            throws Exception {
+        String malformedCredential = "Bearer leak-marker.not-a-jwt";
+        int capturedBeforeRequest = output.getAll().length();
+
+        MvcResult result = mockMvc.perform(get("/api/auth/me")
+                        .header(HttpHeaders.AUTHORIZATION, malformedCredential))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        assertProblemDetails(
+                result.getResponse(),
+                401,
+                "AUTH_TOKEN_INVALID",
+                "Autenticação inválida",
+                "Sua autenticação não é válida. Entre novamente.",
+                "/api/auth/me");
+        assertThat(output.getAll().substring(capturedBeforeRequest))
+                .doesNotContain(
+                        malformedCredential,
+                        jwtProperties.getSecret(),
+                        "Authorization",
+                        "MalformedJwtException",
+                        "io.jsonwebtoken");
+    }
+
+    @Test
+    void returnsExpiredProblemDetailsForExpiredBearer() throws Exception {
+        LoginResult login = registerAndLogin("http-expira@example.com", "Expira HTTP");
+        clock.advance(Duration.ofHours(1).plusSeconds(1));
+
+        MvcResult result = mockMvc.perform(get("/api/auth/me")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.accessToken()))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        assertProblemDetails(
+                result.getResponse(),
+                401,
+                "AUTH_TOKEN_EXPIRED",
+                "Sessão expirada",
+                "Sua sessão expirou. Entre novamente para continuar.",
+                "/api/auth/me");
+    }
+
+    @Test
+    void returnsInactiveAccountProblemDetailsOnlyAfterValidBearerIdentification() throws Exception {
+        LoginResult login = registerAndLogin("http-inativo@example.com", "Inativo HTTP");
+        Usuario usuario = usuarioRepository.findById(login.usuarioId()).orElseThrow();
+        usuario.setAtivo(false);
+        usuarioRepository.saveAndFlush(usuario);
+
+        MvcResult result = mockMvc.perform(get("/api/auth/me")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.accessToken()))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        assertProblemDetails(
+                result.getResponse(),
+                401,
+                "AUTH_ACCOUNT_INACTIVE",
+                "Conta inativa",
+                "Sua conta está inativa. Entre em contato com um administrador.",
+                "/api/auth/me");
+    }
+
+    @Test
+    void returnsAccessDeniedProblemDetailsForAuthenticatedIdentity() throws Exception {
+        assertThat(restAccessDeniedHandler).isNotNull();
+        LoginResult login = registerAndLogin("sem-permissao@example.com", "Sem Permissao");
+        Usuario usuario = usuarioRepository.findById(login.usuarioId()).orElseThrow();
+        UsuarioPrincipal principal = UsuarioPrincipal.withoutCredentials(usuario);
+        Authentication authentication =
+                org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+                        .authenticated(principal, null, principal.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/admin/probe");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        restAccessDeniedHandler.handle(
+                request,
+                response,
+                new AccessDeniedException("denied only inside the test"));
+
+        assertProblemDetails(
+                response,
+                403,
+                "ACCESS_DENIED",
+                "Acesso negado",
+                "Você não tem permissão para realizar esta operação.",
+                "/api/admin/probe");
+    }
+
     private LoginResult registerAndLogin(String email, String nome) throws Exception {
         MvcResult registration = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -392,6 +510,38 @@ class AuthSecurityIntegrationTest {
         } else {
             assertThat(observation.failureReason()).hasToString(expectedFailureReason);
         }
+    }
+
+    private void assertProblemDetails(
+            MockHttpServletResponse response,
+            int expectedStatus,
+            String expectedCode,
+            String expectedTitle,
+            String expectedDetail,
+            String expectedInstance) throws Exception {
+        assertThat(response.getStatus()).isEqualTo(expectedStatus);
+        assertThat(response.getContentType()).isEqualTo("application/problem+json;charset=UTF-8");
+        assertThat(response.getCharacterEncoding()).isEqualTo(StandardCharsets.UTF_8.name());
+
+        String responseBody = response.getContentAsString();
+        JsonNode problem = objectMapper.readTree(responseBody);
+        assertThat(problem.path("type").asText())
+                .isEqualTo("urn:solveit:error:" + expectedCode.toLowerCase().replace('_', '-'));
+        assertThat(problem.path("title").asText()).isEqualTo(expectedTitle);
+        assertThat(problem.path("status").asInt()).isEqualTo(expectedStatus);
+        assertThat(problem.path("detail").asText()).isEqualTo(expectedDetail);
+        assertThat(problem.path("instance").asText()).isEqualTo(expectedInstance);
+        assertThat(problem.path("code").asText()).isEqualTo(expectedCode);
+        assertThat(problem.fieldNames())
+                .toIterable()
+                .containsExactlyInAnyOrder("type", "title", "status", "detail", "instance", "code");
+        assertThat(responseBody).doesNotContain(
+                "Bearer ",
+                jwtProperties.getSecret(),
+                "io.jsonwebtoken",
+                "Exception",
+                "SELECT ",
+                "select ");
     }
 
     private SecretKey configuredSigningKey() {
