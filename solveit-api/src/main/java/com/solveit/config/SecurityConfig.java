@@ -70,7 +70,11 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions ->
                         exceptions.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/auth/register",
+                                "/api/auth/login")
+                        .permitAll()
                         .anyRequest().authenticated());
 
         return http.build();

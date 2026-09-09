@@ -1,6 +1,8 @@
 package com.solveit.controller;
 
+import com.solveit.dto.auth.LoginRequest;
 import com.solveit.dto.auth.RegisterRequest;
+import com.solveit.dto.auth.TokenResponse;
 import com.solveit.dto.auth.UsuarioResponse;
 import com.solveit.service.AuthService;
 import jakarta.validation.Valid;
@@ -25,5 +27,10 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public UsuarioResponse register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
+    }
+
+    @PostMapping("/login")
+    public TokenResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 }
