@@ -19,9 +19,12 @@ import io.jsonwebtoken.Claims;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
@@ -185,6 +188,96 @@ class AuthLoginIntegrationTest {
                 "at com.solveit");
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("invalidCredentialScenarios")
+    void returnsTheSameSafeProblemForEveryInvalidCredential(
+            InvalidLoginScenario scenario,
+            CapturedOutput output) throws Exception {
+        Usuario saved = saveUser(
+                "felipe@example.com",
+                RAW_PASSWORD,
+                scenario.active());
+        String requestBody = objectMapper.writeValueAsString(new LoginPayload(
+                scenario.email(),
+                scenario.password()));
+        int requestLogStart = output.getAll().length();
+
+        MvcResult result = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.type")
+                        .value("urn:solveit:error:auth-credentials-invalid"))
+                .andExpect(jsonPath("$.title").value("Credenciais inválidas"))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.detail").value("E-mail ou senha inválidos."))
+                .andExpect(jsonPath("$.instance").value("/api/auth/login"))
+                .andExpect(jsonPath("$.code").value("AUTH_CREDENTIALS_INVALID"))
+                .andExpect(jsonPath("$.errors").doesNotExist())
+                .andExpect(jsonPath("$.accessToken").doesNotExist())
+                .andExpect(header().doesNotExist("Set-Cookie"))
+                .andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+        JsonNode response = objectMapper.readTree(responseBody);
+        List<String> responseFields = new ArrayList<>();
+        response.fieldNames().forEachRemaining(responseFields::add);
+        assertThat(responseFields).containsExactlyInAnyOrder(
+                "type", "title", "status", "detail", "instance", "code");
+        assertThat(responseBody).doesNotContain(
+                requestBody,
+                scenario.email(),
+                scenario.password(),
+                saved.getSenha(),
+                jwtProperties.getSecret(),
+                "accessToken",
+                "Bearer ",
+                "Exception",
+                "java.",
+                "org.",
+                "select ",
+                "insert ",
+                "stackTrace");
+        assertThat(result.getRequest().getSession(false)).isNull();
+
+        String allLogs = output.getAll();
+        String requestLogs = allLogs.substring(Math.min(requestLogStart, allLogs.length()));
+        assertThat(requestLogs).doesNotContain(
+                requestBody,
+                scenario.email(),
+                scenario.password(),
+                saved.getSenha(),
+                jwtProperties.getSecret(),
+                "accessToken",
+                "Authorization",
+                "Bearer ",
+                "Exception",
+                "java.",
+                "org.",
+                "select ",
+                "insert ",
+                "at com.solveit");
+    }
+
+    static Stream<InvalidLoginScenario> invalidCredentialScenarios() {
+        return Stream.of(
+                new InvalidLoginScenario(
+                        "e-mail inexistente",
+                        "nao.existe@example.com",
+                        RAW_PASSWORD,
+                        true),
+                new InvalidLoginScenario(
+                        "senha incorreta",
+                        "felipe@example.com",
+                        "senha incorreta 456",
+                        true),
+                new InvalidLoginScenario(
+                        "conta inativa",
+                        "felipe@example.com",
+                        RAW_PASSWORD,
+                        false));
+    }
+
     private Usuario saveUser(String email, String rawPassword, boolean active) {
         Usuario usuario = new Usuario(
                 "Felipe",
@@ -196,5 +289,16 @@ class AuthLoginIntegrationTest {
     }
 
     private record LoginPayload(String email, String senha) {
+    }
+
+    private record InvalidLoginScenario(
+            String description,
+            String email,
+            String password,
+            boolean active) {
+        @Override
+        public String toString() {
+            return description;
+        }
     }
 }
