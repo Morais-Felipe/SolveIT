@@ -6,6 +6,7 @@ import java.util.Locale;
 public enum ApiErrorCode {
     VALIDATION_ERROR,
     EMAIL_ALREADY_REGISTERED,
+    AUTH_CREDENTIALS_INVALID,
     INTERNAL_ERROR;
 
     public URI type() {

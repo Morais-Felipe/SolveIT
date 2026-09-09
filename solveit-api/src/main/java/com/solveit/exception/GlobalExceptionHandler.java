@@ -59,6 +59,20 @@ public final class GlobalExceptionHandler {
         return problemResponse(HttpStatus.CONFLICT, problem);
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidCredentials(
+            HttpServletRequest request) {
+        ProblemDetail problem = problemDetailFactory.create(
+                HttpStatus.UNAUTHORIZED,
+                ApiErrorCode.AUTH_CREDENTIALS_INVALID,
+                "Credenciais inválidas",
+                "E-mail ou senha inválidos.",
+                requestUri(request),
+                null);
+
+        return problemResponse(HttpStatus.UNAUTHORIZED, problem);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ProblemDetail> handleDataIntegrityViolation(
             HttpServletRequest request) {

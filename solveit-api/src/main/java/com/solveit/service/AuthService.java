@@ -8,6 +8,7 @@ import com.solveit.dto.auth.UsuarioResponse;
 import com.solveit.entity.Usuario;
 import com.solveit.enums.PerfilUsuario;
 import com.solveit.exception.EmailAlreadyRegisteredException;
+import com.solveit.exception.InvalidCredentialsException;
 import com.solveit.repository.UsuarioRepository;
 import com.solveit.security.JwtService;
 import com.solveit.security.UsuarioPrincipal;
@@ -17,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,10 +82,15 @@ public class AuthService {
     @Transactional(readOnly = true)
     public TokenResponse login(LoginRequest request) {
         String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
-        Authentication authentication = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(
-                        normalizedEmail,
-                        request.senha()));
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    UsernamePasswordAuthenticationToken.unauthenticated(
+                            normalizedEmail,
+                            request.senha()));
+        } catch (AuthenticationException ignored) {
+            throw new InvalidCredentialsException();
+        }
         UsuarioPrincipal principal = (UsuarioPrincipal) authentication.getPrincipal();
         String accessToken = jwtService.issue(principal.getId());
 
