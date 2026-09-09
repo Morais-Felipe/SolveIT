@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 02
 current_phase_name: Autenticação
 status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-09-09T14:46:20.397Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-09-09T16:49:40.878Z"
 last_activity: 2026-09-09
-last_activity_desc: Completed 02-04-PLAN.md provider login and JWT issuance
-state_head: 78dcaa744fc8214607c984c89c8f08ab9557a5f9
+last_activity_desc: Completed 02-05-PLAN.md uniform invalid login responses
+state_head: fd5fdf24dac3ca64216702acd55cc5f768f15da8
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 13
-  completed_plans: 9
+  completed_plans: 10
   percent: 14
 ---
 
@@ -28,31 +28,31 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 02 (Autenticação) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
-Last activity: 2026-09-09 — Completed 02-04-PLAN.md provider login and JWT issuance
+Last activity: 2026-09-09 — Completed 02-05-PLAN.md uniform invalid login responses
 
 Progress by phase: [███░░░░░░░░░░░░░░░░░] 1/7 phases (14%)
-Plan progress: 9/13 known plans complete (69%); Phase 2 has 4/8 plans complete (50%)
+Plan progress: 10/13 known plans complete (77%); Phase 2 has 5/8 plans complete (63%)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9
-- Average duration: 17.0 min
-- Total execution time: 2.6 hours
+- Total plans completed: 10
+- Average duration: 17.3 min
+- Total execution time: 2.9 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 01 | 5 | 66 min | 13.2 min |
-| Phase 02 | 4 | 87 min | 21.8 min |
+| Phase 02 | 5 | 107 min | 21.4 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 16 min, 12 min, 24 min, 20 min, 31 min
+- Last 5 plans: 12 min, 24 min, 20 min, 31 min, 20 min
 - Trend: variável; Planos de autenticação exercitam ciclos RED/GREEN com MySQL/Testcontainers
 
 **Per-Plan Metrics:**
@@ -68,6 +68,7 @@ Plan progress: 9/13 known plans complete (69%); Phase 2 has 4/8 plans complete (
 | Phase 02 P02 | 24 min | 3 tasks | 10 files |
 | Phase 02 P03 | 20 min | 2 tasks | 8 files |
 | Phase 02 P04 | 31 min | 2 tasks | 8 files |
+| Phase 02 P05 | 20 min | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 02]: DaoAuthenticationProvider compara BCrypt e exige conta ativa; AuthService não interpreta o hash. — Mantém a comprovação de credenciais sob responsabilidade do Spring Security.
 - [Phase 02]: UsuarioPrincipal é separado da entidade JPA e apaga o hash após autenticar. — Evita manter credenciais no contexto e prepara ID/perfil atuais para autorização.
 - [Phase 02]: Login normaliza somente o e-mail e deriva expiresIn do TTL JWT configurado. — Preserva a senha exata e impede divergência entre resposta e expiração real.
+- [Phase 02]: Falhas de usuário inexistente, senha errada e conta inativa convergem para 401 AUTH_CREDENTIALS_INVALID. — Impede enumeração de contas por status, mensagem ou schema.
+- [Phase 02]: Rate limiting fica fora da Fase 2, mas é obrigatório decidir o controle antes de exposição à internet. — BCrypt e resposta uniforme não impedem credential stuffing ou brute force.
 
 ### Pending Todos
 
@@ -107,6 +110,7 @@ None yet.
 
 ### Blockers/Concerns
 
+- [Pre-production]: Definir e verificar rate limiting para login/cadastro antes de expor o SolveIT à internet.
 - [Phase 3]: Confirmar matriz de transições/atores e política de locking no planejamento.
 - [Phase 4]: Decidir entre entrega best-effort após commit e outbox durável.
 - [Phase 5]: Definir escopo dos agregados para atendentes e significado de carga ativa.
@@ -125,10 +129,10 @@ None yet.
 | Category | Item | Status | Deferred At | Milestone |
 |----------|------|--------|-------------|-----------|
 | GSD | Reparar `.codex/hooks/lib/hook-exit.js` para restaurar `gsd-context-monitor` | Resolved localmente em C:/SolveIT — helpers oficiais 1.12.0 restaurados; como `.codex` não é versionado, verificar a instalação ao trocar de máquina ou raiz | Phase 02 quick 260908-g6x | v1 |
-| GSD | Investigar `init.execute-phase` reportando runtime `claude` durante sessão Codex | Resolved — `init.execute-phase 2` reportou `agent_runtime: codex` | Phase 01 Ticket 05 | v1 |
+| GSD | Investigar `init.execute-phase` reportando runtime `claude` durante sessão Codex | Reaberto — Wave 5 voltou a reportar `agent_runtime: claude`; execução sequencial não foi afetada, mas revisar antes de delegação | Phase 02 Plan 05 | v1 |
 
 ## Session Continuity
 
-Last session: 2026-09-09T14:46:20.397Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-09-09T16:49:40.878Z
+Stopped at: Completed 02-05-PLAN.md
 Resume file: None

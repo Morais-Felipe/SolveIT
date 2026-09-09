@@ -15,7 +15,7 @@
 ### Autenticação e Acesso
 
 - [x] **AUTH-01**: Uma pessoa pode se cadastrar publicamente com nome, e-mail e senha e recebe exclusivamente o perfil SOLICITANTE.
-- [ ] **AUTH-02**: Um usuário ativo pode entrar com e-mail e senha válidos e receber um JWT válido e limitado no tempo.
+- [x] **AUTH-02**: Um usuário ativo pode entrar com e-mail e senha válidos e receber um JWT válido e limitado no tempo.
 - [ ] **AUTH-03**: Um usuário autenticado pode consultar seus próprios dados em `GET /api/auth/me`.
 - [x] **AUTH-04**: Senhas são armazenadas somente como hash BCrypt e nunca aparecem em respostas ou logs.
 - [ ] **AUTH-05**: Requisições sem token, com token inválido/expirado ou de usuário inativo são rejeitadas nas rotas protegidas.
@@ -120,7 +120,7 @@
 | DATA-03 | Phase 1 | Complete |
 | DATA-04 | Phase 1 | Complete |
 | AUTH-01 | Phase 2 | Complete |
-| AUTH-02 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Complete |
 | AUTH-03 | Phase 2 | Pending |
 | AUTH-04 | Phase 2 | Complete |
 | AUTH-05 | Phase 2 | Pending |
