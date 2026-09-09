@@ -15,6 +15,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -44,9 +45,6 @@ class AuthLoginIntegrationTest {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private DaoAuthenticationProvider daoAuthenticationProvider;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -66,7 +64,11 @@ class AuthLoginIntegrationTest {
                         "  FELIPE@Example.COM  ",
                         RAW_PASSWORD));
 
-        assertThat(daoAuthenticationProvider).isNotNull();
+        assertThat(authenticationManager).isInstanceOf(ProviderManager.class);
+        ProviderManager providerManager = (ProviderManager) authenticationManager;
+        assertThat(providerManager.getProviders())
+                .singleElement()
+                .isInstanceOf(DaoAuthenticationProvider.class);
         assertThat(authentication.isAuthenticated()).isTrue();
         assertThat(authentication.getCredentials()).isNull();
         assertThat(authentication.getPrincipal()).isInstanceOf(UsuarioPrincipal.class);
