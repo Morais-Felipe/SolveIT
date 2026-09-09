@@ -78,7 +78,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 - [x] 02-03-PLAN.md
 - [x] 02-04-PLAN.md
 - [x] 02-05-PLAN.md
-- [ ] 02-06-PLAN.md
+- [x] 02-06-PLAN.md
 - [ ] 02-07-PLAN.md
 - [ ] 02-08-PLAN.md
 
@@ -168,7 +168,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Base do Projeto | 5/5 | Complete    | 2026-09-04 |
-| 2. Autenticação | 5/8 | In Progress|  |
+| 2. Autenticação | 6/8 | In Progress|  |
 | 3. Core de Chamados | 0/TBD | Not started | - |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
 | 5. Dashboard | 0/TBD | Not started | - |
