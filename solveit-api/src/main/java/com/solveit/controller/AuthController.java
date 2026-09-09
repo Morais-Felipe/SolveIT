@@ -4,9 +4,12 @@ import com.solveit.dto.auth.LoginRequest;
 import com.solveit.dto.auth.RegisterRequest;
 import com.solveit.dto.auth.TokenResponse;
 import com.solveit.dto.auth.UsuarioResponse;
+import com.solveit.security.UsuarioPrincipal;
 import com.solveit.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,5 +35,10 @@ public class AuthController {
     @PostMapping("/login")
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @GetMapping("/me")
+    public UsuarioResponse me(@AuthenticationPrincipal UsuarioPrincipal principal) {
+        return authService.me(principal.getId());
     }
 }

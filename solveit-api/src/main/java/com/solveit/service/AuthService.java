@@ -70,13 +70,7 @@ public class AuthService {
             throw exception;
         }
 
-        return new UsuarioResponse(
-                saved.getId(),
-                saved.getNome(),
-                saved.getEmail(),
-                saved.getPerfil(),
-                saved.getAtivo(),
-                saved.getCriadoEm());
+        return toResponse(saved);
     }
 
     @Transactional(readOnly = true)
@@ -98,6 +92,23 @@ public class AuthService {
                 accessToken,
                 "Bearer",
                 jwtProperties.getAccessTokenTtl().toSeconds());
+    }
+
+    @Transactional(readOnly = true)
+    public UsuarioResponse me(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(IllegalStateException::new);
+        return toResponse(usuario);
+    }
+
+    private static UsuarioResponse toResponse(Usuario usuario) {
+        return new UsuarioResponse(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail(),
+                usuario.getPerfil(),
+                usuario.getAtivo(),
+                usuario.getCriadoEm());
     }
 
     private static boolean isEmailUniqueConstraintViolation(
