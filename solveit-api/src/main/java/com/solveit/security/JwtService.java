@@ -2,6 +2,8 @@ package com.solveit.security;
 
 import com.solveit.config.JwtProperties;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -52,5 +54,36 @@ public class JwtService {
 
     public Claims parse(String token) {
         return parser.parseSignedClaims(token).getPayload();
+    }
+
+    AuthenticationResult parseForAuthentication(String token) {
+        try {
+            return AuthenticationResult.accepted(parse(token));
+        } catch (ExpiredJwtException ignored) {
+            return AuthenticationResult.rejected(AuthenticationFailureReason.TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException ignored) {
+            return AuthenticationResult.rejected(AuthenticationFailureReason.TOKEN_INVALID);
+        }
+    }
+
+    record AuthenticationResult(
+            Claims claims,
+            AuthenticationFailureReason failureReason) {
+
+        private static AuthenticationResult accepted(Claims claims) {
+            return new AuthenticationResult(
+                    Objects.requireNonNull(claims, "claims must not be null"),
+                    null);
+        }
+
+        private static AuthenticationResult rejected(AuthenticationFailureReason failureReason) {
+            return new AuthenticationResult(
+                    null,
+                    Objects.requireNonNull(failureReason, "failureReason must not be null"));
+        }
+
+        boolean isAccepted() {
+            return claims != null;
+        }
     }
 }

@@ -137,6 +137,35 @@ class JwtServiceTest {
     }
 
     @Test
+    void classifiesExpiredTokenSeparatelyForAuthentication() {
+        String token = serviceAt(NOW).issue(42L);
+        JwtService laterService = serviceAt(NOW.plus(Duration.ofHours(1)).plusSeconds(1));
+
+        JwtService.AuthenticationResult result = laterService.parseForAuthentication(token);
+
+        assertThat(result.isAccepted()).isFalse();
+        assertThat(result.claims()).isNull();
+        assertThat(result.failureReason()).isEqualTo(AuthenticationFailureReason.TOKEN_EXPIRED);
+    }
+
+    @Test
+    void classifiesEveryOtherJwtRejectionAsInvalidForAuthentication() {
+        String token = signedToken(
+                signingKey(OTHER_SIGNING_MATERIAL),
+                Jwts.SIG.HS256,
+                "solveit-api",
+                "solveit-api",
+                NOW,
+                NOW.plus(Duration.ofHours(1)));
+
+        JwtService.AuthenticationResult result = serviceAt(NOW).parseForAuthentication(token);
+
+        assertThat(result.isAccepted()).isFalse();
+        assertThat(result.claims()).isNull();
+        assertThat(result.failureReason()).isEqualTo(AuthenticationFailureReason.TOKEN_INVALID);
+    }
+
+    @Test
     void rejectsMalformedToken() {
         assertThatThrownBy(() -> serviceAt(NOW).parse("not-a-jwt"))
                 .isInstanceOf(JwtException.class);
