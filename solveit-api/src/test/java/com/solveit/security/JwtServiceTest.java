@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.solveit.config.JwtProperties;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -132,7 +133,7 @@ class JwtServiceTest {
         JwtService laterService = serviceAt(NOW.plus(Duration.ofHours(1)).plusSeconds(1));
 
         assertThatThrownBy(() -> laterService.parse(token))
-                .isInstanceOf(JwtException.class);
+                .isInstanceOf(ExpiredJwtException.class);
     }
 
     @Test

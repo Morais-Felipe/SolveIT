@@ -9,19 +9,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.solveit.config.JwtProperties;
 import com.solveit.entity.Usuario;
 import com.solveit.enums.PerfilUsuario;
 import com.solveit.repository.UsuarioRepository;
 import com.solveit.security.UsuarioPrincipal;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
@@ -29,6 +35,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.crypto.SecretKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +71,9 @@ class AuthSecurityIntegrationTest {
 
     private static final Instant NOW = Instant.parse("2026-09-09T18:00:00Z");
     private static final String RAW_PASSWORD = "senha segura para bearer 123";
+    private static final String AUTHENTICATION_FAILURE_ATTRIBUTE =
+            "com.solveit.security.AuthenticationFailureReason";
+    private static final String OTHER_SIGNING_MATERIAL = "fedcba9876543210".repeat(4);
 
     @Container
     @ServiceConnection
@@ -80,6 +90,9 @@ class AuthSecurityIntegrationTest {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private JwtProperties jwtProperties;
 
     @Autowired
     private FilterChainProxy springSecurityFilterChain;
@@ -135,6 +148,7 @@ class AuthSecurityIntegrationTest {
         FilterObservation whileInactive = filter(login.accessToken(), null);
         assertThat(whileInactive.status()).isEqualTo(401);
         assertThat(whileInactive.authentication()).isNull();
+        assertThat(whileInactive.failureReason()).hasToString("ACCOUNT_INACTIVE");
 
         usuario.setAtivo(true);
         usuarioRepository.saveAndFlush(usuario);
@@ -149,6 +163,7 @@ class AuthSecurityIntegrationTest {
         FilterObservation afterDeletion = filter(login.accessToken(), null);
         assertThat(afterDeletion.status()).isEqualTo(401);
         assertThat(afterDeletion.authentication()).isNull();
+        assertThat(afterDeletion.failureReason()).hasToString("TOKEN_INVALID");
     }
 
     @Test
@@ -169,6 +184,60 @@ class AuthSecurityIntegrationTest {
         FilterObservation afterExpiration = filter(login.accessToken(), null);
         assertThat(afterExpiration.status()).isEqualTo(401);
         assertThat(afterExpiration.authentication()).isNull();
+        assertThat(afterExpiration.failureReason()).hasToString("TOKEN_EXPIRED");
+    }
+
+    @Test
+    void classifiesEveryInvalidBearerShapeWithoutAuthenticatingTheRequest() throws Exception {
+        LoginResult login = registerAndLogin("matriz@example.com", "Matriz JWT");
+
+        assertRejectedWithReason(filterAuthorization(null, null), null);
+        assertRejectedWithReason(filterAuthorization("Basic credentials", null), "TOKEN_INVALID");
+        assertRejectedWithReason(filterAuthorization("Bearer not-a-jwt", null), "TOKEN_INVALID");
+        assertRejectedWithReason(filterAuthorization(
+                "Bearer " + signedToken(
+                        "42",
+                        signingKey(OTHER_SIGNING_MATERIAL),
+                        Jwts.SIG.HS256,
+                        jwtProperties.getIssuer(),
+                        jwtProperties.getAudience()),
+                null), "TOKEN_INVALID");
+        assertRejectedWithReason(filterAuthorization(
+                "Bearer " + signedToken(
+                        "42",
+                        signingKey(OTHER_SIGNING_MATERIAL),
+                        Jwts.SIG.HS384,
+                        jwtProperties.getIssuer(),
+                        jwtProperties.getAudience()),
+                null), "TOKEN_INVALID");
+        assertRejectedWithReason(filterAuthorization(
+                "Bearer " + signedToken(
+                        "42",
+                        configuredSigningKey(),
+                        Jwts.SIG.HS256,
+                        "unexpected-issuer",
+                        jwtProperties.getAudience()),
+                null), "TOKEN_INVALID");
+        assertRejectedWithReason(filterAuthorization(
+                "Bearer " + signedToken(
+                        "42",
+                        configuredSigningKey(),
+                        Jwts.SIG.HS256,
+                        jwtProperties.getIssuer(),
+                        "unexpected-audience"),
+                null), "TOKEN_INVALID");
+        assertRejectedWithReason(filterAuthorization(
+                "Bearer " + signedToken(
+                        "not-a-number",
+                        configuredSigningKey(),
+                        Jwts.SIG.HS256,
+                        jwtProperties.getIssuer(),
+                        jwtProperties.getAudience()),
+                null), "TOKEN_INVALID");
+
+        usuarioRepository.deleteById(login.usuarioId());
+        usuarioRepository.flush();
+        assertRejectedWithReason(filter(login.accessToken(), null), "TOKEN_INVALID");
     }
 
     @Test
@@ -258,8 +327,14 @@ class AuthSecurityIntegrationTest {
     }
 
     private FilterObservation filter(String accessToken, CyclicBarrier barrier) throws Exception {
+        return filterAuthorization("Bearer " + accessToken, barrier);
+    }
+
+    private FilterObservation filterAuthorization(String authorization, CyclicBarrier barrier) throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/security-probe");
-        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        if (authorization != null) {
+            request.addHeader(HttpHeaders.AUTHORIZATION, authorization);
+        }
         MockHttpServletResponse response = new MockHttpServletResponse();
         AtomicReference<Authentication> observedAuthentication = new AtomicReference<>();
 
@@ -275,7 +350,8 @@ class AuthSecurityIntegrationTest {
                 response.getStatus(),
                 observedAuthentication.get(),
                 request.getSession(false) != null,
-                contextCleared);
+                contextCleared,
+                request.getAttribute(AUTHENTICATION_FAILURE_ATTRIBUTE));
     }
 
     private static void awaitBarrier(CyclicBarrier barrier) throws ServletException {
@@ -304,6 +380,44 @@ class AuthSecurityIntegrationTest {
                 .containsExactly(expectedAuthority);
     }
 
+    private static void assertRejectedWithReason(
+            FilterObservation observation,
+            String expectedFailureReason) {
+        assertThat(observation.status()).isEqualTo(401);
+        assertThat(observation.authentication()).isNull();
+        assertThat(observation.sessionCreated()).isFalse();
+        assertThat(observation.contextClearedAfterRequest()).isTrue();
+        if (expectedFailureReason == null) {
+            assertThat(observation.failureReason()).isNull();
+        } else {
+            assertThat(observation.failureReason()).hasToString(expectedFailureReason);
+        }
+    }
+
+    private SecretKey configuredSigningKey() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret()));
+    }
+
+    private SecretKey signingKey(String material) {
+        return Keys.hmacShaKeyFor(material.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String signedToken(
+            String subject,
+            SecretKey key,
+            io.jsonwebtoken.security.MacAlgorithm algorithm,
+            String issuer,
+            String audience) {
+        return Jwts.builder()
+                .subject(subject)
+                .issuedAt(Date.from(NOW))
+                .expiration(Date.from(NOW.plus(Duration.ofHours(1))))
+                .issuer(issuer)
+                .audience().add(audience).and()
+                .signWith(key, algorithm)
+                .compact();
+    }
+
     private record RegisterPayload(String nome, String email, String senha) {
     }
 
@@ -317,7 +431,8 @@ class AuthSecurityIntegrationTest {
             int status,
             Authentication authentication,
             boolean sessionCreated,
-            boolean contextClearedAfterRequest) {
+            boolean contextClearedAfterRequest,
+            Object failureReason) {
     }
 
     @TestConfiguration(proxyBeanMethods = false)
