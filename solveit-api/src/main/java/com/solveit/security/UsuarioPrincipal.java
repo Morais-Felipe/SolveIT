@@ -22,11 +22,19 @@ public class UsuarioPrincipal implements UserDetails, CredentialsContainer {
     private final boolean active;
 
     public UsuarioPrincipal(Usuario usuario) {
+        this(usuario, usuario.getSenha());
+    }
+
+    private UsuarioPrincipal(Usuario usuario, String password) {
         this.id = usuario.getId();
         this.email = usuario.getEmail();
-        this.password = usuario.getSenha();
+        this.password = password;
         this.perfil = usuario.getPerfil();
         this.active = Boolean.TRUE.equals(usuario.getAtivo());
+    }
+
+    public static UsuarioPrincipal withoutCredentials(Usuario usuario) {
+        return new UsuarioPrincipal(usuario, null);
     }
 
     public Long getId() {

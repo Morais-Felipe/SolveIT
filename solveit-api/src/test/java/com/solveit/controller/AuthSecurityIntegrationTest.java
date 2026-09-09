@@ -137,6 +137,13 @@ class AuthSecurityIntegrationTest {
         FilterObservation afterReactivation = filter(login.accessToken(), null);
         assertThat(afterReactivation.status()).isEqualTo(200);
         assertThat(afterReactivation.authentication()).isNotNull();
+
+        usuarioRepository.deleteById(usuario.getId());
+        usuarioRepository.flush();
+
+        FilterObservation afterDeletion = filter(login.accessToken(), null);
+        assertThat(afterDeletion.status()).isEqualTo(401);
+        assertThat(afterDeletion.authentication()).isNull();
     }
 
     @Test

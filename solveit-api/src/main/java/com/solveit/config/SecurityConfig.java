@@ -1,6 +1,7 @@
 package com.solveit.config;
 
 import com.solveit.security.UsuarioDetailsService;
+import com.solveit.security.JwtAuthenticationFilter;
 import java.time.Clock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.NullSecurityContextRepository;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 
@@ -54,7 +56,8 @@ public class SecurityConfig {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            AuthenticationEntryPoint authenticationEntryPoint) throws Exception {
+            AuthenticationEntryPoint authenticationEntryPoint,
+            JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 // O contrato atual usa Bearer no header, sem cookie automático.
                 // Se autenticação migrar para cookie, a proteção CSRF deve ser reavaliada.
@@ -75,7 +78,10 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/login")
                         .permitAll()
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
