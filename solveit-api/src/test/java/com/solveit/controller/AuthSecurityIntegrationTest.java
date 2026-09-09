@@ -1,7 +1,10 @@
 package com.solveit.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,6 +21,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -192,6 +197,39 @@ class AuthSecurityIntegrationTest {
         } finally {
             executor.shutdownNow();
         }
+    }
+
+    @Test
+    void returnsOnlyTheAuthenticatedUsersCurrentPublicDataFromMe() throws Exception {
+        LoginResult authenticated = registerAndLogin("proprio@example.com", "Nome Antigo");
+        LoginResult anotherUser = registerAndLogin("outro@example.com", "Outro Usuario");
+        Usuario currentUser = usuarioRepository.findById(authenticated.usuarioId()).orElseThrow();
+        currentUser.setNome("Nome Atualizado");
+        currentUser.setPerfil(PerfilUsuario.ADMIN);
+        usuarioRepository.saveAndFlush(currentUser);
+
+        MvcResult result = mockMvc.perform(get("/api/auth/me")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + authenticated.accessToken())
+                        .queryParam("userId", anotherUser.usuarioId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(authenticated.usuarioId()))
+                .andExpect(jsonPath("$.nome").value("Nome Atualizado"))
+                .andExpect(jsonPath("$.email").value("proprio@example.com"))
+                .andExpect(jsonPath("$.perfil").value("ADMIN"))
+                .andExpect(jsonPath("$.ativo").value(true))
+                .andExpect(jsonPath("$.criadoEm").isNotEmpty())
+                .andExpect(jsonPath("$.senha").doesNotExist())
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.hash").doesNotExist())
+                .andExpect(header().doesNotExist(HttpHeaders.SET_COOKIE))
+                .andReturn();
+
+        JsonNode response = objectMapper.readTree(result.getResponse().getContentAsString());
+        List<String> responseFields = new ArrayList<>();
+        response.fieldNames().forEachRemaining(responseFields::add);
+        assertThat(responseFields).containsExactlyInAnyOrder(
+                "id", "nome", "email", "perfil", "ativo", "criadoEm");
+        assertThat(result.getRequest().getSession(false)).isNull();
     }
 
     private LoginResult registerAndLogin(String email, String nome) throws Exception {
