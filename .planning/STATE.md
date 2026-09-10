@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 current_phase: 02
 current_phase_name: Autenticação
-status: verifying
-stopped_at: Phase 02 global audit completed with gaps; correction proposal awaits approval
+status: complete
+stopped_at: Phase 02 corrected and verified locally; push awaits explicit approval
 last_updated: "2026-09-10"
 last_activity: 2026-09-10
-last_activity_desc: Global audit found JWT, registration validation and HTTP error contract gaps; see 02-REVIEW.md
-state_head: 97b1f3381475303f447ec1b2d435c2849ab277ab
+last_activity_desc: Phase 02 audit findings corrected; clean build passed with 64 tests
+state_head: 99aeaf2
 progress:
   total_phases: 7
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 13
   completed_plans: 13
-  percent: 14
+  percent: 29
 ---
 
 # Project State
@@ -27,13 +27,13 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 02 (Autenticação) — VERIFICATION GAPS FOUND
+Phase: 02 (Autenticação) — COMPLETE AND VERIFIED LOCALLY
 Plan: 8 of 8
-Status: Plans complete — global verification found gaps; corrections pending approval
-Last activity: 2026-09-10 — Global audit completed; see phases/02-autentica-o/02-REVIEW.md and 02-VERIFICATION.md
+Status: Audit findings corrected and global verification passed; push pending explicit approval
+Last activity: 2026-09-10 — Clean build passed with 64 tests; see phases/02-autentica-o/02-REVIEW-FIX.md and 02-VERIFICATION.md
 
-Progress by phase: [███░░░░░░░░░░░░░░░░░] 1/7 phases (14%)
-Plan progress: 13/13 known plans complete (100%); Phase 2 has 8/8 plans complete (100%, pending verification)
+Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
+Plan progress: 13/13 known plans complete (100%); Phase 2 has 8/8 plans complete and verified
 
 ## Performance Metrics
 
@@ -114,6 +114,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 02]: Perfil governa quem pode tentar a operação; relação persistida governa sobre qual registro pode agir. — Separa a regra ampla em @PreAuthorize da regra dependente de dados dentro do service transacional.
 - [Phase 02]: A autorização usa somente a identidade de UsuarioPrincipal; userId enviado pelo cliente é ignorado. — Impede spoofing e evita que entrada controlada pelo cliente substitua a identidade autenticada.
 - [Phase 02]: A prova da fundação de autorização usa componentes exclusivos de teste; políticas concretas de Chamado ficam para a Fase 3. — Comprova Method Security e guarda de relação sem criar endpoints ou regras de domínio prematuras em produção.
+- [Phase 02 audit]: Tokens Bearer exigem `iat` e `exp` coerentes; ausência ou intervalo inválido é `AUTH_TOKEN_INVALID`.
+- [Phase 02 audit]: E-mail de cadastro é normalizado no DTO antes de validar formato e limite; a senha permanece intacta.
+- [Phase 02 audit]: Erros de leitura JSON e mídia não suportada possuem Problem Details próprios; somente despachos internos `ERROR` atravessam a segurança, e o filtro JWT executa apenas na cadeia Spring Security.
 
 ### Pending Todos
 
@@ -121,7 +124,6 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 02 audit]: R1 JWT temporal claims, R2 registration validation and R3 HTTP error contract require correction/revalidation before phase acceptance. R4 documentation sync and R5 filter registration robustness are detailed in 02-REVIEW.md. No push approved.
 - [Pre-production]: Definir e verificar rate limiting para login/cadastro antes de expor o SolveIT à internet.
 - [Phase 3]: Confirmar matriz de transições/atores e política de locking no planejamento.
 - [Phase 4]: Decidir entre entrega best-effort após commit e outbox durável.
@@ -146,5 +148,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-10T13:22:20.806Z
-Stopped at: Phase 02 audit with gaps; present correction plan for approval. No production fixes or push performed.
+Stopped at: Phase 02 corrected and verified locally; present summary and await explicit push approval. No push, PR or merge performed.
 Resume file: None

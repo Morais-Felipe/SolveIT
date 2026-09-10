@@ -273,8 +273,8 @@ GET    /api/dashboard/por-prioridade     → distribuição de chamados abertos 
 > **Atualize esta seção a cada novo ticket iniciado.**
 
 - **Fase:** 2 — Autenticação
-- **Ticket atual:** Nenhum — discussão e planejamento ainda não iniciados
-- **Status:** Fase 1 concluída e verificada; próximo passo é discutir a Fase 2 antes de criar ou aprovar tickets
+- **Ticket atual:** 08 — encerramento local da Fase 2; push pendente de aprovação explícita
+- **Status:** Fase 2 concluída e verificada após auditoria e correções; próximo passo, depois do fechamento Git, é discutir a Fase 3 antes de criar ou aprovar tickets
 
 ---
 

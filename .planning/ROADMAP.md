@@ -7,7 +7,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 ## Phases
 
 - [x] **Phase 1: Base do Projeto** - A API inicia sobre um esquema MySQL reproduzível e validado. (completed 2026-09-04)
-- [ ] **Phase 2: Autenticação** - Usuários obtêm identidade segura e acesso autorizado.
+- [x] **Phase 2: Autenticação** - Usuários obtêm identidade segura e acesso autorizado. (completed 2026-09-10)
 - [ ] **Phase 3: Core de Chamados** - Os três perfis operam o ciclo auditável completo do chamado.
 - [ ] **Phase 4: Notificações por E-mail** - Eventos confirmados comunicam os envolvidos corretos.
 - [ ] **Phase 5: Dashboard** - Admins e atendentes consultam indicadores autorizados.
@@ -71,7 +71,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   4. Operações negam acesso quando perfil ou relação com o recurso não é permitido.
   5. Senhas ficam exclusivamente em hash BCrypt e não aparecem em respostas ou logs.
 
-**Plans**: 8/8 planos sequenciais executados; verificação da fase pendente
+**Plans**: 8/8 planos sequenciais executados e fase verificada após auditoria/correções
 
 - [x] 02-01-PLAN.md
 - [x] 02-02-PLAN.md
