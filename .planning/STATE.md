@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 current_phase: 02
 current_phase_name: Autenticação
-status: executing
-stopped_at: Completed 02-07-PLAN.md
-last_updated: "2026-09-10T11:52:18.812Z"
+status: verifying
+stopped_at: Completed 02-08-PLAN.md
+last_updated: "2026-09-10T13:22:21.095Z"
 last_activity: 2026-09-10
-last_activity_desc: Completed 02-07-PLAN.md bearer failure classification and security Problem Details
-state_head: eebe5af742e822312699c72b2091cdb9114eebd0
+last_activity_desc: Completed 02-08-PLAN.md server-side profile and persisted relationship authorization
+state_head: 97b1f3381475303f447ec1b2d435c2849ab277ab
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
   percent: 14
 ---
 
@@ -27,32 +27,32 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 02 (Autenticação) — EXECUTING
+Phase: 02 (Autenticação) — READY FOR VERIFICATION
 Plan: 8 of 8
-Status: Ready to execute
-Last activity: 2026-09-09 — Completed 02-06-PLAN.md bearer request identity and /me
+Status: Plans complete — ready for phase verification
+Last activity: 2026-09-10 — Completed 02-08-PLAN.md server-side authorization
 
 Progress by phase: [███░░░░░░░░░░░░░░░░░] 1/7 phases (14%)
-Plan progress: 12/13 known plans complete (92%); Phase 2 has 7/8 plans complete (88%)
+Plan progress: 13/13 known plans complete (100%); Phase 2 has 8/8 plans complete (100%, pending verification)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 12
-- Average duration: 19.1 min
-- Total execution time: 3.8 hours
+- Total plans completed: 13
+- Average duration: 18.6 min
+- Total execution time: 4.0 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 01 | 5 | 66 min | 13.2 min |
-| Phase 02 | 7 | 163 min | 23.3 min |
+| Phase 02 | 8 | 176 min | 22.0 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 20 min, 31 min, 20 min, 28 min, 28 min
+- Last 5 plans: 31 min, 20 min, 28 min, 28 min, 13 min
 - Trend: variável; Planos de autenticação exercitam ciclos RED/GREEN com MySQL/Testcontainers
 
 **Per-Plan Metrics:**
@@ -71,6 +71,7 @@ Plan progress: 12/13 known plans complete (92%); Phase 2 has 7/8 plans complete 
 | Phase 02 P05 | 20 min | 1 tasks | 6 files |
 | Phase 02 P06 | 28 min | 2 tasks | 6 files |
 | Phase 02 P07 | 28 min | 2 tasks | 10 files |
+| Phase 02 P08 | 13 min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -85,7 +86,6 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 01]: Flyway é a única autoridade DDL; Hibernate permanece em ddl-auto=validate.
 - [Phase 01]: Enums de domínio permanecem mínimos e sem regras de autorização, transição ou apresentação.
 - [Phase 01]: Enums serão persistidos por nome com EnumType.STRING; reordenação não altera dados, renomeação exige migração.
-
 - [Phase 01]: Repositories permanecem mínimos; somente identidade e unicidade justificam métodos derivados no Ticket 04.
 - [Phase 01]: Ordenação será sempre explícita nas consultas consumidoras; Comentario/HistoricoStatus permanecem append-only nos services futuros.
 - [Phase 01]: Flyway é a única autoridade DDL; V1..V5 não usam IF NOT EXISTS e Hibernate apenas valida o schema.
@@ -111,6 +111,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 02]: JwtService classifica expiração antes das demais falhas JWT. — Preserva AUTH_TOKEN_EXPIRED sem expor mensagens ou classes do parser.
 - [Phase 02]: Token ausente segue anônimo e Authorization presente fora do formato aceito é inválido. — Mantém AUTH_TOKEN_MISSING distinto de credenciais Bearer rejeitadas.
 - [Phase 02]: Entry point e denied handler escrevem Problem Details pelo factory comum. — Unifica 401 e 403 no contrato RFC 9457 sem reutilizar mensagens de exceção.
+- [Phase 02]: Perfil governa quem pode tentar a operação; relação persistida governa sobre qual registro pode agir. — Separa a regra ampla em @PreAuthorize da regra dependente de dados dentro do service transacional.
+- [Phase 02]: A autorização usa somente a identidade de UsuarioPrincipal; userId enviado pelo cliente é ignorado. — Impede spoofing e evita que entrada controlada pelo cliente substitua a identidade autenticada.
+- [Phase 02]: A prova da fundação de autorização usa componentes exclusivos de teste; políticas concretas de Chamado ficam para a Fase 3. — Comprova Method Security e guarda de relação sem criar endpoints ou regras de domínio prematuras em produção.
 
 ### Pending Todos
 
@@ -141,6 +144,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-10T11:52:18.435Z
-Stopped at: Completed 02-07-PLAN.md
+Last session: 2026-09-10T13:22:20.806Z
+Stopped at: Completed 02-08-PLAN.md
 Resume file: None

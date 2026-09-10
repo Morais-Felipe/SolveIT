@@ -19,7 +19,7 @@
 - [x] **AUTH-03**: Um usuário autenticado pode consultar seus próprios dados em `GET /api/auth/me`.
 - [x] **AUTH-04**: Senhas são armazenadas somente como hash BCrypt e nunca aparecem em respostas ou logs.
 - [x] **AUTH-05**: Requisições sem token, com token inválido/expirado ou de usuário inativo são rejeitadas nas rotas protegidas.
-- [ ] **AUTH-06**: Cada operação aplica no servidor tanto o perfil exigido quanto a relação do usuário com o recurso acessado.
+- [x] **AUTH-06**: Cada operação aplica no servidor tanto o perfil exigido quanto a relação do usuário com o recurso acessado.
 
 ### Usuários e Categorias
 
@@ -124,7 +124,7 @@
 | AUTH-03 | Phase 2 | Complete |
 | AUTH-04 | Phase 2 | Complete |
 | AUTH-05 | Phase 2 | Complete |
-| AUTH-06 | Phase 2 | Pending |
+| AUTH-06 | Phase 2 | Complete |
 | ADMN-01 | Phase 3 | Pending |
 | ADMN-02 | Phase 3 | Pending |
 | ADMN-03 | Phase 3 | Pending |
