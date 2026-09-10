@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -43,6 +45,34 @@ public final class GlobalExceptionHandler {
                 errors);
 
         return problemResponse(HttpStatus.BAD_REQUEST, problem);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ProblemDetail> handleUnreadableRequestBody(
+            HttpServletRequest request) {
+        ProblemDetail problem = problemDetailFactory.create(
+                HttpStatus.BAD_REQUEST,
+                ApiErrorCode.REQUEST_BODY_INVALID,
+                "Corpo da requisição inválido",
+                "O corpo da requisição contém JSON inválido.",
+                requestUri(request),
+                null);
+
+        return problemResponse(HttpStatus.BAD_REQUEST, problem);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ProblemDetail> handleUnsupportedMediaType(
+            HttpServletRequest request) {
+        ProblemDetail problem = problemDetailFactory.create(
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                ApiErrorCode.MEDIA_TYPE_NOT_SUPPORTED,
+                "Formato de conteúdo não suportado",
+                "Use Content-Type application/json.",
+                requestUri(request),
+                null);
+
+        return problemResponse(HttpStatus.UNSUPPORTED_MEDIA_TYPE, problem);
     }
 
     @ExceptionHandler(EmailAlreadyRegisteredException.class)

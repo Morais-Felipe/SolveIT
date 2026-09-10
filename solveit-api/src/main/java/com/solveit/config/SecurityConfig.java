@@ -4,9 +4,11 @@ import com.solveit.security.JwtAuthenticationFilter;
 import com.solveit.security.RestAccessDeniedHandler;
 import com.solveit.security.RestAuthenticationEntryPoint;
 import com.solveit.security.UsuarioDetailsService;
+import jakarta.servlet.DispatcherType;
 import java.time.Clock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -50,6 +52,16 @@ public class SecurityConfig {
 
     @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    public FilterRegistrationBean<JwtAuthenticationFilter> jwtAuthenticationFilterRegistration(
+            JwtAuthenticationFilter jwtAuthenticationFilter) {
+        FilterRegistrationBean<JwtAuthenticationFilter> registration =
+                new FilterRegistrationBean<>(jwtAuthenticationFilter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
+    @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             RestAuthenticationEntryPoint authenticationEntryPoint,
@@ -71,6 +83,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(authorize -> authorize
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/auth/register",
