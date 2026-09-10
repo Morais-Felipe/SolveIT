@@ -6,6 +6,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.time.Clock;
@@ -53,7 +54,18 @@ public class JwtService {
     }
 
     public Claims parse(String token) {
-        return parser.parseSignedClaims(token).getPayload();
+        Claims claims = parser.parseSignedClaims(token).getPayload();
+        Date issuedAt = claims.getIssuedAt();
+        Date expiration = claims.getExpiration();
+
+        if (issuedAt == null || expiration == null) {
+            throw new MalformedJwtException("Required temporal claim is missing");
+        }
+        if (!expiration.after(issuedAt)) {
+            throw new MalformedJwtException("Token expiration must be after issuance");
+        }
+
+        return claims;
     }
 
     AuthenticationResult parseForAuthentication(String token) {

@@ -137,6 +137,33 @@ class JwtServiceTest {
     }
 
     @Test
+    void rejectsTokenWithoutExpiration() {
+        String token = signedTokenWithTimes(NOW, null);
+
+        assertThatThrownBy(() -> serviceAt(NOW).parse(token))
+                .isInstanceOf(JwtException.class);
+        assertInvalidForAuthentication(token);
+    }
+
+    @Test
+    void rejectsTokenWithoutIssuedAt() {
+        String token = signedTokenWithTimes(null, NOW.plus(Duration.ofHours(1)));
+
+        assertThatThrownBy(() -> serviceAt(NOW).parse(token))
+                .isInstanceOf(JwtException.class);
+        assertInvalidForAuthentication(token);
+    }
+
+    @Test
+    void rejectsExpirationThatIsNotAfterIssuedAt() {
+        String token = signedTokenWithTimes(NOW, NOW);
+
+        assertThatThrownBy(() -> serviceAt(NOW).parse(token))
+                .isInstanceOf(JwtException.class);
+        assertInvalidForAuthentication(token);
+    }
+
+    @Test
     void classifiesExpiredTokenSeparatelyForAuthentication() {
         String token = serviceAt(NOW).issue(42L);
         JwtService laterService = serviceAt(NOW.plus(Duration.ofHours(1)).plusSeconds(1));
@@ -208,5 +235,29 @@ class JwtServiceTest {
                 .audience().add(audience).and()
                 .signWith(key, algorithm)
                 .compact();
+    }
+
+    private String signedTokenWithTimes(Instant issuedAt, Instant expiration) {
+        var builder = Jwts.builder()
+                .subject("42")
+                .issuer("solveit-api")
+                .audience().add("solveit-api").and();
+        if (issuedAt != null) {
+            builder.issuedAt(Date.from(issuedAt));
+        }
+        if (expiration != null) {
+            builder.expiration(Date.from(expiration));
+        }
+        return builder
+                .signWith(signingKey(SIGNING_MATERIAL), Jwts.SIG.HS256)
+                .compact();
+    }
+
+    private void assertInvalidForAuthentication(String token) {
+        JwtService.AuthenticationResult result = serviceAt(NOW).parseForAuthentication(token);
+
+        assertThat(result.isAccepted()).isFalse();
+        assertThat(result.claims()).isNull();
+        assertThat(result.failureReason()).isEqualTo(AuthenticationFailureReason.TOKEN_INVALID);
     }
 }
