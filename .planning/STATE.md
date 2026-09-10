@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 current_phase: 02
 current_phase_name: Autenticação
 status: complete
-stopped_at: Phase 02 shipped for review in PR #10; merge awaits explicit approval
+stopped_at: Phase 02 merged via PR 10; ticket 09 documents approved per-plan branching; push pending approval
 last_updated: "2026-09-10"
 last_activity: 2026-09-10
-last_activity_desc: Phase 02 shipped for review in PR #10 after audit and security verification
-state_head: d59c048
+last_activity_desc: Documented approved per-plan branching and Phase 3 discussion handoff
+state_head: 490d276
 progress:
   total_phases: 7
   completed_phases: 2
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 02 (Autenticação) — COMPLETE, VERIFIED AND IN REVIEW
+Phase: 02 (Autenticação) — COMPLETE, VERIFIED AND MERGED
 Plan: 8 of 8
-Status: PR #10 open against `main`; merge pending explicit approval
-Last activity: 2026-09-10 — Phase shipped for review after 64 passing tests, code review fixes and security audit with zero open threats
+Status: PR #10 merged into main at 490d276; ticket/09-fluxo-planos-aprovados documents the approved workflow
+Last activity: 2026-09-10 — Recorded one branch per approved implementation plan; next phase action is discussion of Phase 3 (Core de Chamados)
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
 Plan progress: 13/13 known plans complete (100%); Phase 2 has 8/8 plans complete and verified
@@ -120,7 +120,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-None yet.
+- Concluir publicação do ticket/09-fluxo-planos-aprovados com aprovações próprias de push, PR e merge; a decisão ainda é local até o push.
+- Iniciar `$gsd-discuss-phase 3`: esclarecer regras antes de criar/apresentar os planos. Ainda não há plano 03-01 aprovado para execução.
+- Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
 
@@ -133,6 +135,7 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 260910-jhi | Documentar uma branch por plano aprovado e retomada após merge da Fase 2 | 2026-09-10 | 242f1e3 | [260910-jhi](./quick/260910-jhi-documentar-branch-por-plano-aprovado-e-r/) |
 | 260902-et2 | Criar README completo do SolveIT inspirado na organização do README do GSD Core | 2026-09-02 | 6cf0155 | [260902-et2-criar-readme-completo-do-solveit-inspira](./quick/260902-et2-criar-readme-completo-do-solveit-inspira/) |
 | 2 | Adicionar modo pedagógico obrigatório ao AGENTS.md | 2026-09-03 | 6c3266c | — |
 | 260904-k6p | Atualizar a documentação após a verificação da Fase 1, alinhar as aprovações Git e corrigir a identidade local dos commits | 2026-09-04 | be21535 | [260904-k6p-atualizar-a-documentacao-apos-a-verifica](./quick/260904-k6p-atualizar-a-documentacao-apos-a-verifica/) |
@@ -148,5 +151,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-09-10T13:22:20.806Z
-Stopped at: Phase 02 corrected and verified locally; present summary and await explicit push approval. No push, PR or merge performed.
+Stopped at: Phase 02 merged via PR #10 (490d276). Resume ticket/09-fluxo-planos-aprovados until its publication is complete, then discuss Phase 3. Use one branch per approved implementation plan; preserve separate push/PR/merge approvals.
 Resume file: None
