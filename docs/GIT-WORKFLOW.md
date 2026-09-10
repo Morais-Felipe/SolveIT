@@ -6,6 +6,20 @@ Este documento define como o SolveIT usa Git e GitHub a partir do Ticket 1. O ob
 
 Cada ticket usa uma branch própria. Podem existir vários commits atômicos dentro do ticket. Execução local, push, criação ou atualização do pull request e merge são ações diferentes: a autorização de uma não autoriza a seguinte. Nenhuma ação remota acontece antes de testes, resumo e sua aprovação explícita correspondente.
 
+## Uma branch por plano aprovado — decisão de 2026-09-10
+
+A partir da Fase 3, cada plano de implementação GSD aprovado corresponde a um ticket, uma branch própria e um PR. Não reunir todos os planos de uma fase na mesma branch.
+
+- A fase reúne vários planos; cada plano pode conter várias tarefas e commits atômicos.
+- O número do ticket é sequencial no projeto e não reinicia a cada fase. O identificador GSD `03-01` significa Fase 3, Plano 1; não determina o número `NN` da branch.
+- Registrar no plano/resumo a correspondência entre plano GSD, branch `ticket/NN-descricao-curta` e PR.
+- Apresentar e obter aprovação do plano antes de implementar. Concluir testes, resumo, push, PR e merge do ticket, com as aprovações correspondentes, antes de iniciar a implementação do próximo plano.
+- Criar a próxima branch a partir da `main` atualizada após o merge anterior. Não acumular planos seguintes na branch anterior.
+- Discussão/pesquisa/planejamento da fase e tarefas administrativas têm ticket documental próprio quando alteram arquivos; não contam como execução de um plano ainda não aprovado.
+- Na troca de máquina durante um ticket, retomar a mesma branch e o checkpoint. Push intermediário autorizado permite continuidade, sem representar conclusão ou merge.
+
+Histórico: os tickets 01–05 implementaram os cinco planos da Fase 1; 06–07 trataram verificação e ambiente. O ticket 08 concentrou os oito planos da Fase 2 e foi integrado pelo PR #10. Essa concentração é histórica e não deve ser repetida nas próximas fases.
+
 ## Início do ticket
 
 1. Confirmar que não há alterações locais esquecidas.
