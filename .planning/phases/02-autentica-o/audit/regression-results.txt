@@ -1,0 +1,11 @@
+﻿[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.495 s -- in com.solveit.config.JwtPropertiesContextTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 60.65 s -- in com.solveit.controller.AuthLoginIntegrationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 42.84 s -- in com.solveit.controller.AuthRegistrationIntegrationTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 67.74 s -- in com.solveit.controller.AuthSecurityIntegrationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 41.44 s -- in com.solveit.PersistenceIntegrationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.039 s -- in com.solveit.security.BcryptCostCalibrationTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.070 s -- in com.solveit.security.JwtServiceTest
+[INFO] Tests run: 55, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+[INFO] Total time:  04:02 min
+[INFO] Finished at: 2026-09-10T11:05:40-03:00

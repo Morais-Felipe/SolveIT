@@ -3,3 +3,17 @@ spring:
     name: solveit-api
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+
+logging:
+  level:
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: OFF
+
+solveit:
+  security:
+    bcrypt:
+      strength: ${SOLVEIT_BCRYPT_STRENGTH:12}
+    jwt:
+      secret: ${SOLVEIT_JWT_SECRET}
+      issuer: ${SOLVEIT_JWT_ISSUER:solveit-api}
+      audience: ${SOLVEIT_JWT_AUDIENCE:solveit-api}
+      access-token-ttl: ${SOLVEIT_JWT_ACCESS_TOKEN_TTL:1h}

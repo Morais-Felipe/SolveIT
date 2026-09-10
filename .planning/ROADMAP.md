@@ -7,7 +7,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 ## Phases
 
 - [x] **Phase 1: Base do Projeto** - A API inicia sobre um esquema MySQL reproduzível e validado. (completed 2026-09-04)
-- [ ] **Phase 2: Autenticação** - Usuários obtêm identidade segura e acesso autorizado.
+- [x] **Phase 2: Autenticação** - Usuários obtêm identidade segura e acesso autorizado. (completed 2026-09-10)
 - [ ] **Phase 3: Core de Chamados** - Os três perfis operam o ciclo auditável completo do chamado.
 - [ ] **Phase 4: Notificações por E-mail** - Eventos confirmados comunicam os envolvidos corretos.
 - [ ] **Phase 5: Dashboard** - Admins e atendentes consultam indicadores autorizados.
@@ -71,7 +71,16 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   4. Operações negam acesso quando perfil ou relação com o recurso não é permitido.
   5. Senhas ficam exclusivamente em hash BCrypt e não aparecem em respostas ou logs.
 
-**Plans**: TBD
+**Plans**: 8/8 planos sequenciais executados e fase verificada após auditoria/correções
+
+- [x] 02-01-PLAN.md
+- [x] 02-02-PLAN.md
+- [x] 02-03-PLAN.md
+- [x] 02-04-PLAN.md
+- [x] 02-05-PLAN.md
+- [x] 02-06-PLAN.md
+- [x] 02-07-PLAN.md
+- [x] 02-08-PLAN.md
 
 ### Phase 3: Core de Chamados
 
@@ -159,7 +168,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Base do Projeto | 5/5 | Complete    | 2026-09-04 |
-| 2. Autenticação | 0/TBD | Not started | - |
+| 2. Autenticação | 8/8 | In Progress|  |
 | 3. Core de Chamados | 0/TBD | Not started | - |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
 | 5. Dashboard | 0/TBD | Not started | - |

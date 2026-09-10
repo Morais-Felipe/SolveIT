@@ -4,7 +4,7 @@
 
 ### Chamados de suporte com autorização correta, histórico auditável e comunicação clara
 
-![Status: Fase 1 concluída](https://img.shields.io/badge/status-fase%201%20conclu%C3%ADda-22c55e)
+![Status: Fase 2 concluída](https://img.shields.io/badge/status-fase%202%20conclu%C3%ADda-22c55e)
 ![Abordagem: Build to Learn](https://img.shields.io/badge/abordagem-Build%20to%20Learn-f97316)
 ![Java 17](https://img.shields.io/badge/Java-17-007396)
 ![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3-6DB33F)
@@ -14,7 +14,7 @@
 </div>
 
 > [!IMPORTANT]
-> **Fase 1 concluída e verificada.** A base Spring Boot, o modelo JPA, os repositories, as migrações Flyway e o teste integrado em MySQL 8.4 estão implementados: 1 de 7 fases (14%). A Fase 2 — Autenticação — é o próximo foco, ainda sem plano iniciado. Ainda não existem endpoints de negócio, telas, build publicado ou deploy; as seções correspondentes continuam descrevendo contratos planejados.
+> **Fase 2 concluída e verificada localmente.** Cadastro, login JWT, `/api/auth/me`, rejeição de tokens inválidos e a fundação de autorização por perfil e relação estão implementados. Os 64 testes passam com MySQL 8.4/Testcontainers; o push da branch continua sujeito à aprovação explícita. Chamados, notificações, dashboard, telas, build publicado e deploy permanecem planejados.
 
 ## O que é o SolveIT
 
@@ -34,14 +34,14 @@ O objetivo não é apenas chegar a uma aplicação funcional. A abordagem **Buil
 
 | Item | Situação |
 | --- | --- |
-| Estado do repositório | Fase 1 concluída e verificada |
-| Fases implementadas | 1 de 7 |
-| Progresso do milestone | 14% |
-| Foco atual | Fase 2 — Autenticação, pronta para discussão e planejamento |
+| Estado do repositório | Fases 1 e 2 concluídas e verificadas localmente; push da branch pendente de aprovação |
+| Fases implementadas | 2 de 7 concluídas; Fase 2 com 8 de 8 planos completos |
+| Progresso do milestone | 29% por fases; 13 de 13 planos conhecidos completos (100%) |
+| Foco atual | Encerramento da Fase 2 antes da discussão e do planejamento da Fase 3 |
 | Aplicação executável | Base Spring Boot disponível; execução local exige MySQL configurado |
-| API e telas disponíveis | Não existem ainda |
+| API e telas disponíveis | Rotas de cadastro, login e `/api/auth/me` disponíveis; telas e rotas de negócio planejadas |
 
-A base de persistência descrita neste README está implementada e verificada. Autenticação, regras de negócio, endpoints, notificações, dashboard e telas permanecem **contratos planejados**, não capacidades já disponíveis.
+A base de persistência e a autenticação descritas neste README estão implementadas e verificadas. A Fase 2 comprova o mecanismo de autorização por perfil e relação no servidor; cada operação concreta da Fase 3 ainda deverá aplicar e testar sua própria política. Regras de chamados, notificações, dashboard e telas permanecem **contratos planejados**.
 
 ## Como acompanhar o projeto
 
@@ -52,16 +52,16 @@ A base de persistência descrita neste README está implementada e verificada. A
 
 O andamento só deve ser considerado entregue quando os artefatos de planejamento, os testes proporcionais e o histórico Git confirmarem a conclusão. O texto deste README deve evoluir junto com o estado real do repositório.
 
-## Como verificar a base atual
+## Como verificar o back-end atual
 
-Para compilar e executar os testes da Fase 1 no Windows, tenha Java 17 e Docker Desktop com o engine Linux ativo. O Maven Wrapper fixa a versão do Maven do projeto, e o Testcontainers cria um MySQL 8.4 temporário durante o teste — `DB_USERNAME` e `DB_PASSWORD` não são necessários nesse caminho.
+Para compilar e executar os testes das entregas atuais no Windows, tenha Java 17 e Docker Desktop com o engine Linux ativo. O Maven Wrapper fixa a versão do Maven do projeto, e o Testcontainers cria bancos MySQL 8.4 temporários para validar persistência, migrações, segurança e cadastro — `DB_USERNAME` e `DB_PASSWORD` não são necessários nesse caminho.
 
 ```powershell
 Set-Location solveit-api
 .\mvnw.cmd clean verify
 ```
 
-Em Linux ou macOS, use `./mvnw clean verify`. O resultado esperado é `BUILD SUCCESS`, com o teste de integração validando migrações, constraints, entidades e repositories contra MySQL real.
+Em Linux ou macOS, use `./mvnw clean verify`. O resultado esperado é `BUILD SUCCESS`; a suíte atual possui 64 testes e valida migrações, constraints, entidades, repositories, cadastro, login, JWT, autorização, erros HTTP e concorrência contra MySQL real.
 
 Para iniciar a aplicação localmente, crie antes o database `solveit` em uma instância MySQL e forneça as credenciais pelo ambiente. O Flyway cria e versiona as tabelas, mas deliberadamente não cria o database nem armazena credenciais no repositório.
 
@@ -135,7 +135,7 @@ Os envios deverão ocorrer somente após a confirmação da transação. Uma fal
 
 ## Stack do projeto
 
-A base de back-end, persistência, migrações e testes da Fase 1 já está implementada. Segurança, notificações e front-end continuam planejados para as fases seguintes.
+A base de back-end, persistência, migrações e testes da Fase 1 está implementada. A Fase 2 entregou Spring Security stateless, cadastro público, BCrypt, login JWT, `/api/auth/me`, Problem Details e a fundação de autorização no servidor. Notificações, front-end e as operações concretas de negócio continuam planejados.
 
 | Camada | Tecnologias planejadas | Papel no projeto |
 | --- | --- | --- |
@@ -151,7 +151,7 @@ Segredos de banco, JWT e SMTP deverão vir do ambiente ou de um cofre de segredo
 
 ## Arquitetura do projeto
 
-O back-end é uma aplicação modular única em Spring Boot. A Fase 1 já criou a raiz da aplicação, `entity`, `enums` e `repository`; os demais packages serão adicionados quando tiverem implementação real, sem placeholders. A separação por responsabilidade manterá regras de negócio nos services, contratos HTTP nos controllers e persistência nos repositories:
+O back-end é uma aplicação modular única em Spring Boot. A Fase 1 criou a raiz da aplicação, `entity`, `enums` e `repository`; a Fase 2 adicionou `config`, `controller`, `dto`, `exception`, `security` e `service`. A separação por responsabilidade mantém regras de negócio nos services, contratos HTTP nos controllers e persistência nos repositories:
 
 ```text
 solveit-api/
@@ -180,7 +180,7 @@ O front-end será uma SPA React separada, consumindo a API por uma instância Ax
 
 ## Contrato de API planejado
 
-> **Endpoints ainda não disponíveis.** A tabela documenta o contrato pretendido e não pode ser usada como guia de execução da aplicação atual.
+> **Disponibilidade parcial.** As três rotas de Auth estão implementadas. As demais linhas documentam contratos pretendidos para fases futuras e ainda não podem ser usadas como guia de execução da aplicação atual.
 
 | Grupo | Método e rota planejados | Acesso e finalidade |
 | --- | --- | --- |
@@ -216,14 +216,14 @@ As sete fases são incrementos sequenciais. A base reproduzível foi concluída;
 | Fase | Entrega planejada | Estado |
 | --- | --- | --- |
 | 1 — Base do Projeto | Aplicação Spring inicial sobre esquema MySQL completo, versionado por Flyway e validado pelo JPA | Concluída e verificada |
-| 2 — Autenticação | Cadastro de solicitante, login JWT e autorização por perfil e relação | Pendente |
+| 2 — Autenticação | Cadastro de solicitante, login JWT e autorização por perfil e relação | Concluída e verificada — 8/8 planos |
 | 3 — Core de Chamados | Administração, ciclo completo do chamado, comentários e histórico auditável | Pendente |
 | 4 — Notificações por E-mail | Comunicação dos eventos confirmados aos envolvidos corretos | Pendente |
 | 5 — Dashboard | Indicadores autorizados para administradores e atendentes | Pendente |
 | 6 — Front-end (React + Tailwind) | Jornadas principais dos três perfis na SPA responsiva | Pendente |
 | 7 — Polimento e Qualidade | Estados de interface, responsividade, testes e revisão de segurança | Pendente |
 
-Metas, dependências, critérios de sucesso e rastreabilidade estão no [roadmap completo](.planning/ROADMAP.md). Apenas a Fase 1 representa entrega implementada; as demais linhas continuam planejadas.
+Metas, dependências, critérios de sucesso e rastreabilidade estão no [roadmap completo](.planning/ROADMAP.md). As Fases 1 e 2 estão concluídas e verificadas localmente; as fases seguintes continuam planejadas.
 
 ## Referência visual
 
@@ -241,8 +241,8 @@ Após testes e resumo, há três gates independentes: autorização para fazer p
 
 ## Segurança e auditoria
 
-- Senhas serão armazenadas apenas como hash BCrypt e nunca aparecerão em respostas ou logs.
-- JWTs deverão ser temporários; tokens ausentes, inválidos, expirados ou ligados a usuários inativos serão rejeitados.
+- Senhas cadastradas são armazenadas apenas como hash BCrypt e não aparecem em respostas ou logs.
+- JWTs são temporários; tokens ausentes, inválidos, expirados ou ligados a usuários inativos são rejeitados.
 - Toda operação protegida verificará perfil e relação com o recurso no servidor.
 - O cadastro público não poderá criar `ATENDENTE` nem `ADMIN`.
 - Categorias e usuários serão desativados sem exclusão destrutiva.

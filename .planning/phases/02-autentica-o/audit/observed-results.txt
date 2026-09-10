@@ -1,0 +1,10 @@
+AUDIT invalid-email: persisted, HTTP=201
+AUDIT email-256: HTTP=500
+AUDIT name-121: HTTP=500, code=INTERNAL_ERROR
+AUDIT normal-http: register=201, login=200, me=200, anonymous=401, no-cookie
+AUDIT media-type: HTTP=401, code=AUTH_TOKEN_MISSING
+AUDIT malformed-json: HTTP=401, code=AUTH_TOKEN_MISSING, instance=/error
+AUDIT missing-exp: signed token issued yesterday, exp absent, HTTP=200
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 71.49 s -- in com.solveit.controller.Phase2AuditProbeTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

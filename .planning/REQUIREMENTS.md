@@ -14,12 +14,12 @@
 
 ### Autenticação e Acesso
 
-- [ ] **AUTH-01**: Uma pessoa pode se cadastrar publicamente com nome, e-mail e senha e recebe exclusivamente o perfil SOLICITANTE.
-- [ ] **AUTH-02**: Um usuário ativo pode entrar com e-mail e senha válidos e receber um JWT válido e limitado no tempo.
-- [ ] **AUTH-03**: Um usuário autenticado pode consultar seus próprios dados em `GET /api/auth/me`.
-- [ ] **AUTH-04**: Senhas são armazenadas somente como hash BCrypt e nunca aparecem em respostas ou logs.
-- [ ] **AUTH-05**: Requisições sem token, com token inválido/expirado ou de usuário inativo são rejeitadas nas rotas protegidas.
-- [ ] **AUTH-06**: Cada operação aplica no servidor tanto o perfil exigido quanto a relação do usuário com o recurso acessado.
+- [x] **AUTH-01**: Uma pessoa pode se cadastrar publicamente com nome, e-mail e senha e recebe exclusivamente o perfil SOLICITANTE.
+- [x] **AUTH-02**: Um usuário ativo pode entrar com e-mail e senha válidos e receber um JWT válido e limitado no tempo.
+- [x] **AUTH-03**: Um usuário autenticado pode consultar seus próprios dados em `GET /api/auth/me`.
+- [x] **AUTH-04**: Senhas são armazenadas somente como hash BCrypt e nunca aparecem em respostas ou logs.
+- [x] **AUTH-05**: Requisições sem token, com token inválido/expirado ou de usuário inativo são rejeitadas nas rotas protegidas.
+- [x] **AUTH-06**: Cada operação aplica no servidor tanto o perfil exigido quanto a relação do usuário com o recurso acessado.
 
 ### Usuários e Categorias
 
@@ -119,12 +119,12 @@
 | DATA-02 | Phase 1 | Complete |
 | DATA-03 | Phase 1 | Complete |
 | DATA-04 | Phase 1 | Complete |
-| AUTH-01 | Phase 2 | Pending |
-| AUTH-02 | Phase 2 | Pending |
-| AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 2 | Pending |
-| AUTH-05 | Phase 2 | Pending |
-| AUTH-06 | Phase 2 | Pending |
+| AUTH-01 | Phase 2 | Complete |
+| AUTH-02 | Phase 2 | Complete |
+| AUTH-03 | Phase 2 | Complete |
+| AUTH-04 | Phase 2 | Complete |
+| AUTH-05 | Phase 2 | Complete |
+| AUTH-06 | Phase 2 | Complete |
 | ADMN-01 | Phase 3 | Pending |
 | ADMN-02 | Phase 3 | Pending |
 | ADMN-03 | Phase 3 | Pending |
@@ -172,6 +172,7 @@
 | QUAL-05 | Phase 7 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 55 total
 - Mapped to phases: 55
 - Unmapped: 0
