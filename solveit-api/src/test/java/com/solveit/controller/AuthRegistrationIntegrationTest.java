@@ -244,6 +244,50 @@ class AuthRegistrationIntegrationTest {
     }
 
     @Test
+    void rejectsMalformedEmailAfterRemovingExternalSpaces() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                "E-mail inválido",
+                                "  not-an-email  ",
+                                "senha segura para validar"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.email").value(
+                        "O e-mail deve ter um formato válido"));
+
+        assertThat(usuarioRepository.count()).isZero();
+    }
+
+    @Test
+    void rejectsNameAndEmailBeyondDatabaseLimits() throws Exception {
+        String oversizedName = "n".repeat(121);
+        String oversizedEmail = "user@"
+                + "a".repeat(63) + "."
+                + "b".repeat(63) + "."
+                + "c".repeat(63) + "."
+                + "d".repeat(59);
+        assertThat(oversizedEmail).hasSize(256);
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                oversizedName,
+                                oversizedEmail,
+                                "senha segura para limites"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.nome").value(
+                        "O nome deve ter no máximo 120 caracteres"))
+                .andExpect(jsonPath("$.errors.email").value(
+                        "O e-mail deve ter no máximo 255 caracteres"));
+
+        assertThat(usuarioRepository.count()).isZero();
+    }
+
+    @Test
     void returnsConflictProblemDetailsForSequentialDuplicateEmail() throws Exception {
         String password = "senha segura duplicada 123!";
 
