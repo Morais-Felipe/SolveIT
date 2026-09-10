@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 current_phase: 02
 current_phase_name: Autenticação
 status: complete
-stopped_at: Phase 02 merged via PR 10; ticket 09 documents approved per-plan branching; push pending approval
+stopped_at: Phase 02 merged via PR 10; ticket 09 publication authorized; check GitHub merge status before Phase 3
 last_updated: "2026-09-10"
 last_activity: 2026-09-10
 last_activity_desc: Documented approved per-plan branching and Phase 3 discussion handoff
@@ -120,7 +120,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-- Concluir publicação do ticket/09-fluxo-planos-aprovados com aprovações próprias de push, PR e merge; a decisão ainda é local até o push.
+- Push, PR e merge do ticket/09-fluxo-planos-aprovados autorizados em 2026-09-10. Ao retomar, confirmar no GitHub se foi integrado; se sim, atualizar main e iniciar a discussão da Fase 3.
 - Iniciar `$gsd-discuss-phase 3`: esclarecer regras antes de criar/apresentar os planos. Ainda não há plano 03-01 aprovado para execução.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
