@@ -224,6 +224,7 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 
 - A política obrigatória está em `docs/GIT-WORKFLOW.md` e deve ser lida antes de iniciar qualquer ticket.
 - Use uma branch `ticket/NN-descricao-curta`; não implemente tickets diretamente na `main`.
+- A partir da Fase 3, cada plano de implementação GSD aprovado usa um ticket/branch/PR próprio. Integre o anterior antes de implementar o seguinte; não concentre uma fase inteira na mesma branch. A numeração de tickets é sequencial e independente da numeração de fases/planos. Registre a correspondência plano → branch → PR e retome a mesma branch ao trocar de máquina.
 - Planeje e obtenha aprovação antes de escrever código.
 - Faça commits atômicos durante o ticket e push da branch após testes, resumo e aprovação.
 - Integre na `main` somente após confirmação explícita do usuário.
