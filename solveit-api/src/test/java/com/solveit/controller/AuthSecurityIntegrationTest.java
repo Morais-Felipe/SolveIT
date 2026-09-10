@@ -29,6 +29,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,10 +57,16 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -71,7 +78,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "spring.jpa.hibernate.ddl-auto=validate"
 })
 @AutoConfigureMockMvc
-@Import(AuthSecurityIntegrationTest.TestClockConfiguration.class)
+@Import({
+        AuthSecurityIntegrationTest.TestClockConfiguration.class,
+        AuthSecurityIntegrationTest.AuthorizationProbeConfiguration.class
+})
 @ExtendWith(OutputCaptureExtension.class)
 class AuthSecurityIntegrationTest {
 
@@ -419,6 +429,94 @@ class AuthSecurityIntegrationTest {
                 "/api/admin/probe");
     }
 
+    @Test
+    void deniesAnonymousBeforeTheAuthorizationProbe() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/test/authorization/{resourceId}", 999_999L))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        assertProblemDetails(
+                result.getResponse(),
+                401,
+                "AUTH_TOKEN_MISSING",
+                "Autenticação necessária",
+                "Autenticação necessária.",
+                "/api/test/authorization/999999");
+    }
+
+    @Test
+    void deniesCurrentNonAdminProfileAtTheMethodBoundary() throws Exception {
+        LoginResult solicitante = registerAndLogin(
+                "perfil-negado@example.com",
+                "Perfil Negado");
+
+        MvcResult result = mockMvc.perform(get(
+                                "/api/test/authorization/{resourceId}",
+                                solicitante.usuarioId())
+                        .header(
+                                HttpHeaders.AUTHORIZATION,
+                                "Bearer " + solicitante.accessToken()))
+                .andExpect(status().isForbidden())
+                .andReturn();
+
+        assertProblemDetails(
+                result.getResponse(),
+                403,
+                "ACCESS_DENIED",
+                "Acesso negado",
+                "Você não tem permissão para realizar esta operação.",
+                "/api/test/authorization/" + solicitante.usuarioId());
+    }
+
+    @Test
+    void deniesAdminWhenPersistedRelationshipDoesNotMatchEvenWithForgedUserId()
+            throws Exception {
+        LoginResult admin = registerAndLogin("admin-negado@example.com", "Admin Negado");
+        promoteToAdmin(admin.usuarioId());
+        LoginResult resourceOwner = registerAndLogin(
+                "dono-recurso@example.com",
+                "Dono Recurso");
+
+        MvcResult result = mockMvc.perform(get(
+                                "/api/test/authorization/{resourceId}",
+                                resourceOwner.usuarioId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + admin.accessToken())
+                        .queryParam("userId", resourceOwner.usuarioId().toString()))
+                .andExpect(status().isForbidden())
+                .andReturn();
+
+        assertProblemDetails(
+                result.getResponse(),
+                403,
+                "ACCESS_DENIED",
+                "Acesso negado",
+                "Você não tem permissão para realizar esta operação.",
+                "/api/test/authorization/" + resourceOwner.usuarioId());
+    }
+
+    @Test
+    void allowsAdminWhenPersistedRelationshipMatchesAndIgnoresForgedUserId()
+            throws Exception {
+        LoginResult admin = registerAndLogin("admin-permitido@example.com", "Admin Permitido");
+        promoteToAdmin(admin.usuarioId());
+        LoginResult forgedIdentity = registerAndLogin(
+                "identidade-forjada@example.com",
+                "Identidade Forjada");
+
+        MvcResult result = mockMvc.perform(get(
+                                "/api/test/authorization/{resourceId}",
+                                admin.usuarioId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + admin.accessToken())
+                        .queryParam("userId", forgedIdentity.usuarioId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.principalId").value(admin.usuarioId()))
+                .andExpect(jsonPath("$.resourceOwnerId").value(admin.usuarioId()))
+                .andExpect(header().doesNotExist(HttpHeaders.SET_COOKIE))
+                .andReturn();
+
+        assertThat(result.getRequest().getSession(false)).isNull();
+    }
+
     private LoginResult registerAndLogin(String email, String nome) throws Exception {
         MvcResult registration = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -442,6 +540,12 @@ class AuthSecurityIntegrationTest {
         JsonNode loginBody = objectMapper.readTree(login.getResponse().getContentAsString());
 
         return new LoginResult(usuarioId, loginBody.path("accessToken").asText());
+    }
+
+    private void promoteToAdmin(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
+        usuario.setPerfil(PerfilUsuario.ADMIN);
+        usuarioRepository.saveAndFlush(usuario);
     }
 
     private FilterObservation filter(String accessToken, CyclicBarrier barrier) throws Exception {
@@ -592,6 +696,60 @@ class AuthSecurityIntegrationTest {
         @Primary
         MutableClock mutableClock() {
             return new MutableClock(NOW);
+        }
+    }
+
+    @TestConfiguration(proxyBeanMethods = false)
+    static class AuthorizationProbeConfiguration {
+
+        @Bean
+        AuthorizationProbeService authorizationProbeService(UsuarioRepository usuarioRepository) {
+            return new AuthorizationProbeService(usuarioRepository);
+        }
+
+        @Bean
+        AuthorizationProbeController authorizationProbeController(
+                AuthorizationProbeService authorizationProbeService) {
+            return new AuthorizationProbeController(authorizationProbeService);
+        }
+    }
+
+    @RestController
+    static class AuthorizationProbeController {
+
+        private final AuthorizationProbeService authorizationProbeService;
+
+        AuthorizationProbeController(AuthorizationProbeService authorizationProbeService) {
+            this.authorizationProbeService = authorizationProbeService;
+        }
+
+        @GetMapping("/api/test/authorization/{resourceId}")
+        @PreAuthorize("hasRole('ADMIN')")
+        public Map<String, Long> authorize(
+                @PathVariable Long resourceId,
+                @AuthenticationPrincipal UsuarioPrincipal principal) {
+            Long resourceOwnerId = authorizationProbeService.authorize(principal, resourceId);
+            return Map.of(
+                    "principalId", principal.getId(),
+                    "resourceOwnerId", resourceOwnerId);
+        }
+    }
+
+    static class AuthorizationProbeService {
+
+        private final UsuarioRepository usuarioRepository;
+
+        AuthorizationProbeService(UsuarioRepository usuarioRepository) {
+            this.usuarioRepository = usuarioRepository;
+        }
+
+        @Transactional(readOnly = true)
+        public Long authorize(UsuarioPrincipal principal, Long resourceId) {
+            Usuario resourceOwner = usuarioRepository.findById(resourceId).orElseThrow();
+            if (!resourceOwner.getId().equals(principal.getId())) {
+                throw new AccessDeniedException("Authenticated user is not related to the resource");
+            }
+            return resourceOwner.getId();
         }
     }
 
