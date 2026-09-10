@@ -1,0 +1,168 @@
+{
+  "auditedCommit": "ee8c6b9",
+  "base": "e465840d9d98f0f42608e8ce1f56c72259b8f5d9",
+  "plans": [
+    {
+      "id": "02-01",
+      "requirements": [
+        "AUTH-01",
+        "AUTH-04"
+      ],
+      "requirementSetsMatch": true,
+      "summaryStatus": "complete",
+      "summaryVerified": true,
+      "summaryErrors": [],
+      "coverageTotal": 3,
+      "coverageAutoCovered": true,
+      "coverageErrors": [],
+      "missingFiles": [],
+      "invalidTestRefs": []
+    },
+    {
+      "id": "02-02",
+      "requirements": [
+        "AUTH-01",
+        "AUTH-04"
+      ],
+      "requirementSetsMatch": true,
+      "summaryStatus": "complete",
+      "summaryVerified": true,
+      "summaryErrors": [],
+      "coverageTotal": 3,
+      "coverageAutoCovered": true,
+      "coverageErrors": [],
+      "missingFiles": [],
+      "invalidTestRefs": []
+    },
+    {
+      "id": "02-03",
+      "requirements": [
+        "AUTH-02",
+        "AUTH-05"
+      ],
+      "requirementSetsMatch": true,
+      "summaryStatus": "complete",
+      "summaryVerified": true,
+      "summaryErrors": [],
+      "coverageTotal": 3,
+      "coverageAutoCovered": true,
+      "coverageErrors": [],
+      "missingFiles": [],
+      "invalidTestRefs": []
+    },
+    {
+      "id": "02-04",
+      "requirements": [
+        "AUTH-02",
+        "AUTH-04"
+      ],
+      "requirementSetsMatch": true,
+      "summaryStatus": "complete",
+      "summaryVerified": true,
+      "summaryErrors": [],
+      "coverageTotal": 3,
+      "coverageAutoCovered": true,
+      "coverageErrors": [],
+      "missingFiles": [],
+      "invalidTestRefs": []
+    },
+    {
+      "id": "02-05",
+      "requirements": [
+        "AUTH-02",
+        "AUTH-04"
+      ],
+      "requirementSetsMatch": true,
+      "summaryStatus": "complete",
+      "summaryVerified": true,
+      "summaryErrors": [],
+      "coverageTotal": 2,
+      "coverageAutoCovered": true,
+      "coverageErrors": [],
+      "missingFiles": [],
+      "invalidTestRefs": []
+    },
+    {
+      "id": "02-06",
+      "requirements": [
+        "AUTH-03",
+        "AUTH-05"
+      ],
+      "requirementSetsMatch": true,
+      "summaryStatus": "complete",
+      "summaryVerified": true,
+      "summaryErrors": [],
+      "coverageTotal": 3,
+      "coverageAutoCovered": true,
+      "coverageErrors": [],
+      "missingFiles": [],
+      "invalidTestRefs": []
+    },
+    {
+      "id": "02-07",
+      "requirements": [
+        "AUTH-05"
+      ],
+      "requirementSetsMatch": true,
+      "summaryStatus": "complete",
+      "summaryVerified": true,
+      "summaryErrors": [],
+      "coverageTotal": 4,
+      "coverageAutoCovered": true,
+      "coverageErrors": [],
+      "missingFiles": [],
+      "invalidTestRefs": []
+    },
+    {
+      "id": "02-08",
+      "requirements": [
+        "AUTH-06"
+      ],
+      "requirementSetsMatch": true,
+      "summaryStatus": "complete",
+      "summaryVerified": true,
+      "summaryErrors": [],
+      "coverageTotal": 3,
+      "coverageAutoCovered": true,
+      "coverageErrors": [],
+      "missingFiles": [],
+      "invalidTestRefs": []
+    }
+  ],
+  "omittedFromSummaries": [],
+  "scope": [
+    ".planning/phases/02-autentica-o/02-05-PLAN.md",
+    "solveit-api/pom.xml",
+    "solveit-api/src/main/java/com/solveit/config/JwtProperties.java",
+    "solveit-api/src/main/java/com/solveit/config/SecurityConfig.java",
+    "solveit-api/src/main/java/com/solveit/controller/AuthController.java",
+    "solveit-api/src/main/java/com/solveit/dto/auth/LoginRequest.java",
+    "solveit-api/src/main/java/com/solveit/dto/auth/RegisterRequest.java",
+    "solveit-api/src/main/java/com/solveit/dto/auth/TokenResponse.java",
+    "solveit-api/src/main/java/com/solveit/dto/auth/UsuarioResponse.java",
+    "solveit-api/src/main/java/com/solveit/dto/validation/PasswordValidator.java",
+    "solveit-api/src/main/java/com/solveit/dto/validation/ValidPassword.java",
+    "solveit-api/src/main/java/com/solveit/exception/ApiErrorCode.java",
+    "solveit-api/src/main/java/com/solveit/exception/EmailAlreadyRegisteredException.java",
+    "solveit-api/src/main/java/com/solveit/exception/GlobalExceptionHandler.java",
+    "solveit-api/src/main/java/com/solveit/exception/InvalidCredentialsException.java",
+    "solveit-api/src/main/java/com/solveit/exception/ProblemDetailFactory.java",
+    "solveit-api/src/main/java/com/solveit/security/AuthenticationFailureReason.java",
+    "solveit-api/src/main/java/com/solveit/security/JwtAuthenticationFilter.java",
+    "solveit-api/src/main/java/com/solveit/security/JwtService.java",
+    "solveit-api/src/main/java/com/solveit/security/RestAccessDeniedHandler.java",
+    "solveit-api/src/main/java/com/solveit/security/RestAuthenticationEntryPoint.java",
+    "solveit-api/src/main/java/com/solveit/security/UsuarioDetailsService.java",
+    "solveit-api/src/main/java/com/solveit/security/UsuarioPrincipal.java",
+    "solveit-api/src/main/java/com/solveit/service/AuthService.java",
+    "solveit-api/src/main/resources/application.yml",
+    "solveit-api/src/test/java/com/solveit/config/JwtPropertiesContextTest.java",
+    "solveit-api/src/test/java/com/solveit/controller/AuthLoginIntegrationTest.java",
+    "solveit-api/src/test/java/com/solveit/controller/AuthRegistrationIntegrationTest.java",
+    "solveit-api/src/test/java/com/solveit/controller/AuthSecurityIntegrationTest.java",
+    "solveit-api/src/test/java/com/solveit/security/BcryptCostCalibrationTest.java",
+    "solveit-api/src/test/java/com/solveit/security/JwtServiceTest.java",
+    "solveit-api/src/test/resources/application-test.yml"
+  ],
+  "note": "Structural checks only; passing coverage metadata does not disprove audit findings."
+}
