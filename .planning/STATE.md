@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 02
 current_phase_name: Autenticação
 status: executing
-stopped_at: Completed 02-06-PLAN.md
-last_updated: "2026-09-09T17:43:58.742Z"
-last_activity: 2026-09-09
-last_activity_desc: Completed 02-06-PLAN.md bearer request identity and /me
-state_head: 5590ca38cedf720a6d574df6d36f2155d483c084
+stopped_at: Completed 02-07-PLAN.md
+last_updated: "2026-09-10T11:52:18.812Z"
+last_activity: 2026-09-10
+last_activity_desc: Completed 02-07-PLAN.md bearer failure classification and security Problem Details
+state_head: eebe5af742e822312699c72b2091cdb9114eebd0
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
   percent: 14
 ---
 
@@ -28,31 +28,31 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 02 (Autenticação) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-09-09 — Completed 02-06-PLAN.md bearer request identity and /me
 
 Progress by phase: [███░░░░░░░░░░░░░░░░░] 1/7 phases (14%)
-Plan progress: 11/13 known plans complete (85%); Phase 2 has 6/8 plans complete (75%)
+Plan progress: 12/13 known plans complete (92%); Phase 2 has 7/8 plans complete (88%)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 11
-- Average duration: 18.3 min
-- Total execution time: 3.4 hours
+- Total plans completed: 12
+- Average duration: 19.1 min
+- Total execution time: 3.8 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 01 | 5 | 66 min | 13.2 min |
-| Phase 02 | 6 | 135 min | 22.5 min |
+| Phase 02 | 7 | 163 min | 23.3 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 24 min, 20 min, 31 min, 20 min, 28 min
+- Last 5 plans: 20 min, 31 min, 20 min, 28 min, 28 min
 - Trend: variável; Planos de autenticação exercitam ciclos RED/GREEN com MySQL/Testcontainers
 
 **Per-Plan Metrics:**
@@ -70,6 +70,7 @@ Plan progress: 11/13 known plans complete (85%); Phase 2 has 6/8 plans complete 
 | Phase 02 P04 | 31 min | 2 tasks | 8 files |
 | Phase 02 P05 | 20 min | 1 tasks | 6 files |
 | Phase 02 P06 | 28 min | 2 tasks | 6 files |
+| Phase 02 P07 | 28 min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 02]: Bearer usa somente o sub assinado e recarrega perfil/atividade do banco em toda requisição. — Impede que estado de autorização obsoleto no token sobreviva a mudança de perfil ou desativação.
 - [Phase 02]: O principal Bearer não copia o hash e usa um SecurityContext vazio por requisição. — Reduz material sensível em memória e preserva isolamento stateless entre threads.
 - [Phase 02]: GET /api/auth/me deriva o usuário somente de UsuarioPrincipal.getId(). — Impede que identificadores fornecidos pelo cliente substituam a identidade autenticada.
+- [Phase 02]: JwtService classifica expiração antes das demais falhas JWT. — Preserva AUTH_TOKEN_EXPIRED sem expor mensagens ou classes do parser.
+- [Phase 02]: Token ausente segue anônimo e Authorization presente fora do formato aceito é inválido. — Mantém AUTH_TOKEN_MISSING distinto de credenciais Bearer rejeitadas.
+- [Phase 02]: Entry point e denied handler escrevem Problem Details pelo factory comum. — Unifica 401 e 403 no contrato RFC 9457 sem reutilizar mensagens de exceção.
 
 ### Pending Todos
 
@@ -137,6 +141,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-09-09T17:43:58.742Z
-Stopped at: Completed 02-06-PLAN.md
+Last session: 2026-09-10T11:52:18.435Z
+Stopped at: Completed 02-07-PLAN.md
 Resume file: None
