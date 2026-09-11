@@ -25,7 +25,7 @@
 
 - [ ] **ADMN-01**: Um administrador pode listar usuários de forma paginada e consultar um usuário por id.
 - [ ] **ADMN-02**: Um administrador pode criar e editar usuários com qualquer perfil sem permitir e-mails duplicados.
-- [ ] **ADMN-03**: Um administrador pode ativar ou desativar usuários sem excluí-los.
+- [ ] **ADMN-03**: Um administrador pode ativar ou desativar usuários sem excluí-los. Desativação ou retirada do perfil ATENDENTE devolve seus chamados EM_ANDAMENTO a ABERTO sem responsável, após confirmação explícita da quantidade, com histórico e operação atômica. Conflito exige nova revisão sem mudanças parciais. O último ADMIN ativo não pode ser desativado nem perder seu perfil.
 - [ ] **ADMN-04**: Qualquer usuário autenticado pode listar categorias ativas e consultar uma categoria permitida por id.
 - [ ] **ADMN-05**: Um administrador pode criar e editar categorias com nome único.
 - [ ] **ADMN-06**: Um administrador pode ativar ou desativar categorias sem excluí-las.
@@ -41,13 +41,13 @@
 - [ ] **TICK-07**: Somente o atendente responsável ou um administrador pode alterar EM_ANDAMENTO para RESOLVIDO, preenchendo `resolvidoEm`.
 - [ ] **TICK-08**: Somente o solicitante proprietário pode alterar RESOLVIDO para FECHADO.
 - [ ] **TICK-09**: Somente o solicitante proprietário pode cancelar um chamado ABERTO, e somente um administrador pode cancelar um chamado EM_ANDAMENTO.
-- [ ] **TICK-10**: Transições não previstas, inclusive reabertura de FECHADO ou CANCELADO, são rejeitadas com resposta de erro clara.
-- [ ] **TICK-11**: Toda transição altera o chamado e cria exatamente um HistoricoStatus com ator, estados, data e observação opcional na mesma transação.
+- [ ] **TICK-10**: Transições não previstas, inclusive reabertura de FECHADO ou CANCELADO, são rejeitadas. EM_ANDAMENTO → ABERTO é permitido exclusivamente pela desativação ou retirada do perfil do atendente, com devolução à fila conforme ADMN-03; as regras de edição de ABERTO voltam a valer.
+- [ ] **TICK-11**: A abertura registra autor, data e estado inicial ABERTO no histórico. Toda transição confirmada cria exatamente um HistoricoStatus na mesma transação, com ator, estados, data e observação manual opcional; devoluções administrativas têm motivo automático obrigatório. Tentativas rejeitadas não geram histórico de status.
 - [ ] **TICK-12**: Atualizações concorrentes do mesmo chamado não podem sobrescrever silenciosamente uma transição já confirmada.
 
 ### Colaboração e Auditoria
 
-- [ ] **COLL-01**: Um usuário com acesso ao chamado pode adicionar um comentário atribuído à sua própria identidade autenticada.
+- [ ] **COLL-01**: Um usuário com acesso pode comentar com sua identidade autenticada somente em ABERTO, EM_ANDAMENTO ou RESOLVIDO. FECHADO/CANCELADO permitem apenas leitura das mensagens anteriores e histórico por usuários autorizados; validar o estado atual inclusive em envios concorrentes ao encerramento.
 - [ ] **COLL-02**: Um usuário com acesso ao chamado pode listar comentários em ordem cronológica.
 - [ ] **COLL-03**: Comentários não podem ser editados nem excluídos por nenhuma rota da aplicação.
 - [ ] **COLL-04**: Um usuário com acesso ao chamado pode consultar todo o histórico de status em ordem cronológica.
