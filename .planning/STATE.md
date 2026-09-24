@@ -1,19 +1,19 @@
 ---
 gsd_state_version: 1.0
-current_phase: 02
-current_phase_name: Autenticação
-status: complete
-stopped_at: Phase 03 context gathered on ticket/10-discussao-fase-3; ready for research and planning; no implementation authorized
-last_updated: "2026-09-11T11:35:06.845Z"
-last_activity: 2026-09-10
-last_activity_desc: Documented approved per-plan branching and Phase 3 discussion handoff
-state_head: 73157721ed67287fce099869f5dbffbfe4a127e2
+current_phase: 03
+current_phase_name: Core de Chamados
+status: executing
+stopped_at: Phase 03 planning complete and verified on ticket/10-discussao-fase-3; awaiting review and push approval; no implementation authorized
+last_updated: "2026-09-24T13:32:43.874Z"
+last_activity: 2026-09-24
+state_head: 4cb1bfb11aa9ec947ac22246029f929a2382b86e
 progress:
   total_phases: 7
   completed_phases: 2
-  total_plans: 13
+  total_plans: 23
   completed_plans: 13
   percent: 29
+last_activity_desc: Phase 03 planning complete; 10 plans independently verified
 ---
 
 # Project State
@@ -23,17 +23,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-04)
 
 **Core value:** Permitir que um chamado percorra seu fluxo completo com autorização correta, histórico auditável e comunicação clara entre todos os envolvidos.
-**Current focus:** Phase 02 — Autenticação
+**Current focus:** Phase 03 — Core de Chamados
 
 ## Current Position
 
-Phase: 02 (Autenticação) — COMPLETE, VERIFIED AND MERGED
-Plan: 8 of 8
-Status: PR #10 merged into main at 490d276; ticket/09-fluxo-planos-aprovados documents the approved workflow
-Last activity: 2026-09-10 — Recorded one branch per approved implementation plan; next phase action is discussion of Phase 3 (Core de Chamados)
+Phase: 03 (Core de Chamados) — READY TO EXECUTE
+Plan: 0 of 10 implemented
+Status: Ready to execute
+Last activity: 2026-09-24
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
-Plan progress: 13/13 known plans complete (100%); Phase 2 has 8/8 plans complete and verified
+Plan progress: 13/23 plans complete (57%); Phase 03 has 10 planned implementation tickets
 
 ## Performance Metrics
 
@@ -120,14 +120,14 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-- Push, PR e merge do ticket/09-fluxo-planos-aprovados autorizados em 2026-09-10. Ao retomar, confirmar no GitHub se foi integrado; se sim, atualizar main e iniciar a discussão da Fase 3.
-- Iniciar `$gsd-discuss-phase 3`: esclarecer regras antes de criar/apresentar os planos. Ainda não há plano 03-01 aprovado para execução.
+- Ticket `ticket/10-discussao-fase-3`: planejamento completo e verificado; apresentar resumo e obter aprovações separadas para push, PR e merge.
+- Após integrar o ticket documental, apresentar o `03-01-PLAN.md` e obter aprovação conceitual antes de criar sua branch de implementação. Nenhum plano da Fase 3 está autorizado para código.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
 
 - [Pre-production]: Definir e verificar rate limiting para login/cadastro antes de expor o SolveIT à internet.
-- [Phase 3]: Confirmar matriz de transições/atores e política de locking no planejamento.
+- [Phase 3 / Plan 05]: Decidir no checkpoint humano a visibilidade de categoria inativa por ID antes da implementação da consulta de chamados.
 - [Phase 4]: Decidir entre entrega best-effort após commit e outbox durável.
 - [Phase 5]: Definir escopo dos agregados para atendentes e significado de carga ativa.
 
@@ -150,6 +150,6 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-09-11T11:35:05.800Z
-Stopped at: Phase 03 context gathered on ticket/10-discussao-fase-3; ready for research and planning; no implementation authorized
-Resume file: .planning/phases/03-core-de-chamados/03-CONTEXT.md
+Last session: 2026-09-24T13:31:19.136Z
+Stopped at: Phase 03 planning complete and verified on ticket/10-discussao-fase-3; awaiting review and push approval; no implementation authorized
+Resume file: .planning/phases/03-core-de-chamados/03-01-PLAN.md

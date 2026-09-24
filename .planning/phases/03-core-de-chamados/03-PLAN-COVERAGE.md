@@ -75,7 +75,7 @@ O probe spec-less classificou os 22 requisitos como `unclassified — review man
 | ID | Assumption | Coverage / resolution gate |
 |---|---|---|
 | A-01 | Uma linha global `core_write_guard` serializa as escritas curtas da Fase 3. | 03-01 explica contenção e exige aprovação individual antes da implementação; 03-01 prova mesma transação e timeout. |
-| A-02 | Categoria inativa por ID é visível a ADMIN ou a usuário com chamado visível vinculado. | 03-05 identifica a proposta como técnica; aprovação de 03-05 decide o detalhe sem alterar D-11. |
+| A-02 | Categoria inativa por ID é visível a ADMIN ou a usuário com chamado visível vinculado. | 03-05 mantém a proposta como [ASSUMED] e insere `checkpoint:decision` `blocking-human` antes da tarefa 2; a implementação só segue após decisão conceitual explícita, e qualquer alternativa exige revisar o plano. |
 | A-03 | Prévia administrativa stateless é ecoada integralmente na confirmação. | 03-10 começa com `checkpoint:decision` `blocking-human`; opção persistida exige revisão do plano. |
 | A-04 | Listas de comentários e histórico são completas, sem paginação silenciosa. | 03-09 assume o contrato canônico/COLL-04 e registra risco de disponibilidade como aceito no threat model. |
 
