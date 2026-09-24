@@ -18,6 +18,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.PersistenceContext;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationVersion;
 import org.flywaydb.core.api.output.MigrateResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -66,12 +67,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PersistenceIntegrationTest {
 
     private static final Set<String> DOMAIN_TABLES = Set.of(
-            "usuario", "categoria", "chamado", "comentario", "historico_status");
+            "usuario", "categoria", "chamado", "comentario", "historico_status",
+            "core_write_guard");
 
     private static final Set<String> NAMED_CONSTRAINTS = Set.of(
             "uk_usuario_email", "uk_categoria_nome",
             "ck_usuario_perfil", "ck_chamado_status", "ck_chamado_prioridade",
             "ck_historico_status_anterior", "ck_historico_status_novo",
+            "chk_core_write_guard_singleton",
             "fk_chamado_solicitante", "fk_chamado_atendente", "fk_chamado_categoria",
             "fk_comentario_chamado", "fk_comentario_autor",
             "fk_historico_chamado", "fk_historico_alterado_por");
@@ -133,6 +136,36 @@ class PersistenceIntegrationTest {
 
     @Test
     @Order(1)
+    void versionFiveDatabaseUpgradesToVersionSixWithoutLosingData() {
+        Flyway versionFive = Flyway.configure()
+                .dataSource(MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword())
+                .locations("classpath:db/migration")
+                .target(MigrationVersion.fromVersion("5"))
+                .cleanDisabled(false)
+                .load();
+        versionFive.clean();
+        MigrateResult versionFiveResult = versionFive.migrate();
+
+        assertThat(versionFiveResult.migrationsExecuted).isEqualTo(5);
+        jdbcTemplate.update("""
+                INSERT INTO categoria (nome, descricao, ativo)
+                VALUES ('Categoria anterior ao guard', 'Dado criado na V5', TRUE)
+                """);
+
+        MigrateResult upgradeResult = flywayForContainer().migrate();
+
+        assertThat(upgradeResult.migrationsExecuted).isOne();
+        assertThat(successfulMigrationVersions()).containsExactly("1", "2", "3", "4", "5", "6");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM categoria WHERE nome = 'Categoria anterior ao guard'",
+                Integer.class)).isOne();
+        assertThat(jdbcTemplate.queryForList(
+                "SELECT id FROM core_write_guard ORDER BY id", Long.class))
+                .containsExactly(1L);
+    }
+
+    @Test
+    @Order(2)
     void concurrentSpringContextsMigrateAnEmptyDatabaseExactlyOnce() throws Exception {
         flywayForContainer().clean();
         assertThat(jdbcTemplate.queryForObject(
@@ -167,30 +200,31 @@ class PersistenceIntegrationTest {
             executor.shutdownNow();
         }
 
-        assertThat(successfulMigrationVersions()).containsExactly("1", "2", "3", "4", "5");
+        assertThat(successfulMigrationVersions()).containsExactly("1", "2", "3", "4", "5", "6");
         assertThat(jdbcTemplate.queryForList("""
                 SELECT version, COUNT(*) AS version_count
                 FROM flyway_schema_history
                 WHERE success = TRUE
                 GROUP BY version
                 """))
-                .hasSize(5)
+                .hasSize(6)
                 .allSatisfy(row ->
                         assertThat(((Number) row.get("version_count")).intValue()).isOne());
         assertThat(domainTableNames()).containsExactlyInAnyOrderElementsOf(DOMAIN_TABLES);
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     void schemaMetadataMatchesTheApprovedPhysicalContract() {
         List<Map<String, Object>> tables = jdbcTemplate.queryForList("""
                 SELECT table_name, engine, table_collation
                 FROM information_schema.tables
                 WHERE table_schema = DATABASE()
-                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status')
+                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status',
+                                     'core_write_guard')
                 ORDER BY table_name
                 """);
-        assertThat(tables).hasSize(5).allSatisfy(table -> {
+        assertThat(tables).hasSize(6).allSatisfy(table -> {
             assertThat(table.get("engine")).isEqualTo("InnoDB");
             assertThat(table.get("table_collation")).isEqualTo("utf8mb4_0900_ai_ci");
         });
@@ -199,11 +233,12 @@ class PersistenceIntegrationTest {
                 SELECT table_name, constraint_name, constraint_type
                 FROM information_schema.table_constraints
                 WHERE constraint_schema = DATABASE()
-                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status')
+                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status',
+                                     'core_write_guard')
                 """);
         assertThat(constraints)
                 .filteredOn(row -> "PRIMARY KEY".equals(row.get("constraint_type")))
-                .hasSize(5)
+                .hasSize(6)
                 .allSatisfy(row -> assertThat(row.get("constraint_name")).isEqualTo("PRIMARY"));
         assertThat(constraints)
                 .extracting(row -> (String) row.get("constraint_name"))
@@ -213,7 +248,8 @@ class PersistenceIntegrationTest {
                 SELECT DISTINCT index_name
                 FROM information_schema.statistics
                 WHERE table_schema = DATABASE()
-                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status')
+                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status',
+                                     'core_write_guard')
                 """, String.class);
         assertThat(indexes).containsAll(SECONDARY_INDEXES);
 
@@ -236,6 +272,7 @@ class PersistenceIntegrationTest {
         assertThat(columnNames("historico_status")).containsExactly(
                 "id", "chamado_id", "status_anterior", "status_novo",
                 "alterado_por_id", "alterado_em", "observacao");
+        assertThat(columnNames("core_write_guard")).containsExactly("id");
 
         assertColumn("usuario", "email", "varchar", 255L, "NO");
         assertColumn("usuario", "perfil", "varchar", 20L, "NO");
@@ -247,10 +284,11 @@ class PersistenceIntegrationTest {
         assertColumn("chamado", "resolvido_em", "datetime", null, "YES");
         assertColumn("chamado", "version", "bigint", null, "NO");
         assertColumn("historico_status", "observacao", "varchar", 500L, "YES");
+        assertColumn("core_write_guard", "id", "bigint", null, "NO");
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     void repositoriesPersistFlushClearAndReloadTheUnicodeDomainGraph() {
         transactionTemplate.executeWithoutResult(status -> {
             Usuario solicitante = usuarioRepository.save(new Usuario(
@@ -307,7 +345,7 @@ class PersistenceIntegrationTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void databaseRejectsDuplicatesRequiredNullsInvalidEnumsAndOrphanReferences() {
         String email = uniqueEmail("duplicado");
         insertUser("Pessoa válida", email, "SOLICITANTE");
@@ -351,7 +389,7 @@ class PersistenceIntegrationTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void savingTheSameMutableEntityUpdatesOneRowInsteadOfDuplicatingIt() {
         long before = usuarioRepository.count();
         Usuario user = usuarioRepository.saveAndFlush(new Usuario(
@@ -369,7 +407,7 @@ class PersistenceIntegrationTest {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     void staleConcurrentTicketUpdateFailsAndVersionIncrements() {
         Usuario user = usuarioRepository.saveAndFlush(new Usuario(
                 "Concorrência", uniqueEmail("locking"), "hash", PerfilUsuario.ATENDENTE));
@@ -410,7 +448,7 @@ class PersistenceIntegrationTest {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     void repeatedMigrationAndHibernateValidationDoNotChangeSchemaOrHistory() {
         List<Map<String, Object>> historyBefore = migrationHistorySnapshot();
         List<String> metadataBefore = metadataSignature();
@@ -465,7 +503,8 @@ class PersistenceIntegrationTest {
                 SELECT table_name
                 FROM information_schema.tables
                 WHERE table_schema = DATABASE()
-                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status')
+                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status',
+                                     'core_write_guard')
                 """, String.class));
     }
 
@@ -504,19 +543,22 @@ class PersistenceIntegrationTest {
                 SELECT CONCAT('TABLE|', table_name, '|', engine, '|', table_collation)
                 FROM information_schema.tables
                 WHERE table_schema = DATABASE()
-                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status')
+                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status',
+                                     'core_write_guard')
                 """, String.class));
         signature.addAll(jdbcTemplate.queryForList("""
                 SELECT CONCAT('CONSTRAINT|', table_name, '|', constraint_name, '|', constraint_type)
                 FROM information_schema.table_constraints
                 WHERE constraint_schema = DATABASE()
-                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status')
+                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status',
+                                     'core_write_guard')
                 """, String.class));
         signature.addAll(jdbcTemplate.queryForList("""
                 SELECT CONCAT('INDEX|', table_name, '|', index_name, '|', seq_in_index, '|', column_name)
                 FROM information_schema.statistics
                 WHERE table_schema = DATABASE()
-                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status')
+                  AND table_name IN ('usuario', 'categoria', 'chamado', 'comentario', 'historico_status',
+                                     'core_write_guard')
                 """, String.class));
         signature.sort(String::compareTo);
         return signature;
