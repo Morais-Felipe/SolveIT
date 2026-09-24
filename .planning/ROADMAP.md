@@ -96,7 +96,47 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   4. Cada mudança confirmada cria exatamente um histórico na mesma transação e concorrência não sobrescreve o estado silenciosamente.
   5. Usuários autorizados adicionam e leem comentários imutáveis e consultam comentários e histórico cronologicamente.
 
-**Plans**: TBD
+**Plans**: 10 planos sequenciais planejados; execução não iniciada
+
+**Wave 1**
+
+- [ ] `03-01-PLAN.md` — Consultar e cadastrar categorias pela API protegida
+
+**Wave 2** *(bloqueada pela conclusão e integração da Wave 1)*
+
+- [ ] `03-02-PLAN.md` — Editar e ativar/desativar categorias sem perder vínculos
+
+**Wave 3** *(bloqueada pela conclusão e integração da Wave 2)*
+
+- [ ] `03-03-PLAN.md` — Administrar cadastro de usuários sem atalhos de perfil/status
+
+**Wave 4** *(bloqueada pela conclusão e integração da Wave 3)*
+
+- [ ] `03-04-PLAN.md` — Abrir chamado e registrar sua origem atomicamente
+
+**Wave 5** *(bloqueada pela conclusão e integração da Wave 4)*
+
+- [ ] `03-05-PLAN.md` — Consultar, filtrar e editar chamados no escopo correto
+
+**Wave 6** *(bloqueada pela conclusão e integração da Wave 5)*
+
+- [ ] `03-06-PLAN.md` — Assumir e atribuir chamados com um único vencedor
+
+**Wave 7** *(bloqueada pela conclusão e integração da Wave 6)*
+
+- [ ] `03-07-PLAN.md` — Resolver, fechar e cancelar pelo fluxo autorizado
+
+**Wave 8** *(bloqueada pela conclusão e integração da Wave 7)*
+
+- [ ] `03-08-PLAN.md` — Comentar com acesso atual e concorrência segura
+
+**Wave 9** *(bloqueada pela conclusão e integração da Wave 8)*
+
+- [ ] `03-09-PLAN.md` — Consultar comentários e histórico cronologicamente e provar imutabilidade
+
+**Wave 10** *(bloqueada pela conclusão e integração da Wave 9)*
+
+- [ ] `03-10-PLAN.md` — Alterar atividade/perfil com prévia, devolução auditada e proteção do último ADMIN
 
 ### Phase 4: Notificações por E-mail
 
@@ -168,8 +208,8 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Base do Projeto | 5/5 | Complete    | 2026-09-04 |
-| 2. Autenticação | 8/8 | In Progress|  |
-| 3. Core de Chamados | 0/TBD | Not started | - |
+| 2. Autenticação | 8/8 | Complete | 2026-09-10 |
+| 3. Core de Chamados | 0/10 | Planned | - |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
 | 5. Dashboard | 0/TBD | Not started | - |
 | 6. Front-end (React + Tailwind) | 0/TBD | Not started | - |
