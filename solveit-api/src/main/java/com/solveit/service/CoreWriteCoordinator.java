@@ -6,7 +6,9 @@ import com.solveit.exception.DomainException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class CoreWriteCoordinator {
 
+    private static final int LOCK_WAIT_TIMEOUT_SECONDS = 5;
     private static final String LOCK_SQL =
             "SELECT id FROM core_write_guard WHERE id = 1 FOR UPDATE";
 
@@ -28,11 +31,35 @@ public class CoreWriteCoordinator {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public void adquirir() {
-        Long guardId = jdbcTemplate.query(connection -> {
-            PreparedStatement statement = connection.prepareStatement(LOCK_SQL);
-            statement.setQueryTimeout(5);
-            return statement;
-        }, resultSet -> resultSet.next() ? resultSet.getLong("id") : null);
+        Long guardId = jdbcTemplate.execute((ConnectionCallback<Long>) connection -> {
+            int previousLockWaitTimeout;
+            try (Statement readTimeout = connection.createStatement();
+                    var resultSet = readTimeout.executeQuery(
+                            "SELECT @@SESSION.innodb_lock_wait_timeout")) {
+                resultSet.next();
+                previousLockWaitTimeout = resultSet.getInt(1);
+            }
+
+            try {
+                try (Statement setTimeout = connection.createStatement()) {
+                    setTimeout.execute(
+                            "SET SESSION innodb_lock_wait_timeout = "
+                                    + LOCK_WAIT_TIMEOUT_SECONDS);
+                }
+                try (PreparedStatement statement = connection.prepareStatement(LOCK_SQL)) {
+                    statement.setQueryTimeout(LOCK_WAIT_TIMEOUT_SECONDS);
+                    try (var resultSet = statement.executeQuery()) {
+                        return resultSet.next() ? resultSet.getLong("id") : null;
+                    }
+                }
+            } finally {
+                try (Statement restoreTimeout = connection.createStatement()) {
+                    restoreTimeout.execute(
+                            "SET SESSION innodb_lock_wait_timeout = "
+                                    + previousLockWaitTimeout);
+                }
+            }
+        });
 
         if (!Long.valueOf(1L).equals(guardId)) {
             throw new DomainException(
