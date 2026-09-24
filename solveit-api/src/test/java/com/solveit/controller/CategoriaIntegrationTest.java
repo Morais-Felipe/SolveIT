@@ -187,6 +187,99 @@ class CategoriaIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void createsAnActiveCategoryAsAdmin() throws Exception {
+        LoginResult admin = registerAndLogin("admin-cria@example.com", "Admin Cria");
+        promoteToAdmin(admin.usuarioId());
+
+        MvcResult result = mockMvc.perform(post("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CreateCategoryPayload(
+                                "  Redes  ",
+                                "Conectividade corporativa"))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.nome").value("Redes"))
+                .andExpect(jsonPath("$.descricao").value("Conectividade corporativa"))
+                .andExpect(jsonPath("$.ativo").value(true))
+                .andExpect(header().string(HttpHeaders.LOCATION, org.hamcrest.Matchers.matchesPattern(
+                        "/api/categorias/\\d+")))
+                .andReturn();
+
+        Long categoriaId = objectMapper.readTree(result.getResponse().getContentAsString())
+                .path("id")
+                .asLong();
+        Categoria persisted = categoriaRepository.findById(categoriaId).orElseThrow();
+        assertThat(persisted.getNome()).isEqualTo("Redes");
+        assertThat(persisted.getDescricao()).isEqualTo("Conectividade corporativa");
+        assertThat(persisted.getAtivo()).isTrue();
+    }
+
+    @Test
+    void forbidsSolicitanteFromCreatingCategoryWithoutWriting() throws Exception {
+        LoginResult solicitante = registerAndLogin(
+                "solicitante-cria@example.com",
+                "Solicitante Cria");
+
+        mockMvc.perform(post("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(solicitante))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CreateCategoryPayload(
+                                "Sem Permissao",
+                                null))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+
+        assertThat(categoriaRepository.count()).isZero();
+    }
+
+    @Test
+    void rejectsBlankCategoryNameBeforeWriting() throws Exception {
+        LoginResult admin = registerAndLogin("admin-valida@example.com", "Admin Valida");
+        promoteToAdmin(admin.usuarioId());
+
+        mockMvc.perform(post("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CreateCategoryPayload(
+                                "   ",
+                                "Descricao"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.nome").value("O nome é obrigatório"));
+
+        assertThat(categoriaRepository.count()).isZero();
+    }
+
+    @Test
+    void returnsControlledConflictForDuplicateCategoryName() throws Exception {
+        LoginResult admin = registerAndLogin("admin-duplica@example.com", "Admin Duplica");
+        promoteToAdmin(admin.usuarioId());
+        categoriaRepository.saveAndFlush(new Categoria("Software", "Existente"));
+
+        MvcResult result = mockMvc.perform(post("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CreateCategoryPayload(
+                                "Software",
+                                "Duplicada"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type")
+                        .value("urn:solveit:error:category-name-already-exists"))
+                .andExpect(jsonPath("$.title").value("Conflito de categoria"))
+                .andExpect(jsonPath("$.detail").value("Já existe uma categoria com este nome."))
+                .andExpect(jsonPath("$.code").value("CATEGORY_NAME_ALREADY_EXISTS"))
+                .andReturn();
+
+        assertThat(result.getResponse().getContentAsString()).doesNotContain(
+                "uk_categoria_nome",
+                "ConstraintViolationException",
+                "DataIntegrityViolationException",
+                "SQL");
+        assertThat(categoriaRepository.count()).isEqualTo(1);
+    }
+
     private LoginResult registerAndLogin(String email, String nome) throws Exception {
         MvcResult registration = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -235,6 +328,9 @@ class CategoriaIntegrationTest {
     }
 
     private record LoginPayload(String email, String senha) {
+    }
+
+    private record CreateCategoryPayload(String nome, String descricao) {
     }
 
     private record LoginResult(Long usuarioId, String accessToken) {
