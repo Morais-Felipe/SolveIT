@@ -1,19 +1,19 @@
----
+﻿---
 gsd_state_version: 1.0
 current_phase: 03
 current_phase_name: Core de Chamados
 status: executing
-stopped_at: Phase 03 planning complete and verified on ticket/10-discussao-fase-3; awaiting review and push approval; no implementation authorized
-last_updated: "2026-09-24T13:32:43.874Z"
+stopped_at: Completed 03-01-PLAN.md on ticket/11-categorias-api; awaiting push approval
+last_updated: "2026-09-24T18:41:46.592Z"
 last_activity: 2026-09-24
-state_head: 4cb1bfb11aa9ec947ac22246029f929a2382b86e
+last_activity_desc: Plan 03-01 completed locally; awaiting push approval for ticket 11
+state_head: 4a037881945091621c86badbb65b412fa3d31e17
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 23
-  completed_plans: 13
+  completed_plans: 14
   percent: 29
-last_activity_desc: Phase 03 planning complete; 10 plans independently verified
 ---
 
 # Project State
@@ -27,21 +27,21 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 03 (Core de Chamados) — READY TO EXECUTE
-Plan: 0 of 10 implemented
-Status: Ready to execute
-Last activity: 2026-09-24
+Phase: 03 (Core de Chamados) — EXECUTING
+Plan: 2 of 10 (blocked until ticket 11 is integrated)
+Status: Awaiting push approval for completed Plan 03-01
+Last activity: 2026-09-24 — Plan 03-01 completed locally and verified
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
-Plan progress: 13/23 plans complete (57%); Phase 03 has 10 planned implementation tickets
+Plan progress: 14/23 plans complete (61%); Phase 03 has 1/10 implementation tickets complete
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 13
-- Average duration: 18.6 min
-- Total execution time: 4.0 hours
+- Total plans completed: 14
+- Average duration: 37.0 min
+- Total execution time: 8.6 hours
 
 **By Phase:**
 
@@ -49,11 +49,12 @@ Plan progress: 13/23 plans complete (57%); Phase 03 has 10 planned implementatio
 |-------|-------|-------|----------|
 | Phase 01 | 5 | 66 min | 13.2 min |
 | Phase 02 | 8 | 176 min | 22.0 min |
+| Phase 03 | 1 | 276 min | 276.0 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 31 min, 20 min, 28 min, 28 min, 13 min
-- Trend: variável; Planos de autenticação exercitam ciclos RED/GREEN com MySQL/Testcontainers
+- Last 5 plans: 20 min, 28 min, 28 min, 13 min, 276 min
+- Trend: o primeiro plano do core foi mais longo por incluir o protocolo compartilhado de concorrência e sua prova em MySQL
 
 **Per-Plan Metrics:**
 
@@ -72,6 +73,7 @@ Plan progress: 13/23 plans complete (57%); Phase 03 has 10 planned implementatio
 | Phase 02 P06 | 28 min | 2 tasks | 6 files |
 | Phase 02 P07 | 28 min | 2 tasks | 10 files |
 | Phase 02 P08 | 13 min | 1 tasks | 2 files |
+| Phase 03 P01 | 4h 36m | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -117,11 +119,14 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 02 audit]: Tokens Bearer exigem `iat` e `exp` coerentes; ausência ou intervalo inválido é `AUTH_TOKEN_INVALID`.
 - [Phase 02 audit]: E-mail de cadastro é normalizado no DTO antes de validar formato e limite; a senha permanece intacta.
 - [Phase 02 audit]: Erros de leitura JSON e mídia não suportada possuem Problem Details próprios; somente despachos internos `ERROR` atravessam a segurança, e o filtro JWT executa apenas na cadeia Spring Security.
+- [Phase 03]: Escritas curtas da Fase 3 compartilham a linha singleton core_write_guard e mantem o lock ate commit ou rollback. — Serializa decisoes criticas entre instancias com uma ordem de locks unica e verificavel.
+- [Phase 03]: Timeout de row lock e temporario na sessao JDBC e restaurado em finally; setQueryTimeout permanece como segunda barreira. — O teste MySQL mostrou que setQueryTimeout sozinho nao interrompe a espera de lock de forma confiavel.
+- [Phase 03]: Toda escrita recarrega perfil e atividade do ator depois de adquirir o guard. — Impede que autoridade revogada durante a espera produza uma escrita.
 
 ### Pending Todos
 
-- Ticket `ticket/10-discussao-fase-3`: planejamento completo e verificado; apresentar resumo e obter aprovações separadas para push, PR e merge.
-- Após integrar o ticket documental, apresentar o `03-01-PLAN.md` e obter aprovação conceitual antes de criar sua branch de implementação. Nenhum plano da Fase 3 está autorizado para código.
+- Ticket `ticket/11-categorias-api`: plano 03-01 concluído localmente e verificado; aguardar aprovação separada para push, PR e merge.
+- Após integrar o ticket 11, apresentar o `03-02-PLAN.md` e obter aprovação conceitual antes de criar sua branch de implementação.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
@@ -150,6 +155,6 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-09-24T13:31:19.136Z
-Stopped at: Phase 03 planning complete and verified on ticket/10-discussao-fase-3; awaiting review and push approval; no implementation authorized
-Resume file: .planning/phases/03-core-de-chamados/03-01-PLAN.md
+Last session: 2026-09-24T18:41:45.406Z
+Stopped at: Completed 03-01-PLAN.md on ticket/11-categorias-api; awaiting push approval
+Resume file: None
