@@ -1,13 +1,13 @@
-﻿---
+---
 gsd_state_version: 1.0
 current_phase: 03
 current_phase_name: Core de Chamados
 status: executing
-stopped_at: Completed 03-01-PLAN.md on ticket/11-categorias-api; awaiting push approval
-last_updated: "2026-09-24T18:41:46.592Z"
-last_activity: 2026-09-24
-last_activity_desc: Plan 03-01 completed locally; awaiting push approval for ticket 11
-state_head: 4a037881945091621c86badbb65b412fa3d31e17
+stopped_at: Completed Task 1/2 of 03-02 on ticket/12-edicao-categorias; awaiting Task 2 approval
+last_updated: "2026-09-29T14:38:25.287Z"
+last_activity: 2026-09-29
+last_activity_desc: Plan 03-02 Task 1 completed and verified on ticket 12
+state_head: 7151693
 progress:
   total_phases: 7
   completed_phases: 2
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (Core de Chamados) — EXECUTING
-Plan: 2 of 10 (blocked until ticket 11 is integrated)
-Status: Awaiting push approval for completed Plan 03-01
-Last activity: 2026-09-24 — Plan 03-01 completed locally and verified
+Plan: 2 of 10 (Task 1 of 2 complete)
+Status: Awaiting approval to execute Task 2 of Plan 03-02
+Last activity: 2026-09-29 — Versioned category editing completed and verified
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
 Plan progress: 14/23 plans complete (61%); Phase 03 has 1/10 implementation tickets complete
@@ -125,8 +125,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-- Ticket `ticket/11-categorias-api`: plano 03-01 concluído localmente e verificado; aguardar aprovação separada para push, PR e merge.
-- Após integrar o ticket 11, apresentar o `03-02-PLAN.md` e obter aprovação conceitual antes de criar sua branch de implementação.
+- Ticket `ticket/12-edicao-categorias`: Tarefa 1 do plano 03-02 concluída e verificada; aguardar aprovação para iniciar a Tarefa 2.
+- Após concluir as duas tarefas, criar o SUMMARY e seguir aprovações separadas para push, PR e merge.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
@@ -155,6 +155,6 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-09-24T18:41:45.406Z
-Stopped at: Completed 03-01-PLAN.md on ticket/11-categorias-api; awaiting push approval
-Resume file: None
+Last session: 2026-09-29T14:38:25.287Z
+Stopped at: Completed Task 1/2 of 03-02 on ticket/12-edicao-categorias; awaiting Task 2 approval
+Resume file: .planning/phases/03-core-de-chamados/.continue-here.md

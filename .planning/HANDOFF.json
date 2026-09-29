@@ -1,0 +1,55 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-09-29T14:38:25.287Z",
+  "phase": "03",
+  "phase_name": "Core de Chamados",
+  "phase_dir": ".planning/phases/03-core-de-chamados",
+  "plan": 2,
+  "task": 2,
+  "total_tasks": 2,
+  "status": "paused",
+  "completed_tasks": [
+    {
+      "id": 1,
+      "name": "Editar categoria com versão real",
+      "status": "done",
+      "commit": "cc62a30,7151693"
+    }
+  ],
+  "remaining_tasks": [
+    {
+      "id": 2,
+      "name": "Ativar/desativar preservando dados e prova de upgrade",
+      "status": "not_started"
+    }
+  ],
+  "blockers": [],
+  "async_jobs": [],
+  "human_actions_pending": [
+    {
+      "action": "Aprovar a execução da Tarefa 2 do plano 03-02",
+      "context": "A aprovação anterior foi explicitamente limitada à Tarefa 1.",
+      "blocking": true
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Categoria usa @Version e coluna BIGINT NOT NULL DEFAULT 0 criada pela Flyway V7.",
+      "rationale": "Permite atualizar bancos existentes e rejeitar formulários desatualizados sem sobrescrita silenciosa.",
+      "phase": "03"
+    },
+    {
+      "decision": "PUT adquire o guard global, relê o ADMIN atual e bloqueia a categoria antes de comparar a versão esperada.",
+      "rationale": "Mantém a ordem comum de locks e revalida autoridade e estado na mesma transação.",
+      "phase": "03"
+    },
+    {
+      "decision": "CategoriaDtos.Resposta expõe versao em listagem, detalhe, criação e edição.",
+      "rationale": "O cliente precisa receber a versão real para enviar comandos concorrentes seguros.",
+      "phase": "03"
+    }
+  ],
+  "uncommitted_files": [],
+  "next_action": "Apresentar a Tarefa 2 e aguardar aprovação explícita; depois criar testes RED para PATCH /api/categorias/{id}/ativo e upgrade V6->V7.",
+  "context_notes": "Branch ticket/12-edicao-categorias. Task 1 concluída por TDD: RED cc62a30 e GREEN 7151693. CategoriaEdicaoIntegrationTest: 5/5; CategoriaIntegrationTest: 10/10. Docker Desktop foi iniciado e está saudável; Testcontainers removeu os containers de teste ao final. Não criar SUMMARY até concluir a Tarefa 2. Não fazer push sem aprovação separada."
+}
