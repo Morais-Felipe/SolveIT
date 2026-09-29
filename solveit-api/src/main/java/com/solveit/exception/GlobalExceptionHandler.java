@@ -7,6 +7,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -16,6 +19,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.transaction.TransactionTimedOutException;
 
 @RestControllerAdvice
 public final class GlobalExceptionHandler {
@@ -101,6 +105,52 @@ public final class GlobalExceptionHandler {
                 null);
 
         return problemResponse(HttpStatus.UNAUTHORIZED, problem);
+    }
+
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ProblemDetail> handleDomainException(
+            DomainException exception,
+            HttpServletRequest request) {
+        ProblemDetail problem = problemDetailFactory.create(
+                exception.getStatus(),
+                exception.getCode(),
+                exception.getTitle(),
+                exception.getDetail(),
+                requestUri(request),
+                null);
+
+        return problemResponse(exception.getStatus(), problem);
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ProblemDetail> handleOptimisticLockingFailure(
+            HttpServletRequest request) {
+        ProblemDetail problem = problemDetailFactory.create(
+                HttpStatus.CONFLICT,
+                ApiErrorCode.STALE_RESOURCE,
+                "Recurso desatualizado",
+                "O recurso foi alterado por outra operação. Atualize os dados e tente novamente.",
+                requestUri(request),
+                null);
+
+        return problemResponse(HttpStatus.CONFLICT, problem);
+    }
+
+    @ExceptionHandler({
+            PessimisticLockingFailureException.class,
+            QueryTimeoutException.class,
+            TransactionTimedOutException.class
+    })
+    public ResponseEntity<ProblemDetail> handleCoreBusy(HttpServletRequest request) {
+        ProblemDetail problem = problemDetailFactory.create(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                ApiErrorCode.CORE_BUSY,
+                "Operação temporariamente indisponível",
+                "Não foi possível iniciar a operação. Tente novamente.",
+                requestUri(request),
+                null);
+
+        return problemResponse(HttpStatus.SERVICE_UNAVAILABLE, problem);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
