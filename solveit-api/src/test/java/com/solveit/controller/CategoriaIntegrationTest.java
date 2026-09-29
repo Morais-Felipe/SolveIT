@@ -118,6 +118,7 @@ class CategoriaIntegrationTest {
                 .andExpect(jsonPath("$.items[0].nome").value("Alpha"))
                 .andExpect(jsonPath("$.items[0].descricao").value("Primeira categoria"))
                 .andExpect(jsonPath("$.items[0].ativo").value(true))
+                .andExpect(jsonPath("$.items[0].versao").value(0))
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(1))
                 .andExpect(jsonPath("$.totalElements").value(2))
@@ -148,9 +149,10 @@ class CategoriaIntegrationTest {
                 .andExpect(jsonPath("$.nome").value("Hardware"))
                 .andExpect(jsonPath("$.descricao").value("Equipamentos fisicos"))
                 .andExpect(jsonPath("$.ativo").value(true))
+                .andExpect(jsonPath("$.versao").value(0))
                 .andReturn();
 
-        assertResponseFields(result, "id", "nome", "descricao", "ativo");
+        assertResponseFields(result, "id", "nome", "descricao", "ativo", "versao");
     }
 
     @Test
@@ -203,6 +205,7 @@ class CategoriaIntegrationTest {
                 .andExpect(jsonPath("$.nome").value("Redes"))
                 .andExpect(jsonPath("$.descricao").value("Conectividade corporativa"))
                 .andExpect(jsonPath("$.ativo").value(true))
+                .andExpect(jsonPath("$.versao").value(0))
                 .andExpect(header().string(HttpHeaders.LOCATION, org.hamcrest.Matchers.matchesPattern(
                         "/api/categorias/\\d+")))
                 .andReturn();
