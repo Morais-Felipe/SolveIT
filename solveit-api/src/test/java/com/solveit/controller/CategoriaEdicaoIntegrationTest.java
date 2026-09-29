@@ -1,6 +1,8 @@
 package com.solveit.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -9,9 +11,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solveit.entity.Categoria;
+import com.solveit.entity.Chamado;
 import com.solveit.entity.Usuario;
 import com.solveit.enums.PerfilUsuario;
+import com.solveit.enums.Prioridade;
+import com.solveit.enums.StatusChamado;
 import com.solveit.repository.CategoriaRepository;
+import com.solveit.repository.ChamadoRepository;
 import com.solveit.repository.UsuarioRepository;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -25,6 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.containers.MySQLContainer;
@@ -59,10 +66,17 @@ class CategoriaEdicaoIntegrationTest {
     private CategoriaRepository categoriaRepository;
 
     @Autowired
+    private ChamadoRepository chamadoRepository;
+
+    @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void cleanDatabase() {
+        chamadoRepository.deleteAll();
         categoriaRepository.deleteAll();
         usuarioRepository.deleteAll();
     }
@@ -198,6 +212,156 @@ class CategoriaEdicaoIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void deactivatesReferencedCategoryWithoutDeletingTicketRelationship() throws Exception {
+        LoginResult admin = registerAndLogin("admin-desativa@example.com", "Admin Desativa");
+        promoteToAdmin(admin.usuarioId());
+        LoginResult solicitante = registerAndLogin(
+                "solicitante-vinculo@example.com",
+                "Solicitante Vinculo");
+        Usuario solicitantePersistido = usuarioRepository.findById(solicitante.usuarioId()).orElseThrow();
+        Categoria categoria = categoriaRepository.saveAndFlush(
+                new Categoria("Acesso", "Categoria vinculada"));
+        Chamado chamado = chamadoRepository.saveAndFlush(new Chamado(
+                "Sem acesso ao sistema",
+                "O usuario nao consegue autenticar",
+                StatusChamado.ABERTO,
+                Prioridade.MEDIA,
+                solicitantePersistido,
+                null,
+                categoria));
+
+        MvcResult result = mockMvc.perform(patch("/api/categorias/{id}/ativo", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeActivePayload(false, 0L))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(categoria.getId()))
+                .andExpect(jsonPath("$.nome").value("Acesso"))
+                .andExpect(jsonPath("$.descricao").value("Categoria vinculada"))
+                .andExpect(jsonPath("$.ativo").value(false))
+                .andExpect(jsonPath("$.versao").value(1))
+                .andReturn();
+
+        assertResponseFields(result, "id", "nome", "descricao", "ativo", "versao");
+        mockMvc.perform(get("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(0));
+
+        Map<String, Object> relationship = jdbcTemplate.queryForMap("""
+                SELECT ch.categoria_id, c.nome, c.ativo
+                FROM chamado ch
+                JOIN categoria c ON c.id = ch.categoria_id
+                WHERE ch.id = ?
+                """, chamado.getId());
+        assertThat(((Number) relationship.get("categoria_id")).longValue())
+                .isEqualTo(categoria.getId());
+        assertThat(relationship.get("nome")).isEqualTo("Acesso");
+        assertThat(relationship.get("ativo")).isEqualTo(false);
+        assertThat(categoriaRepository.existsById(categoria.getId())).isTrue();
+    }
+
+    @Test
+    void reactivatesCategoryAndReturnsItToCatalog() throws Exception {
+        LoginResult admin = registerAndLogin("admin-reativa@example.com", "Admin Reativa");
+        promoteToAdmin(admin.usuarioId());
+        Categoria categoria = new Categoria("Banco de dados", "Categoria inativa");
+        categoria.setAtivo(false);
+        categoria = categoriaRepository.saveAndFlush(categoria);
+
+        mockMvc.perform(patch("/api/categorias/{id}/ativo", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeActivePayload(true, 0L))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ativo").value(true))
+                .andExpect(jsonPath("$.versao").value(1));
+
+        mockMvc.perform(get("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.items[0].id").value(categoria.getId()))
+                .andExpect(jsonPath("$.items[0].nome").value("Banco de dados"));
+    }
+
+    @Test
+    void keepsVersionOnNoOpAndRejectsStaleActivationChange() throws Exception {
+        LoginResult admin = registerAndLogin("admin-noop@example.com", "Admin Noop");
+        promoteToAdmin(admin.usuarioId());
+        Categoria categoria = categoriaRepository.saveAndFlush(
+                new Categoria("Monitoramento", "Categoria ativa"));
+
+        mockMvc.perform(patch("/api/categorias/{id}/ativo", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeActivePayload(true, 0L))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ativo").value(true))
+                .andExpect(jsonPath("$.versao").value(0));
+
+        mockMvc.perform(patch("/api/categorias/{id}/ativo", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeActivePayload(false, 0L))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ativo").value(false))
+                .andExpect(jsonPath("$.versao").value(1));
+
+        mockMvc.perform(patch("/api/categorias/{id}/ativo", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeActivePayload(true, 0L))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STALE_RESOURCE"));
+
+        Categoria persisted = categoriaRepository.findById(categoria.getId()).orElseThrow();
+        assertThat(persisted.getAtivo()).isFalse();
+        assertThat(persisted.getVersion()).isOne();
+    }
+
+    @Test
+    void forbidsSolicitanteFromChangingCategoryActivation() throws Exception {
+        LoginResult solicitante = registerAndLogin(
+                "solicitante-ativacao@example.com",
+                "Solicitante Ativacao");
+        Categoria categoria = categoriaRepository.saveAndFlush(
+                new Categoria("Seguranca", "Categoria protegida"));
+
+        mockMvc.perform(patch("/api/categorias/{id}/ativo", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(solicitante))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeActivePayload(false, 0L))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+
+        Categoria persisted = categoriaRepository.findById(categoria.getId()).orElseThrow();
+        assertThat(persisted.getAtivo()).isTrue();
+        assertThat(persisted.getVersion()).isZero();
+    }
+
+    @Test
+    void rejectsMissingExpectedVersionForActivationChange() throws Exception {
+        LoginResult admin = registerAndLogin(
+                "admin-ativacao-sem-versao@example.com",
+                "Admin Ativacao Sem Versao");
+        promoteToAdmin(admin.usuarioId());
+        Categoria categoria = categoriaRepository.saveAndFlush(
+                new Categoria("Observabilidade", null));
+
+        mockMvc.perform(patch("/api/categorias/{id}/ativo", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ativo\":false}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.versaoEsperada")
+                        .value("A versÃ£o esperada Ã© obrigatÃ³ria"));
+
+        assertThat(categoriaRepository.findById(categoria.getId()).orElseThrow().getAtivo()).isTrue();
+    }
+
     private LoginResult registerAndLogin(String email, String nome) throws Exception {
         MvcResult registration = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -252,6 +416,9 @@ class CategoriaEdicaoIntegrationTest {
             String nome,
             String descricao,
             Long versaoEsperada) {
+    }
+
+    private record ChangeActivePayload(Boolean ativo, Long versaoEsperada) {
     }
 
     private record LoginResult(Long usuarioId, String accessToken) {
