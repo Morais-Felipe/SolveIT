@@ -176,7 +176,7 @@ class CategoriaEdicaoIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.errors.versaoEsperada")
-                        .value("A versao esperada e obrigatoria"));
+                        .value("A versão esperada é obrigatória"));
 
         Categoria persisted = categoriaRepository.findById(categoria.getId()).orElseThrow();
         assertThat(persisted.getNome()).isEqualTo("Telefonia");
