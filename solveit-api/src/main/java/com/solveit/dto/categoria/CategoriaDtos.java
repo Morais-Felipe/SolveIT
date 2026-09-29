@@ -36,6 +36,14 @@ public final class CategoriaDtos {
         }
     }
 
+    public record AlterarAtivo(
+            @NotNull(message = "O estado ativo Ã© obrigatÃ³rio")
+            Boolean ativo,
+            @NotNull(message = "A versÃ£o esperada Ã© obrigatÃ³ria")
+            @PositiveOrZero(message = "A versÃ£o esperada nÃ£o pode ser negativa")
+            Long versaoEsperada) {
+    }
+
     public record Resposta(
             Long id,
             String nome,

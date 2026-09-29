@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -65,5 +66,14 @@ public class CategoriaController {
             @AuthenticationPrincipal UsuarioPrincipal principal,
             @Valid @RequestBody CategoriaDtos.Editar request) {
         return categoriaService.editar(principal.getId(), id, request);
+    }
+
+    @PatchMapping("/{id}/ativo")
+    @PreAuthorize("hasRole('ADMIN')")
+    public CategoriaDtos.Resposta alterarAtivo(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UsuarioPrincipal principal,
+            @Valid @RequestBody CategoriaDtos.AlterarAtivo request) {
+        return categoriaService.alterarAtivo(principal.getId(), id, request);
     }
 }
