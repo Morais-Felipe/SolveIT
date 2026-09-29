@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 03
 current_phase_name: Core de Chamados
 status: executing
-stopped_at: Completed Task 1/2 of 03-02 on ticket/12-edicao-categorias; awaiting Task 2 approval
-last_updated: "2026-09-29T14:38:25.287Z"
+stopped_at: Completed Plan 03-02 on ticket/12-edicao-categorias; awaiting approval to push
+last_updated: "2026-09-29T15:13:08.000Z"
 last_activity: 2026-09-29
-last_activity_desc: Plan 03-02 Task 1 completed and verified on ticket 12
-state_head: 7151693
+last_activity_desc: Plan 03-02 completed and verified with 90 passing backend tests
+state_head: 92d1879
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 23
-  completed_plans: 14
+  completed_plans: 15
   percent: 29
 ---
 
@@ -28,20 +28,20 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (Core de Chamados) — EXECUTING
-Plan: 2 of 10 (Task 1 of 2 complete)
-Status: Awaiting approval to execute Task 2 of Plan 03-02
-Last activity: 2026-09-29 — Versioned category editing completed and verified
+Plan: 2 of 10 complete
+Status: Awaiting explicit approval to push ticket/12-edicao-categorias
+Last activity: 2026-09-29 — Versioned category editing and logical activation completed and verified
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
-Plan progress: 14/23 plans complete (61%); Phase 03 has 1/10 implementation tickets complete
+Plan progress: 15/23 plans complete (65%); Phase 03 has 2/10 implementation tickets complete
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 14
-- Average duration: 37.0 min
-- Total execution time: 8.6 hours
+- Total plans completed: 15
+- Average duration: 37.3 min
+- Total execution time: 9.3 hours
 
 **By Phase:**
 
@@ -49,12 +49,12 @@ Plan progress: 14/23 plans complete (61%); Phase 03 has 1/10 implementation tick
 |-------|-------|-------|----------|
 | Phase 01 | 5 | 66 min | 13.2 min |
 | Phase 02 | 8 | 176 min | 22.0 min |
-| Phase 03 | 1 | 276 min | 276.0 min |
+| Phase 03 | 2 | 319 min | 159.5 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 20 min, 28 min, 28 min, 13 min, 276 min
-- Trend: o primeiro plano do core foi mais longo por incluir o protocolo compartilhado de concorrência e sua prova em MySQL
+- Last 5 plans: 28 min, 28 min, 13 min, 276 min, 43 min
+- Trend: o segundo plano reutilizou o protocolo compartilhado e fechou em 43 minutos com prova completa no MySQL
 
 **Per-Plan Metrics:**
 
@@ -74,6 +74,7 @@ Plan progress: 14/23 plans complete (61%); Phase 03 has 1/10 implementation tick
 | Phase 02 P07 | 28 min | 2 tasks | 10 files |
 | Phase 02 P08 | 13 min | 1 tasks | 2 files |
 | Phase 03 P01 | 4h 36m | 3 tasks | 12 files |
+| Phase 03 P02 | 43 min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -122,11 +123,13 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 03]: Escritas curtas da Fase 3 compartilham a linha singleton core_write_guard e mantem o lock ate commit ou rollback. — Serializa decisoes criticas entre instancias com uma ordem de locks unica e verificavel.
 - [Phase 03]: Timeout de row lock e temporario na sessao JDBC e restaurado em finally; setQueryTimeout permanece como segunda barreira. — O teste MySQL mostrou que setQueryTimeout sozinho nao interrompe a espera de lock de forma confiavel.
 - [Phase 03]: Toda escrita recarrega perfil e atividade do ator depois de adquirir o guard. — Impede que autoridade revogada durante a espera produza uma escrita.
+- [Phase 03]: Categoria usa @Version e o cliente envia versaoEsperada; comparação ocorre depois do guard e do lock pessimista. — Impede sobrescrita silenciosa por formulário desatualizado.
+- [Phase 03]: Ativação sem mudança valida a versão mas não executa UPDATE; desativação nunca remove a categoria ou seus vínculos. — Preserva idempotência, auditoria relacional e versão significativa.
 
 ### Pending Todos
 
-- Ticket `ticket/12-edicao-categorias`: Tarefa 1 do plano 03-02 concluída e verificada; aguardar aprovação para iniciar a Tarefa 2.
-- Após concluir as duas tarefas, criar o SUMMARY e seguir aprovações separadas para push, PR e merge.
+- Ticket `ticket/12-edicao-categorias`: plano 03-02 concluído e verificado; aguardar aprovação explícita para push.
+- Depois do push, criar o PR somente com aprovação separada; integrar na main somente após nova confirmação.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
@@ -155,6 +158,6 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-09-29T14:38:25.287Z
-Stopped at: Completed Task 1/2 of 03-02 on ticket/12-edicao-categorias; awaiting Task 2 approval
-Resume file: .planning/phases/03-core-de-chamados/.continue-here.md
+Last session: 2026-09-29T15:13:08.000Z
+Stopped at: Completed Plan 03-02 on ticket/12-edicao-categorias; awaiting approval to push
+Resume file: none

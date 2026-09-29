@@ -27,8 +27,8 @@
 - [ ] **ADMN-02**: Um administrador pode criar e editar usuários com qualquer perfil sem permitir e-mails duplicados.
 - [ ] **ADMN-03**: Um administrador pode ativar ou desativar usuários sem excluí-los. Desativação ou retirada do perfil ATENDENTE devolve seus chamados EM_ANDAMENTO a ABERTO sem responsável, após confirmação explícita da quantidade, com histórico e operação atômica. Conflito exige nova revisão sem mudanças parciais. O último ADMIN ativo não pode ser desativado nem perder seu perfil.
 - [ ] **ADMN-04**: Qualquer usuário autenticado pode listar categorias ativas e consultar uma categoria permitida por id.
-- [ ] **ADMN-05**: Um administrador pode criar e editar categorias com nome único.
-- [ ] **ADMN-06**: Um administrador pode ativar ou desativar categorias sem excluí-las.
+- [x] **ADMN-05**: Um administrador pode criar e editar categorias com nome único.
+- [x] **ADMN-06**: Um administrador pode ativar ou desativar categorias sem excluí-las.
 
 ### Chamados e Fluxo
 
@@ -129,8 +129,8 @@
 | ADMN-02 | Phase 3 | Pending |
 | ADMN-03 | Phase 3 | Pending |
 | ADMN-04 | Phase 3 | Pending |
-| ADMN-05 | Phase 3 | Pending |
-| ADMN-06 | Phase 3 | Pending |
+| ADMN-05 | Phase 3 | Complete |
+| ADMN-06 | Phase 3 | Complete |
 | TICK-01 | Phase 3 | Pending |
 | TICK-02 | Phase 3 | Pending |
 | TICK-03 | Phase 3 | Pending |
