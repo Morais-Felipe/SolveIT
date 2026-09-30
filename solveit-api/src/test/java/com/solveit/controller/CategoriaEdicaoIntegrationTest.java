@@ -396,7 +396,7 @@ class CategoriaEdicaoIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.errors.versaoEsperada")
-                        .value("A versÃ£o esperada Ã© obrigatÃ³ria"));
+                        .value("A versão esperada é obrigatória"));
 
         assertThat(categoriaRepository.findById(categoria.getId()).orElseThrow().getAtivo()).isTrue();
     }
