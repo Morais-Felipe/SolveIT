@@ -143,7 +143,7 @@ None - no external service configuration required.
 
 - **Plano:** 03-02
 - **Ticket/branch:** `ticket/12-edicao-categorias`
-- **PR:** pendente; push ainda não autorizado
+- **PR:** [#14 — Plano 03-02: editar e ativar/desativar categorias](https://github.com/Morais-Felipe/SolveIT/pull/14)
 
 ## Next Phase Readiness
 
