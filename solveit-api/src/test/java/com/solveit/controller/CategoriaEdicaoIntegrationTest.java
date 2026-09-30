@@ -23,6 +23,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +39,9 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -42,7 +50,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(properties = {
         "spring.profiles.active=test",
         "spring.jpa.open-in-view=false",
-        "spring.jpa.hibernate.ddl-auto=validate"
+        "spring.jpa.hibernate.ddl-auto=validate",
+        "spring.datasource.hikari.connection-init-sql=SET SESSION innodb_lock_wait_timeout = 1"
 })
 @AutoConfigureMockMvc
 class CategoriaEdicaoIntegrationTest {
@@ -73,6 +82,9 @@ class CategoriaEdicaoIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @BeforeEach
     void cleanDatabase() {
@@ -148,6 +160,33 @@ class CategoriaEdicaoIntegrationTest {
         Categoria persisted = categoriaRepository.findById(target.getId()).orElseThrow();
         assertThat(persisted.getNome()).isEqualTo("Hardware");
         assertThat(persisted.getDescricao()).isEqualTo("Categoria alvo");
+    }
+
+    @Test
+    void returnsCoreBusyAndRollsBackWhenCategoryRowIsLocked() throws Exception {
+        LoginResult admin = registerAndLogin("admin-lock@example.com", "Admin Lock");
+        promoteToAdmin(admin.usuarioId());
+        Categoria categoria = categoriaRepository.saveAndFlush(
+                new Categoria("Impressoras", "Descricao original"));
+
+        assertCoreBusyWhileCategoryLocked(
+                categoria.getId(),
+                put("/api/categorias/{id}", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new EditCategoryPayload(
+                                "Impressoras alteradas",
+                                "Nao deve persistir",
+                                0L))));
+        assertCategoryUnchanged(categoria.getId());
+
+        assertCoreBusyWhileCategoryLocked(
+                categoria.getId(),
+                patch("/api/categorias/{id}/ativo", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeActivePayload(false, 0L))));
+        assertCategoryUnchanged(categoria.getId());
     }
 
     @Test
@@ -387,6 +426,61 @@ class CategoriaEdicaoIntegrationTest {
                 .asText();
 
         return new LoginResult(usuarioId, accessToken);
+    }
+
+    private void assertCoreBusyWhileCategoryLocked(
+            Long categoriaId,
+            MockHttpServletRequestBuilder request) throws Exception {
+        CountDownLatch lockAcquired = new CountDownLatch(1);
+        CountDownLatch releaseLock = new CountDownLatch(1);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<?> lockHolder = executor.submit(() ->
+                new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+                    jdbcTemplate.queryForObject(
+                            "SELECT id FROM categoria WHERE id = ? FOR UPDATE",
+                            Long.class,
+                            categoriaId);
+                    lockAcquired.countDown();
+                    await(releaseLock, "Category row lock was not released");
+                }));
+
+        try {
+            assertThat(lockAcquired.await(5, TimeUnit.SECONDS)).isTrue();
+            MvcResult result = mockMvc.perform(request)
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(jsonPath("$.type").value("urn:solveit:error:core-busy"))
+                    .andExpect(jsonPath("$.code").value("CORE_BUSY"))
+                    .andReturn();
+
+            assertThat(result.getResponse().getContentAsString()).doesNotContain(
+                    "LockTimeoutException",
+                    "PessimisticLockException",
+                    "SQL");
+        } finally {
+            releaseLock.countDown();
+            lockHolder.get(10, TimeUnit.SECONDS);
+            executor.shutdownNow();
+            assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+        }
+    }
+
+    private void assertCategoryUnchanged(Long categoriaId) {
+        Categoria persisted = categoriaRepository.findById(categoriaId).orElseThrow();
+        assertThat(persisted.getNome()).isEqualTo("Impressoras");
+        assertThat(persisted.getDescricao()).isEqualTo("Descricao original");
+        assertThat(persisted.getAtivo()).isTrue();
+        assertThat(persisted.getVersion()).isZero();
+    }
+
+    private static void await(CountDownLatch latch, String message) {
+        try {
+            if (!latch.await(10, TimeUnit.SECONDS)) {
+                throw new IllegalStateException(message);
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Lock holder was interrupted", exception);
+        }
     }
 
     private void promoteToAdmin(Long usuarioId) {

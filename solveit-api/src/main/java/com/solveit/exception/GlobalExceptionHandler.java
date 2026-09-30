@@ -1,5 +1,7 @@
 package com.solveit.exception;
 
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.PessimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.LinkedHashMap;
@@ -137,6 +139,8 @@ public final class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
+            LockTimeoutException.class,
+            PessimisticLockException.class,
             PessimisticLockingFailureException.class,
             QueryTimeoutException.class,
             TransactionTimedOutException.class
