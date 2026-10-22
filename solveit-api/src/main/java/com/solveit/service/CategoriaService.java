@@ -8,6 +8,8 @@ import com.solveit.exception.ApiErrorCode;
 import com.solveit.exception.DomainException;
 import com.solveit.exception.UniqueConstraints;
 import com.solveit.repository.CategoriaRepository;
+import com.solveit.repository.ChamadoRepository;
+import com.solveit.repository.ChamadoSpecifications;
 import com.solveit.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
@@ -16,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -31,16 +34,19 @@ public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ChamadoRepository chamadoRepository;
     private final CoreWriteCoordinator coreWriteCoordinator;
     private final EntityManager entityManager;
 
     public CategoriaService(
             CategoriaRepository categoriaRepository,
             UsuarioRepository usuarioRepository,
+            ChamadoRepository chamadoRepository,
             CoreWriteCoordinator coreWriteCoordinator,
             EntityManager entityManager) {
         this.categoriaRepository = categoriaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.chamadoRepository = chamadoRepository;
         this.coreWriteCoordinator = coreWriteCoordinator;
         this.entityManager = entityManager;
     }
@@ -65,9 +71,16 @@ public class CategoriaService {
         Categoria categoria = categoriaRepository.findById(categoriaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
+        // Decisão linked-visible-ticket (03-05): categoria inativa é legível pelo ADMIN ou
+        // por quem hoje pode ver ao menos um chamado vinculado a ela. Isso autoriza só
+        // esta leitura; não amplia o acesso a chamado algum.
         if (!Boolean.TRUE.equals(categoria.getAtivo())
-                && usuario.getPerfil() != PerfilUsuario.ADMIN) {
-            throw new AccessDeniedException("Inactive category requires administrator profile");
+                && usuario.getPerfil() != PerfilUsuario.ADMIN
+                && !chamadoRepository.exists(Specification
+                        .where(ChamadoSpecifications.visivelPara(usuario))
+                        .and(ChamadoSpecifications.daCategoria(categoria.getId())))) {
+            throw new AccessDeniedException(
+                    "Inactive category requires administrator or a visible linked ticket");
         }
 
         return toResponse(categoria);
