@@ -6,6 +6,7 @@ import com.solveit.enums.StatusChamado;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -40,6 +41,34 @@ public final class ChamadoDtos {
             Map<String, Object> camposNaoPermitidos) {
 
         public Criar {
+            if (titulo != null) {
+                titulo = titulo.trim();
+            }
+            camposNaoPermitidos = camposNaoPermitidos == null
+                    ? Map.of()
+                    : Collections.unmodifiableMap(new LinkedHashMap<>(camposNaoPermitidos));
+        }
+    }
+
+    /**
+     * Edição limitada ao texto do chamado. Status, prioridade, categoria, responsável e
+     * datas têm rotas próprias ou pertencem ao servidor; se enviados, viram 400.
+     */
+    public record Editar(
+            @NotBlank(message = "O título é obrigatório")
+            @Size(max = 200, message = "O título deve ter no máximo 200 caracteres")
+            String titulo,
+            @NotBlank(message = "A descrição é obrigatória")
+            @Size(max = 10_000, message = "A descrição deve ter no máximo 10000 caracteres")
+            String descricao,
+            @NotNull(message = "A versão esperada é obrigatória")
+            @PositiveOrZero(message = "A versão esperada não pode ser negativa")
+            Long versaoEsperada,
+            @JsonAnySetter
+            @Size(max = 0, message = "Envie somente titulo, descricao e versaoEsperada")
+            Map<String, Object> camposNaoPermitidos) {
+
+        public Editar {
             if (titulo != null) {
                 titulo = titulo.trim();
             }

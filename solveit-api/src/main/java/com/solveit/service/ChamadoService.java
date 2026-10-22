@@ -17,6 +17,7 @@ import com.solveit.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -149,6 +150,47 @@ public class ChamadoService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         chamadoAuthorizationService.exigirAcesso(usuario, chamado);
         return toDetalhe(chamado);
+    }
+
+    /**
+     * Ordem do protocolo: guard → ator atual → chamado travado → papel/relação → versão →
+     * estado. Só título e descrição mudam; a edição não é transição de status e por isso
+     * não gera HistoricoStatus.
+     */
+    @Transactional(timeout = 10)
+    public ChamadoDtos.Detalhe editar(
+            Long usuarioId,
+            Long chamadoId,
+            ChamadoDtos.Editar request) {
+        coreWriteCoordinator.adquirir();
+        Usuario usuario = coreWriteCoordinator.carregarUsuarioAtual(usuarioId);
+        Chamado chamado = chamadoRepository.findById(chamadoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        entityManager.refresh(chamado, LockModeType.PESSIMISTIC_WRITE);
+
+        boolean donoSolicitante = usuario.getPerfil() == PerfilUsuario.SOLICITANTE
+                && Objects.equals(chamado.getSolicitante().getId(), usuario.getId());
+        if (usuario.getPerfil() != PerfilUsuario.ADMIN && !donoSolicitante) {
+            throw new AccessDeniedException("Only the requester or an administrator edits a ticket");
+        }
+        if (!Objects.equals(chamado.getVersion(), request.versaoEsperada())) {
+            throw new DomainException(
+                    ApiErrorCode.STALE_RESOURCE,
+                    HttpStatus.CONFLICT,
+                    "Recurso desatualizado",
+                    "O recurso foi alterado por outra operação. Atualize os dados e tente novamente.");
+        }
+        if (chamado.getStatus() != StatusChamado.ABERTO) {
+            throw new DomainException(
+                    ApiErrorCode.INVALID_STATE,
+                    HttpStatus.CONFLICT,
+                    "Chamado não editável",
+                    "Somente chamados abertos podem ter título e descrição alterados.");
+        }
+
+        chamado.setTitulo(request.titulo());
+        chamado.setDescricao(request.descricao());
+        return toDetalhe(chamadoRepository.saveAndFlush(chamado));
     }
 
     private Categoria carregarCategoriaAtivaBloqueada(Long categoriaId) {
