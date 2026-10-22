@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 03
 current_phase_name: Core de Chamados
 status: executing
-stopped_at: Plan 03-04 complete on ticket/14-abertura-chamados; awaiting push approval
+stopped_at: Plan 03-05 complete on ticket/15-consulta-chamados; awaiting push approval
 last_updated: "2026-10-22T12:00:00.000Z"
 last_activity: 2026-10-22
-last_activity_desc: Plan 03-04 implemented and verified locally; flaky guard test fixed
+last_activity_desc: Plan 03-05 implemented and verified locally (141/145; 4 loopback failures are environmental)
 state_head: 92d1879
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 23
-  completed_plans: 17
+  completed_plans: 18
   percent: 29
 ---
 
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (Core de Chamados) — EXECUTING
-Plan: 4 of 10 complete
-Status: ticket/14-abertura-chamados committed locally; awaiting push approval
-Last activity: 2026-10-22 — Plan 03-04 implemented with Claude Code
+Plan: 5 of 10 complete
+Status: ticket/15-consulta-chamados committed locally; awaiting push approval
+Last activity: 2026-10-22 — Plan 03-05 implemented with Claude Code
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
-Plan progress: 17/23 plans complete (74%); Phase 03 has 4/10 implementation tickets complete
+Plan progress: 18/23 plans complete (78%); Phase 03 has 5/10 implementation tickets complete
 
 ## Performance Metrics
 
@@ -132,13 +132,17 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 03 / 03-04]: V9 permite status_anterior nulo somente quando status_novo = ABERTO; V5 intacta e nenhum histórico retroativo.
 - [Phase 03 / 03-04]: Requests de criação rejeitam campos fora do contrato via @JsonAnySetter + @Size(max = 0).
 - [Phase 03 / 03-04]: Abertura com categoria inativa responde 409 INVALID_STATE; inexistente responde 404.
+- [Phase 03 / 03-05]: Checkpoint humano decidido em 2026-10-22: linked-visible-ticket. Categoria inativa por ID é legível por ADMIN ou por quem hoje vê ao menos um chamado vinculado.
+- [Phase 03 / 03-05]: A regra de leitura de chamados existe em Java (ChamadoAuthorizationService) e em SQL (ChamadoSpecifications.visivelPara) e deve mudar nas duas juntas.
+- [Phase 03 / 03-05]: Edição de chamado verifica papel/relação antes de versão e estado e não gera HistoricoStatus.
 - [Process]: A partir de 2026-10-22 o projeto segue os planos em .planning com Claude Code, sem GSD; fluxo Git por ticket e modo pedagógico permanecem.
 
 ### Pending Todos
 
 - PR [#14](https://github.com/Morais-Felipe/SolveIT/pull/14) (plano 03-02) integrado na `main` em 2026-10-22 (a3fc265).
 - PR [#15](https://github.com/Morais-Felipe/SolveIT/pull/15) (plano 03-03) integrado na `main` em 2026-10-22 (8e376c7).
-- Ticket 14 (`ticket/14-abertura-chamados`, plano 03-04): commits locais; push, PR e merge exigem aprovações separadas.
+- PR [#16](https://github.com/Morais-Felipe/SolveIT/pull/16) (plano 03-04) integrado na `main` em 2026-10-22 (bee398b).
+- Ticket 15 (`ticket/15-consulta-chamados`, plano 03-05): commits locais; push, PR e merge exigem aprovações separadas.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
 - TICK-11 e TICK-12 seguem parciais até os planos de transição.
 - Investigar `Unable to establish loopback connection` no AuthHttpErrorIntegrationTest nesta máquina (reproduz na `main`).
@@ -148,7 +152,6 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ### Blockers/Concerns
 
 - [Pre-production]: Definir e verificar rate limiting para login/cadastro antes de expor o SolveIT à internet.
-- [Phase 3 / Plan 05]: Decidir no checkpoint humano a visibilidade de categoria inativa por ID antes da implementação da consulta de chamados.
 - [Phase 4]: Decidir entre entrega best-effort após commit e outbox durável.
 - [Phase 5]: Definir escopo dos agregados para atendentes e significado de carga ativa.
 
@@ -172,5 +175,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 03-04 complete on ticket/14-abertura-chamados; awaiting push approval
+Stopped at: Plan 03-05 complete on ticket/15-consulta-chamados; awaiting push approval
 Resume file: none

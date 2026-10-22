@@ -26,17 +26,17 @@
 - [x] **ADMN-01**: Um administrador pode listar usuários de forma paginada e consultar um usuário por id.
 - [x] **ADMN-02**: Um administrador pode criar e editar usuários com qualquer perfil sem permitir e-mails duplicados.
 - [ ] **ADMN-03**: Um administrador pode ativar ou desativar usuários sem excluí-los. Desativação ou retirada do perfil ATENDENTE devolve seus chamados EM_ANDAMENTO a ABERTO sem responsável, após confirmação explícita da quantidade, com histórico e operação atômica. Conflito exige nova revisão sem mudanças parciais. O último ADMIN ativo não pode ser desativado nem perder seu perfil.
-- [ ] **ADMN-04**: Qualquer usuário autenticado pode listar categorias ativas e consultar uma categoria permitida por id.
+- [x] **ADMN-04**: Qualquer usuário autenticado pode listar categorias ativas e consultar uma categoria permitida por id.
 - [x] **ADMN-05**: Um administrador pode criar e editar categorias com nome único.
 - [x] **ADMN-06**: Um administrador pode ativar ou desativar categorias sem excluí-las.
 
 ### Chamados e Fluxo
 
 - [x] **TICK-01**: Um solicitante pode abrir chamado com título, descrição, prioridade e categoria ativa; o chamado nasce ABERTO, sem atendente e com datas automáticas.
-- [ ] **TICK-02**: Usuários autenticados podem listar somente os chamados que seu perfil e relação permitem, com paginação e ordenação determinística.
-- [ ] **TICK-03**: A listagem aceita filtros opcionais por status, prioridade, categoria, atendente e solicitante sem carregar todos os registros em memória.
-- [ ] **TICK-04**: Um usuário autorizado pode consultar o detalhe completo de um chamado por id.
-- [ ] **TICK-05**: O solicitante proprietário ou um administrador pode editar título e descrição somente enquanto o chamado estiver ABERTO.
+- [x] **TICK-02**: Usuários autenticados podem listar somente os chamados que seu perfil e relação permitem, com paginação e ordenação determinística.
+- [x] **TICK-03**: A listagem aceita filtros opcionais por status, prioridade, categoria, atendente e solicitante sem carregar todos os registros em memória.
+- [x] **TICK-04**: Um usuário autorizado pode consultar o detalhe completo de um chamado por id.
+- [x] **TICK-05**: O solicitante proprietário ou um administrador pode editar título e descrição somente enquanto o chamado estiver ABERTO.
 - [ ] **TICK-06**: Um administrador ou o próprio atendente pode atribuir um atendente ativo a um chamado ABERTO, alterando-o automaticamente para EM_ANDAMENTO.
 - [ ] **TICK-07**: Somente o atendente responsável ou um administrador pode alterar EM_ANDAMENTO para RESOLVIDO, preenchendo `resolvidoEm`.
 - [ ] **TICK-08**: Somente o solicitante proprietário pode alterar RESOLVIDO para FECHADO.
@@ -128,21 +128,21 @@
 | ADMN-01 | Phase 3 | Complete |
 | ADMN-02 | Phase 3 | Complete |
 | ADMN-03 | Phase 3 | Pending |
-| ADMN-04 | Phase 3 | Pending |
+| ADMN-04 | Phase 3 | Complete |
 | ADMN-05 | Phase 3 | Complete |
 | ADMN-06 | Phase 3 | Complete |
 | TICK-01 | Phase 3 | Complete |
-| TICK-02 | Phase 3 | Pending |
-| TICK-03 | Phase 3 | Pending |
-| TICK-04 | Phase 3 | Pending |
-| TICK-05 | Phase 3 | Pending |
+| TICK-02 | Phase 3 | Complete |
+| TICK-03 | Phase 3 | Complete |
+| TICK-04 | Phase 3 | Complete |
+| TICK-05 | Phase 3 | Complete |
 | TICK-06 | Phase 3 | Pending |
 | TICK-07 | Phase 3 | Pending |
 | TICK-08 | Phase 3 | Pending |
 | TICK-09 | Phase 3 | Pending |
 | TICK-10 | Phase 3 | Pending |
 | TICK-11 | Phase 3 | Partial (abertura em 03-04) |
-| TICK-12 | Phase 3 | Partial (abertura em 03-04) |
+| TICK-12 | Phase 3 | Partial (abertura 03-04, edição 03-05) |
 | COLL-01 | Phase 3 | Pending |
 | COLL-02 | Phase 3 | Pending |
 | COLL-03 | Phase 3 | Pending |
