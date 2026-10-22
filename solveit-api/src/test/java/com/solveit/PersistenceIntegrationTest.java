@@ -74,6 +74,7 @@ class PersistenceIntegrationTest {
             "uk_usuario_email", "uk_categoria_nome",
             "ck_usuario_perfil", "ck_chamado_status", "ck_chamado_prioridade",
             "ck_historico_status_anterior", "ck_historico_status_novo",
+            "ck_historico_anterior_somente_abertura",
             "chk_core_write_guard_singleton",
             "fk_chamado_solicitante", "fk_chamado_atendente", "fk_chamado_categoria",
             "fk_comentario_chamado", "fk_comentario_autor",
@@ -136,7 +137,7 @@ class PersistenceIntegrationTest {
 
     @Test
     @Order(1)
-    void versionSixDatabaseUpgradesToCurrentWithoutLosingCategoryOrUserData() {
+    void versionSixDatabaseUpgradesToCurrentWithoutLosingOrFabricatingData() {
         Flyway versionSix = Flyway.configure()
                 .dataSource(MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword())
                 .locations("classpath:db/migration")
@@ -156,12 +157,34 @@ class PersistenceIntegrationTest {
                 VALUES ('Usuario anterior a versao', 'legado@example.com',
                         '$2a$12$hashpreexistente', 'ADMIN', FALSE, UTC_TIMESTAMP(6))
                 """);
+        jdbcTemplate.update("""
+                INSERT INTO chamado (
+                    titulo, descricao, status, prioridade, solicitante_id, atendente_id,
+                    categoria_id, criado_em, atualizado_em, resolvido_em, version)
+                SELECT 'Chamado legado', 'Anterior a V9', 'EM_ANDAMENTO', 'MEDIA', u.id, NULL,
+                       c.id, '2026-01-10 09:00:00.000000', '2026-01-10 10:00:00.000000',
+                       NULL, 1
+                FROM usuario u, categoria c
+                WHERE u.email = 'legado@example.com'
+                  AND c.nome = 'Categoria anterior a versao'
+                """);
+        jdbcTemplate.update("""
+                INSERT INTO historico_status (
+                    chamado_id, status_anterior, status_novo, alterado_por_id, alterado_em,
+                    observacao)
+                SELECT ch.id, 'ABERTO', 'EM_ANDAMENTO', ch.solicitante_id,
+                       '2026-01-10 10:00:00.000000', 'Transicao legitima anterior a V9'
+                FROM chamado ch
+                WHERE ch.titulo = 'Chamado legado'
+                """);
+        List<Map<String, Object>> historyBeforeUpgrade = jdbcTemplate.queryForList(
+                "SELECT * FROM historico_status ORDER BY id");
 
         MigrateResult upgradeResult = flywayForContainer().migrate();
 
-        assertThat(upgradeResult.migrationsExecuted).isEqualTo(2);
+        assertThat(upgradeResult.migrationsExecuted).isEqualTo(3);
         assertThat(successfulMigrationVersions())
-                .containsExactly("1", "2", "3", "4", "5", "6", "7", "8");
+                .containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9");
         Map<String, Object> upgradedCategory = jdbcTemplate.queryForMap("""
                 SELECT nome, descricao, ativo, version
                 FROM categoria
@@ -181,6 +204,10 @@ class PersistenceIntegrationTest {
         assertThat(upgradedUser.get("perfil")).isEqualTo("ADMIN");
         assertThat(upgradedUser.get("ativo")).isEqualTo(false);
         assertThat(((Number) upgradedUser.get("version")).longValue()).isZero();
+        // V9 só relaxa a coluna: nenhum histórico de abertura é fabricado para o passado.
+        assertThat(jdbcTemplate.queryForList("SELECT * FROM historico_status ORDER BY id"))
+                .hasSize(1)
+                .isEqualTo(historyBeforeUpgrade);
         assertThat(jdbcTemplate.queryForList(
                 "SELECT id FROM core_write_guard ORDER BY id", Long.class))
                 .containsExactly(1L);
@@ -223,14 +250,14 @@ class PersistenceIntegrationTest {
         }
 
         assertThat(successfulMigrationVersions())
-                .containsExactly("1", "2", "3", "4", "5", "6", "7", "8");
+                .containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9");
         assertThat(jdbcTemplate.queryForList("""
                 SELECT version, COUNT(*) AS version_count
                 FROM flyway_schema_history
                 WHERE success = TRUE
                 GROUP BY version
                 """))
-                .hasSize(8)
+                .hasSize(9)
                 .allSatisfy(row ->
                         assertThat(((Number) row.get("version_count")).intValue()).isOne());
         assertThat(domainTableNames()).containsExactlyInAnyOrderElementsOf(DOMAIN_TABLES);
@@ -308,6 +335,8 @@ class PersistenceIntegrationTest {
         assertColumn("chamado", "atendente_id", "bigint", null, "YES");
         assertColumn("chamado", "resolvido_em", "datetime", null, "YES");
         assertColumn("chamado", "version", "bigint", null, "NO");
+        assertColumn("historico_status", "status_anterior", "varchar", 20L, "YES");
+        assertColumn("historico_status", "status_novo", "varchar", 20L, "NO");
         assertColumn("historico_status", "observacao", "varchar", 500L, "YES");
         assertColumn("core_write_guard", "id", "bigint", null, "NO");
     }
@@ -513,6 +542,57 @@ class PersistenceIntegrationTest {
                         "--spring.jpa.hibernate.ddl-auto=validate",
                         "--spring.jpa.properties.hibernate.jdbc.time_zone=UTC",
                         "--spring.main.banner-mode=off");
+    }
+
+    @Test
+    @Order(9)
+    void historyAllowsMissingPreviousStatusOnlyForTheOpeningRecord() {
+        insertUser("Autor do historico", "autor-historico@example.com", "SOLICITANTE");
+        jdbcTemplate.update("INSERT INTO categoria (nome, ativo) VALUES ('Categoria historico', TRUE)");
+        jdbcTemplate.update("""
+                INSERT INTO chamado (
+                    titulo, descricao, status, prioridade, solicitante_id, atendente_id,
+                    categoria_id, criado_em, atualizado_em, resolvido_em, version)
+                SELECT 'Chamado historico', 'CHECKs do V9', 'ABERTO', 'BAIXA', u.id, NULL,
+                       c.id, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6), NULL, 0
+                FROM usuario u, categoria c
+                WHERE u.email = 'autor-historico@example.com'
+                  AND c.nome = 'Categoria historico'
+                """);
+        Long chamadoId = jdbcTemplate.queryForObject(
+                "SELECT id FROM chamado WHERE titulo = 'Chamado historico'", Long.class);
+        Long autorId = jdbcTemplate.queryForObject(
+                "SELECT id FROM usuario WHERE email = 'autor-historico@example.com'", Long.class);
+
+        insertHistory(chamadoId, null, "ABERTO", autorId);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM historico_status WHERE status_anterior IS NULL",
+                Integer.class)).isOne();
+
+        assertThatThrownBy(() -> insertHistory(chamadoId, null, "RESOLVIDO", autorId))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_historico_anterior_somente_abertura");
+        assertThatThrownBy(() -> insertHistory(chamadoId, "INVENTADO", "ABERTO", autorId))
+                .isInstanceOf(DataAccessException.class)
+                .hasMessageContaining("ck_historico_status_anterior");
+        assertThatThrownBy(() -> insertHistory(chamadoId, "ABERTO", null, autorId))
+                .isInstanceOf(DataIntegrityViolationException.class);
+
+        insertHistory(chamadoId, "ABERTO", "EM_ANDAMENTO", autorId);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM historico_status", Integer.class)).isEqualTo(2);
+    }
+
+    private void insertHistory(
+            Long chamadoId,
+            String statusAnterior,
+            String statusNovo,
+            Long autorId) {
+        jdbcTemplate.update("""
+                INSERT INTO historico_status (
+                    chamado_id, status_anterior, status_novo, alterado_por_id, alterado_em)
+                VALUES (?, ?, ?, ?, UTC_TIMESTAMP(6))
+                """, chamadoId, statusAnterior, statusNovo, autorId);
     }
 
     private List<String> successfulMigrationVersions() {
