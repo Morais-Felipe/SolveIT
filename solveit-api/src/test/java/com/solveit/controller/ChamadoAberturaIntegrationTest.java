@@ -1,17 +1,24 @@
 package com.solveit.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.solveit.dto.chamado.ChamadoDtos;
 import com.solveit.entity.Categoria;
 import com.solveit.entity.Usuario;
 import com.solveit.enums.PerfilUsuario;
+import com.solveit.enums.Prioridade;
 import com.solveit.repository.CategoriaRepository;
 import com.solveit.repository.UsuarioRepository;
+import com.solveit.service.ChamadoService;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -63,6 +71,9 @@ class ChamadoAberturaIntegrationTest {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ChamadoService chamadoService;
 
     @BeforeEach
     void cleanDatabase() {
@@ -245,6 +256,45 @@ class ChamadoAberturaIntegrationTest {
                         .content(json(validPayload(999_999L))))
                 .andExpect(status().isNotFound());
         assertThat(countRows("chamado")).isZero();
+    }
+
+    @Test
+    void historyFailureRollsBackTheTicket() throws Exception {
+        LoginResult solicitante = registerAndLogin("rollback@example.com", "Rollback");
+        Categoria categoria = categoriaRepository.saveAndFlush(new Categoria("Falha", null));
+
+        // Falha real no MySQL: a trigger recusa qualquer INSERT de histórico. Criada como
+        // root porque, com log binário ativo, o usuário da aplicação não pode criar triggers.
+        executeAsRoot("""
+                CREATE TRIGGER trg_teste_falha_historico
+                BEFORE INSERT ON historico_status
+                FOR EACH ROW
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'falha simulada de historico'
+                """);
+        try {
+            assertThatThrownBy(() -> chamadoService.abrir(
+                    solicitante.usuarioId(),
+                    new ChamadoDtos.Criar(
+                            "Chamado que deve sumir",
+                            "O historico vai falhar.",
+                            Prioridade.MEDIA,
+                            categoria.getId(),
+                            Map.of())))
+                    .isInstanceOf(DataAccessException.class);
+        } finally {
+            executeAsRoot("DROP TRIGGER IF EXISTS trg_teste_falha_historico");
+        }
+
+        assertThat(countRows("chamado")).isZero();
+        assertThat(countRows("historico_status")).isZero();
+    }
+
+    private static void executeAsRoot(String sql) throws Exception {
+        try (Connection connection = DriverManager.getConnection(
+                        MYSQL.getJdbcUrl(), "root", MYSQL.getPassword());
+                Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+        }
     }
 
     private static Map<String, Object> validPayload(Long categoriaId) {
