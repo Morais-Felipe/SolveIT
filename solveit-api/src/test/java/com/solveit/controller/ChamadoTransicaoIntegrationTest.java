@@ -199,6 +199,95 @@ class ChamadoTransicaoIntegrationTest {
     }
 
     @Test
+    void ownerClosesResolvedTicketKeepingResolutionDate() throws Exception {
+        Chamado chamado = chamado(StatusChamado.RESOLVIDO, responsavel);
+        jdbcTemplate.update(
+                "UPDATE chamado SET resolvido_em = '2026-10-01 10:00:00.000000' WHERE id = ?",
+                chamado.getId());
+        Map<String, Object> antes = row(chamado.getId());
+
+        change(dono, chamado.getId(), payload("FECHADO", 0L, "Funcionou"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("FECHADO"));
+
+        Map<String, Object> depois = row(chamado.getId());
+        assertThat(depois.get("resolvido_em")).isEqualTo(antes.get("resolvido_em"));
+        assertThat(depois.get("criado_em")).isEqualTo(antes.get("criado_em"));
+        assertThat(depois.get("atualizado_em")).isNotEqualTo(antes.get("atualizado_em"));
+        Map<String, Object> registro = history(chamado.getId()).get(0);
+        assertThat(registro.get("status_anterior")).isEqualTo("RESOLVIDO");
+        assertThat(registro.get("status_novo")).isEqualTo("FECHADO");
+        assertThat(registro.get("alterado_em")).isEqualTo(depois.get("atualizado_em"));
+    }
+
+    @Test
+    void ownerCancelsOpenTicketAndAdminCancelsOngoingOne() throws Exception {
+        Chamado aberto = chamado(StatusChamado.ABERTO, null);
+        Chamado emAndamento = chamado(StatusChamado.EM_ANDAMENTO, responsavel);
+
+        change(dono, aberto.getId(), payload("CANCELADO", 0L, null))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELADO"))
+                .andExpect(jsonPath("$.resolvidoEm").isEmpty());
+        change(admin, emAndamento.getId(), payload("CANCELADO", 0L, "Duplicado"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELADO"))
+                .andExpect(jsonPath("$.resolvidoEm").isEmpty());
+
+        assertThat(history(aberto.getId())).hasSize(1);
+        assertThat(((Number) history(emAndamento.getId()).get(0).get("alterado_por_id")).longValue())
+                .isEqualTo(admin.usuarioId());
+    }
+
+    @Test
+    void adminAndAttendantsDoNotInheritRequesterDecisions() throws Exception {
+        Chamado resolvido = chamado(StatusChamado.RESOLVIDO, responsavel);
+        Chamado aberto = chamado(StatusChamado.ABERTO, null);
+        Chamado emAndamento = chamado(StatusChamado.EM_ANDAMENTO, responsavel);
+
+        change(admin, resolvido.getId(), payload("FECHADO", 0L, null))
+                .andExpect(status().isForbidden());
+        change(responsavel, resolvido.getId(), payload("FECHADO", 0L, null))
+                .andExpect(status().isForbidden());
+        change(admin, aberto.getId(), payload("CANCELADO", 0L, null))
+                .andExpect(status().isForbidden());
+        change(dono, emAndamento.getId(), payload("CANCELADO", 0L, null))
+                .andExpect(status().isForbidden());
+        change(responsavel, emAndamento.getId(), payload("CANCELADO", 0L, null))
+                .andExpect(status().isForbidden());
+
+        assertThat(row(resolvido.getId()).get("status")).isEqualTo("RESOLVIDO");
+        assertUnchanged(aberto.getId(), "ABERTO");
+        assertUnchanged(emAndamento.getId(), "EM_ANDAMENTO");
+    }
+
+    @Test
+    void finalStatesNeverChangeAndNothingReopens() throws Exception {
+        Chamado fechado = chamado(StatusChamado.FECHADO, responsavel);
+        Chamado cancelado = chamado(StatusChamado.CANCELADO, null);
+        Chamado resolvido = chamado(StatusChamado.RESOLVIDO, responsavel);
+
+        for (String destino : List.of("ABERTO", "EM_ANDAMENTO", "RESOLVIDO", "CANCELADO")) {
+            change(admin, fechado.getId(), payload(destino, 0L, null))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.code").value("INVALID_STATE"));
+        }
+        for (String destino : List.of("ABERTO", "EM_ANDAMENTO", "RESOLVIDO", "FECHADO")) {
+            change(admin, cancelado.getId(), payload(destino, 0L, null))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.code").value("INVALID_STATE"));
+        }
+        change(responsavel, resolvido.getId(), payload("EM_ANDAMENTO", 0L, null))
+                .andExpect(status().isConflict());
+        change(dono, resolvido.getId(), payload("ABERTO", 0L, null))
+                .andExpect(status().isConflict());
+
+        assertThat(history(fechado.getId())).isEmpty();
+        assertThat(history(cancelado.getId())).isEmpty();
+        assertThat(history(resolvido.getId())).isEmpty();
+    }
+
+    @Test
     void returnsNotFoundForMissingTicket() throws Exception {
         change(admin, 999_999L, payload("RESOLVIDO", 0L, null))
                 .andExpect(status().isNotFound());

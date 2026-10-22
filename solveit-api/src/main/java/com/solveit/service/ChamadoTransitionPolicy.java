@@ -27,7 +27,13 @@ public class ChamadoTransitionPolicy {
 
     private static final Map<Transicao, BiPredicate<Usuario, Chamado>> PERMITIDAS = Map.of(
             new Transicao(StatusChamado.EM_ANDAMENTO, StatusChamado.RESOLVIDO),
-            (usuario, chamado) -> eAdmin(usuario) || eAtendenteResponsavel(usuario, chamado));
+            (usuario, chamado) -> eAdmin(usuario) || eAtendenteResponsavel(usuario, chamado),
+            new Transicao(StatusChamado.RESOLVIDO, StatusChamado.FECHADO),
+            ChamadoTransitionPolicy::eSolicitanteDono,
+            new Transicao(StatusChamado.ABERTO, StatusChamado.CANCELADO),
+            ChamadoTransitionPolicy::eSolicitanteDono,
+            new Transicao(StatusChamado.EM_ANDAMENTO, StatusChamado.CANCELADO),
+            (usuario, chamado) -> eAdmin(usuario));
 
     public void exigirPermitida(Usuario usuario, Chamado chamado, StatusChamado destino) {
         BiPredicate<Usuario, Chamado> regra =
@@ -46,6 +52,12 @@ public class ChamadoTransitionPolicy {
 
     private static boolean eAdmin(Usuario usuario) {
         return usuario.getPerfil() == PerfilUsuario.ADMIN;
+    }
+
+    /** Exige o perfil SOLICITANTE: um atendente que abriu o chamado não herda esse papel. */
+    private static boolean eSolicitanteDono(Usuario usuario, Chamado chamado) {
+        return usuario.getPerfil() == PerfilUsuario.SOLICITANTE
+                && Objects.equals(chamado.getSolicitante().getId(), usuario.getId());
     }
 
     private static boolean eAtendenteResponsavel(Usuario usuario, Chamado chamado) {
