@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 03
 current_phase_name: Core de Chamados
 status: executing
-stopped_at: Plan 03-06 complete on ticket/16-transicoes-status; awaiting push approval
+stopped_at: Plan 03-07 merged; next is plan 03-08
 last_updated: "2026-10-22T12:00:00.000Z"
 last_activity: 2026-10-22
-last_activity_desc: Plan 03-06 implemented and verified locally (157/161; 4 loopback failures are environmental)
+last_activity_desc: Plan 03-07 implemented, verified (174/178; 4 loopback failures are environmental) and integrated with joint push/PR/merge authorization
 state_head: 92d1879
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 23
-  completed_plans: 19
+  completed_plans: 20
   percent: 29
 ---
 
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (Core de Chamados) — EXECUTING
-Plan: 6 of 10 complete
-Status: ticket/16-transicoes-status committed locally; awaiting push approval
-Last activity: 2026-10-22 — Plan 03-06 implemented with Claude Code
+Plan: 7 of 10 complete
+Status: plan 03-07 integrated; plan 03-08 not started
+Last activity: 2026-10-22 — Plan 03-07 implemented with Claude Code
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
-Plan progress: 19/23 plans complete (83%); Phase 03 has 6/10 implementation tickets complete
+Plan progress: 20/23 plans complete (87%); Phase 03 has 7/10 implementation tickets complete
 
 ## Performance Metrics
 
@@ -137,6 +137,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 03 / 03-05]: Edição de chamado verifica papel/relação antes de versão e estado e não gera HistoricoStatus.
 - [Phase 03 / 03-06]: Histórico de transição usa alteradoEm = atualizadoEm do chamado (HistoricoStatus.transicao).
 - [Phase 03 / 03-06]: Chamado já assumido responde 409; destino inválido responde 409 INVALID_STATE; versão é conferida antes do estado.
+- [Phase 03 / 03-07]: Transições manuais vivem em ChamadoTransitionPolicy (tabela origem→destino→regra); ordem leitura → versão → tabela.
+- [Phase 03 / 03-07]: Chamado.transicionar aplica um instante do Clock a atualizadoEm/resolvidoEm; @Transient atualizacaoDatada impede o @PreUpdate de sobrescrevê-lo.
 - [Process]: A partir de 2026-10-22 o projeto segue os planos em .planning com Claude Code, sem GSD; fluxo Git por ticket e modo pedagógico permanecem.
 
 ### Pending Todos
@@ -145,10 +147,11 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#15](https://github.com/Morais-Felipe/SolveIT/pull/15) (plano 03-03) integrado na `main` em 2026-10-22 (8e376c7).
 - PR [#16](https://github.com/Morais-Felipe/SolveIT/pull/16) (plano 03-04) integrado na `main` em 2026-10-22 (bee398b).
 - PR [#17](https://github.com/Morais-Felipe/SolveIT/pull/17) (plano 03-05) integrado na `main` em 2026-10-22 (e1fb47e).
-- Ticket 16 (`ticket/16-transicoes-status`, plano 03-06): commits locais; push, PR e merge exigem aprovações separadas.
+- PR [#18](https://github.com/Morais-Felipe/SolveIT/pull/18) (plano 03-06) integrado na `main` em 2026-10-22 (d1ca0c9).
+- Ticket 17 (`ticket/17-resolver-fechar-cancelar`, plano 03-07): push, PR e merge feitos com autorização conjunta explícita de 2026-10-22, condicionada à suíte sem falhas além do loopback.
 - A suíte completa passou de 10 minutos localmente; considerar CI no GitHub Actions.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
-- TICK-11 e TICK-12 seguem parciais até os planos de transição.
+- TICK-10, TICK-11 e TICK-12 seguem parciais até a devolução administrativa do plano 03-10.
 - Investigar `Unable to establish loopback connection` no AuthHttpErrorIntegrationTest nesta máquina (reproduz na `main`).
 - Remover do AGENTS.md e do docs/GIT-WORKFLOW.md as instruções que exigem GSD (decisão de 2026-10-22: GSD descontinuado).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
@@ -179,5 +182,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 03-06 complete on ticket/16-transicoes-status; awaiting push approval
+Stopped at: Plan 03-07 merged; next is plan 03-08
 Resume file: none

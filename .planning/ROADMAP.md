@@ -104,7 +104,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 - [x] 03-04-PLAN.md
 - [x] 03-05-PLAN.md
 - [x] 03-06-PLAN.md
-- [ ] 03-07-PLAN.md
+- [x] 03-07-PLAN.md
 - [ ] 03-08-PLAN.md
 - [ ] 03-09-PLAN.md
 - [ ] 03-10-PLAN.md
@@ -135,7 +135,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 **Wave 7** *(bloqueada pela conclusão e integração da Wave 6)*
 
-- [ ] `03-07-PLAN.md` — Resolver, fechar e cancelar pelo fluxo autorizado
+- [x] `03-07-PLAN.md` — Resolver, fechar e cancelar pelo fluxo autorizado
 
 **Wave 8** *(bloqueada pela conclusão e integração da Wave 7)*
 
@@ -220,7 +220,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 |-------|----------------|--------|-----------|
 | 1. Base do Projeto | 5/5 | Complete    | 2026-09-04 |
 | 2. Autenticação | 8/8 | Complete | 2026-09-10 |
-| 3. Core de Chamados | 6/10 | In Progress |  |
+| 3. Core de Chamados | 7/10 | In Progress |  |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
 | 5. Dashboard | 0/TBD | Not started | - |
 | 6. Front-end (React + Tailwind) | 0/TBD | Not started | - |
