@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 
 import java.time.LocalDateTime;
@@ -68,6 +69,10 @@ public class Chamado {
     @Column(name = "version", nullable = false)
     private Long version;
 
+    /** Indica que atualizadoEm já foi definido por {@link #transicionar}; não é persistido. */
+    @Transient
+    private boolean atualizacaoDatada;
+
     protected Chamado() {
     }
 
@@ -99,9 +104,26 @@ public class Chamado {
         }
     }
 
+    /**
+     * Aplica uma transição de status num instante definido pelo servidor. O mesmo instante
+     * vira {@code atualizadoEm} e, na resolução, {@code resolvidoEm}; o histórico copia
+     * {@code atualizadoEm}, então as três datas coincidem.
+     */
+    public void transicionar(StatusChamado destino, LocalDateTime instante) {
+        this.status = destino;
+        this.atualizadoEm = instante;
+        this.atualizacaoDatada = true;
+        if (destino == StatusChamado.RESOLVIDO) {
+            this.resolvidoEm = instante;
+        }
+    }
+
     @PreUpdate
     private void preencherDataDeAtualizacao() {
-        atualizadoEm = LocalDateTime.now(ZoneOffset.UTC);
+        if (!atualizacaoDatada) {
+            atualizadoEm = LocalDateTime.now(ZoneOffset.UTC);
+        }
+        atualizacaoDatada = false;
     }
 
     public Long getId() {

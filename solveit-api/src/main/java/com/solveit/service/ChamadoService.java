@@ -16,6 +16,9 @@ import com.solveit.repository.HistoricoStatusRepository;
 import com.solveit.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -39,8 +42,10 @@ public class ChamadoService {
     private final CategoriaRepository categoriaRepository;
     private final UsuarioRepository usuarioRepository;
     private final ChamadoAuthorizationService chamadoAuthorizationService;
+    private final ChamadoTransitionPolicy chamadoTransitionPolicy;
     private final CoreWriteCoordinator coreWriteCoordinator;
     private final EntityManager entityManager;
+    private final Clock clock;
 
     public ChamadoService(
             ChamadoRepository chamadoRepository,
@@ -48,15 +53,60 @@ public class ChamadoService {
             CategoriaRepository categoriaRepository,
             UsuarioRepository usuarioRepository,
             ChamadoAuthorizationService chamadoAuthorizationService,
+            ChamadoTransitionPolicy chamadoTransitionPolicy,
             CoreWriteCoordinator coreWriteCoordinator,
-            EntityManager entityManager) {
+            EntityManager entityManager,
+            Clock clock) {
         this.chamadoRepository = chamadoRepository;
         this.historicoStatusRepository = historicoStatusRepository;
         this.categoriaRepository = categoriaRepository;
         this.usuarioRepository = usuarioRepository;
         this.chamadoAuthorizationService = chamadoAuthorizationService;
+        this.chamadoTransitionPolicy = chamadoTransitionPolicy;
         this.coreWriteCoordinator = coreWriteCoordinator;
         this.entityManager = entityManager;
+        this.clock = clock;
+    }
+
+    /**
+     * Transição manual. Ordem aprovada: guard → ator → chamado travado → leitura (403) →
+     * versão (409 STALE) → tabela de transições (409 se não existe, 403 se o ator não pode).
+     * Um único instante do Clock vira atualizadoEm, resolvidoEm (na resolução) e a data
+     * do histórico.
+     */
+    @Transactional(timeout = 10)
+    public ChamadoDtos.Detalhe alterarStatus(
+            Long usuarioId,
+            Long chamadoId,
+            ChamadoDtos.AlterarStatus request) {
+        coreWriteCoordinator.adquirir();
+        Usuario ator = coreWriteCoordinator.carregarUsuarioAtual(usuarioId);
+        Chamado chamado = chamadoRepository.findById(chamadoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        entityManager.refresh(chamado, LockModeType.PESSIMISTIC_WRITE);
+
+        chamadoAuthorizationService.exigirAcesso(ator, chamado);
+        if (!Objects.equals(chamado.getVersion(), request.versaoEsperada())) {
+            throw new DomainException(
+                    ApiErrorCode.STALE_RESOURCE,
+                    HttpStatus.CONFLICT,
+                    "Recurso desatualizado",
+                    "O recurso foi alterado por outra operação. Atualize os dados e tente novamente.");
+        }
+        chamadoTransitionPolicy.exigirPermitida(ator, chamado, request.status());
+
+        StatusChamado anterior = chamado.getStatus();
+        chamado.transicionar(
+                request.status(),
+                LocalDateTime.now(clock).truncatedTo(ChronoUnit.MICROS));
+        Chamado atualizado = chamadoRepository.saveAndFlush(chamado);
+        historicoStatusRepository.saveAndFlush(HistoricoStatus.transicao(
+                atualizado,
+                anterior,
+                ator,
+                request.observacao()));
+
+        return toDetalhe(atualizado);
     }
 
     /**

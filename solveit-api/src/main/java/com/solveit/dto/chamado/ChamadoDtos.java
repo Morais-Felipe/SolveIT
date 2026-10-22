@@ -104,6 +104,32 @@ public final class ChamadoDtos {
         }
     }
 
+    /** Transição manual. Datas e responsável nunca vêm do cliente. */
+    public record AlterarStatus(
+            @NotNull(message = "O status é obrigatório")
+            StatusChamado status,
+            @NotNull(message = "A versão esperada é obrigatória")
+            @PositiveOrZero(message = "A versão esperada não pode ser negativa")
+            Long versaoEsperada,
+            @Size(max = 500, message = "A observação deve ter no máximo 500 caracteres")
+            String observacao,
+            @JsonAnySetter
+            @Size(max = 0, message = "Envie somente status, versaoEsperada e observacao")
+            Map<String, Object> camposNaoPermitidos) {
+
+        public AlterarStatus {
+            if (observacao != null) {
+                observacao = observacao.trim();
+                if (observacao.isEmpty()) {
+                    observacao = null;
+                }
+            }
+            camposNaoPermitidos = camposNaoPermitidos == null
+                    ? Map.of()
+                    : Collections.unmodifiableMap(new LinkedHashMap<>(camposNaoPermitidos));
+        }
+    }
+
     public record Detalhe(
             Long id,
             String titulo,
