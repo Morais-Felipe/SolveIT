@@ -16,6 +16,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -559,6 +565,58 @@ class UsuarioIntegrationTest {
                                 "email", "fantasma@example.com",
                                 "versaoEsperada", 0))))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void concurrentPublicAndAdminRegistrationOfSameEmailCreatesExactlyOneUser()
+            throws Exception {
+        LoginResult admin = registerAndLogin("admin-corrida@example.com", "Admin Corrida");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            for (int rodada = 0; rodada < 5; rodada++) {
+                String email = "corrida-" + rodada + "@example.com";
+                CountDownLatch largada = new CountDownLatch(1);
+
+                Callable<Integer> publico = () -> {
+                    largada.await(10, TimeUnit.SECONDS);
+                    return mockMvc.perform(post("/api/auth/register")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(json(new RegisterPayload(
+                                            "Publico", email, RAW_PASSWORD))))
+                            .andReturn().getResponse().getStatus();
+                };
+                Callable<Integer> administrativo = () -> {
+                    largada.await(10, TimeUnit.SECONDS);
+                    return mockMvc.perform(post("/api/usuarios")
+                                    .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(json(Map.of(
+                                            "nome", "Administrativo",
+                                            "email", email,
+                                            "senha", NEW_PASSWORD,
+                                            "perfil", "ATENDENTE"))))
+                            .andReturn().getResponse().getStatus();
+                };
+
+                Future<Integer> primeiro = executor.submit(publico);
+                Future<Integer> segundo = executor.submit(administrativo);
+                largada.countDown();
+
+                assertThat(List.of(
+                                primeiro.get(60, TimeUnit.SECONDS),
+                                segundo.get(60, TimeUnit.SECONDS)))
+                        .containsExactlyInAnyOrder(201, 409);
+                assertThat(usuarioRepository.findByEmail(email)).isPresent();
+                assertThat(usuarioRepository.findAll().stream()
+                                .filter(usuario -> usuario.getEmail().equals(email))
+                                .count())
+                        .isOne();
+            }
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     private String json(Object payload) throws Exception {
