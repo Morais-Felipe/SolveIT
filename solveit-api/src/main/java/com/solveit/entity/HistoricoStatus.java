@@ -31,7 +31,7 @@ public class HistoricoStatus {
     private Chamado chamado;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status_anterior", nullable = false, length = 20)
+    @Column(name = "status_anterior", nullable = true, length = 20)
     private StatusChamado statusAnterior;
 
     @Enumerated(EnumType.STRING)
@@ -62,6 +62,24 @@ public class HistoricoStatus {
         this.statusNovo = statusNovo;
         this.alteradoPor = alteradoPor;
         this.observacao = observacao;
+    }
+
+    /**
+     * Registro de origem do chamado: sem estado anterior, no mesmo instante da criação.
+     * Exige um chamado já persistido, para que {@code criadoEm} venha do servidor.
+     */
+    public static HistoricoStatus abertura(Chamado chamado, Usuario solicitante) {
+        if (chamado.getCriadoEm() == null) {
+            throw new IllegalStateException("Opening history requires a persisted ticket");
+        }
+        HistoricoStatus historico = new HistoricoStatus(
+                chamado,
+                null,
+                StatusChamado.ABERTO,
+                solicitante,
+                null);
+        historico.alteradoEm = chamado.getCriadoEm();
+        return historico;
     }
 
     @PrePersist
