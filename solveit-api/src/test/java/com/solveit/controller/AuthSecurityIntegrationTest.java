@@ -154,7 +154,7 @@ class AuthSecurityIntegrationTest {
         Usuario usuario = usuarioRepository.findById(login.usuarioId()).orElseThrow();
 
         usuario.setPerfil(PerfilUsuario.ADMIN);
-        usuarioRepository.saveAndFlush(usuario);
+        usuario = usuarioRepository.saveAndFlush(usuario);
 
         FilterObservation afterProfileChange = filter(login.accessToken(), null);
         assertThat(afterProfileChange.authentication().getAuthorities())
@@ -162,7 +162,7 @@ class AuthSecurityIntegrationTest {
                 .containsExactly("ROLE_ADMIN");
 
         usuario.setAtivo(false);
-        usuarioRepository.saveAndFlush(usuario);
+        usuario = usuarioRepository.saveAndFlush(usuario);
 
         FilterObservation whileInactive = filter(login.accessToken(), null);
         assertThat(whileInactive.status()).isEqualTo(401);
@@ -170,7 +170,7 @@ class AuthSecurityIntegrationTest {
         assertThat(whileInactive.failureReason()).hasToString("ACCOUNT_INACTIVE");
 
         usuario.setAtivo(true);
-        usuarioRepository.saveAndFlush(usuario);
+        usuario = usuarioRepository.saveAndFlush(usuario);
 
         FilterObservation afterReactivation = filter(login.accessToken(), null);
         assertThat(afterReactivation.status()).isEqualTo(200);
@@ -191,10 +191,10 @@ class AuthSecurityIntegrationTest {
         Usuario usuario = usuarioRepository.findById(login.usuarioId()).orElseThrow();
 
         usuario.setAtivo(false);
-        usuarioRepository.saveAndFlush(usuario);
+        usuario = usuarioRepository.saveAndFlush(usuario);
         clock.advance(Duration.ofMinutes(30));
         usuario.setAtivo(true);
-        usuarioRepository.saveAndFlush(usuario);
+        usuario = usuarioRepository.saveAndFlush(usuario);
 
         assertThat(filter(login.accessToken(), null).status()).isEqualTo(200);
 
