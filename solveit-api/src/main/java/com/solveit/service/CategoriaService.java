@@ -6,12 +6,12 @@ import com.solveit.entity.Usuario;
 import com.solveit.enums.PerfilUsuario;
 import com.solveit.exception.ApiErrorCode;
 import com.solveit.exception.DomainException;
+import com.solveit.exception.UniqueConstraints;
 import com.solveit.repository.CategoriaRepository;
 import com.solveit.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.util.Objects;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -90,7 +90,7 @@ public class CategoriaService {
         try {
             return toResponse(categoriaRepository.saveAndFlush(categoria));
         } catch (DataIntegrityViolationException exception) {
-            if (isCategoryNameUniqueConstraintViolation(exception)) {
+            if (UniqueConstraints.isViolationOf(exception, UniqueConstraints.CATEGORIA_NOME)) {
                 throw categoryNameAlreadyExists();
             }
             throw exception;
@@ -112,7 +112,7 @@ public class CategoriaService {
         try {
             return toResponse(categoriaRepository.saveAndFlush(categoria));
         } catch (DataIntegrityViolationException exception) {
-            if (isCategoryNameUniqueConstraintViolation(exception)) {
+            if (UniqueConstraints.isViolationOf(exception, UniqueConstraints.CATEGORIA_NOME)) {
                 throw categoryNameAlreadyExists();
             }
             throw exception;
@@ -189,34 +189,5 @@ public class CategoriaService {
                 HttpStatus.CONFLICT,
                 "Recurso desatualizado",
                 "O recurso foi alterado por outra operação. Atualize os dados e tente novamente.");
-    }
-
-    private static boolean isCategoryNameUniqueConstraintViolation(
-            DataIntegrityViolationException exception) {
-        Throwable current = exception;
-        while (current != null) {
-            if (current instanceof ConstraintViolationException constraintViolation
-                    && isCategoryNameConstraint(constraintViolation.getConstraintName())) {
-                return true;
-            }
-            Throwable cause = current.getCause();
-            if (cause == current) {
-                break;
-            }
-            current = cause;
-        }
-        return false;
-    }
-
-    private static boolean isCategoryNameConstraint(String constraintName) {
-        if (constraintName == null) {
-            return false;
-        }
-        String unquotedName = constraintName.replace("`", "").replace("\"", "");
-        int lastQualifier = unquotedName.lastIndexOf('.');
-        String simpleName = lastQualifier >= 0
-                ? unquotedName.substring(lastQualifier + 1)
-                : unquotedName;
-        return "uk_categoria_nome".equalsIgnoreCase(simpleName);
     }
 }

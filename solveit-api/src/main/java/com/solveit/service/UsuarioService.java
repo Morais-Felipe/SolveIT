@@ -6,11 +6,11 @@ import com.solveit.enums.PerfilUsuario;
 import com.solveit.exception.ApiErrorCode;
 import com.solveit.exception.DomainException;
 import com.solveit.exception.EmailAlreadyRegisteredException;
+import com.solveit.exception.UniqueConstraints;
 import com.solveit.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.util.Objects;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -166,7 +166,7 @@ public class UsuarioService {
         try {
             return usuarioRepository.saveAndFlush(usuario);
         } catch (DataIntegrityViolationException exception) {
-            if (isEmailUniqueConstraintViolation(exception)) {
+            if (UniqueConstraints.isViolationOf(exception, UniqueConstraints.USUARIO_EMAIL)) {
                 throw new EmailAlreadyRegisteredException();
             }
             throw exception;
@@ -192,34 +192,5 @@ public class UsuarioService {
                 usuario.getAtivo(),
                 usuario.getCriadoEm(),
                 usuario.getVersion());
-    }
-
-    private static boolean isEmailUniqueConstraintViolation(
-            DataIntegrityViolationException exception) {
-        Throwable current = exception;
-        while (current != null) {
-            if (current instanceof ConstraintViolationException constraintViolation
-                    && isEmailConstraint(constraintViolation.getConstraintName())) {
-                return true;
-            }
-            Throwable cause = current.getCause();
-            if (cause == current) {
-                break;
-            }
-            current = cause;
-        }
-        return false;
-    }
-
-    private static boolean isEmailConstraint(String constraintName) {
-        if (constraintName == null) {
-            return false;
-        }
-        String unquotedName = constraintName.replace("`", "").replace("\"", "");
-        int lastQualifier = unquotedName.lastIndexOf('.');
-        String simpleName = lastQualifier >= 0
-                ? unquotedName.substring(lastQualifier + 1)
-                : unquotedName;
-        return "uk_usuario_email".equalsIgnoreCase(simpleName);
     }
 }
