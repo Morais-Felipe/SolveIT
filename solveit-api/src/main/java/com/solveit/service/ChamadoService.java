@@ -12,6 +12,7 @@ import com.solveit.exception.DomainException;
 import com.solveit.repository.CategoriaRepository;
 import com.solveit.repository.ChamadoRepository;
 import com.solveit.repository.HistoricoStatusRepository;
+import com.solveit.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,8 @@ public class ChamadoService {
     private final ChamadoRepository chamadoRepository;
     private final HistoricoStatusRepository historicoStatusRepository;
     private final CategoriaRepository categoriaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ChamadoAuthorizationService chamadoAuthorizationService;
     private final CoreWriteCoordinator coreWriteCoordinator;
     private final EntityManager entityManager;
 
@@ -33,11 +36,15 @@ public class ChamadoService {
             ChamadoRepository chamadoRepository,
             HistoricoStatusRepository historicoStatusRepository,
             CategoriaRepository categoriaRepository,
+            UsuarioRepository usuarioRepository,
+            ChamadoAuthorizationService chamadoAuthorizationService,
             CoreWriteCoordinator coreWriteCoordinator,
             EntityManager entityManager) {
         this.chamadoRepository = chamadoRepository;
         this.historicoStatusRepository = historicoStatusRepository;
         this.categoriaRepository = categoriaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.chamadoAuthorizationService = chamadoAuthorizationService;
         this.coreWriteCoordinator = coreWriteCoordinator;
         this.entityManager = entityManager;
     }
@@ -66,6 +73,16 @@ public class ChamadoService {
                 categoria));
         historicoStatusRepository.saveAndFlush(HistoricoStatus.abertura(chamado, solicitante));
 
+        return toDetalhe(chamado);
+    }
+
+    @Transactional(readOnly = true)
+    public ChamadoDtos.Detalhe buscarPorId(Long usuarioId, Long chamadoId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new AccessDeniedException("Authenticated user no longer exists"));
+        Chamado chamado = chamadoRepository.findById(chamadoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        chamadoAuthorizationService.exigirAcesso(usuario, chamado);
         return toDetalhe(chamado);
     }
 

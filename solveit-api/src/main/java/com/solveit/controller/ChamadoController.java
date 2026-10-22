@@ -8,6 +8,8 @@ import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,5 +34,13 @@ public class ChamadoController {
         return ResponseEntity
                 .created(URI.create("/api/chamados/" + response.id()))
                 .body(response);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ChamadoDtos.Detalhe buscarPorId(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UsuarioPrincipal principal) {
+        return chamadoService.buscarPorId(principal.getId(), id);
     }
 }
