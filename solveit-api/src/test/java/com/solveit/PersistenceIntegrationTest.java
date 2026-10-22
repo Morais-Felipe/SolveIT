@@ -136,29 +136,36 @@ class PersistenceIntegrationTest {
 
     @Test
     @Order(1)
-    void versionFiveDatabaseUpgradesToVersionSixWithoutLosingData() {
-        Flyway versionFive = Flyway.configure()
+    void versionSixDatabaseUpgradesToVersionSevenWithoutLosingCategoryData() {
+        Flyway versionSix = Flyway.configure()
                 .dataSource(MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword())
                 .locations("classpath:db/migration")
-                .target(MigrationVersion.fromVersion("5"))
+                .target(MigrationVersion.fromVersion("6"))
                 .cleanDisabled(false)
                 .load();
-        versionFive.clean();
-        MigrateResult versionFiveResult = versionFive.migrate();
+        versionSix.clean();
+        MigrateResult versionSixResult = versionSix.migrate();
 
-        assertThat(versionFiveResult.migrationsExecuted).isEqualTo(5);
+        assertThat(versionSixResult.migrationsExecuted).isEqualTo(6);
         jdbcTemplate.update("""
                 INSERT INTO categoria (nome, descricao, ativo)
-                VALUES ('Categoria anterior ao guard', 'Dado criado na V5', TRUE)
+                VALUES ('Categoria anterior a versao', 'Dado criado na V6', FALSE)
                 """);
 
         MigrateResult upgradeResult = flywayForContainer().migrate();
 
         assertThat(upgradeResult.migrationsExecuted).isOne();
-        assertThat(successfulMigrationVersions()).containsExactly("1", "2", "3", "4", "5", "6");
-        assertThat(jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM categoria WHERE nome = 'Categoria anterior ao guard'",
-                Integer.class)).isOne();
+        assertThat(successfulMigrationVersions())
+                .containsExactly("1", "2", "3", "4", "5", "6", "7");
+        Map<String, Object> upgradedCategory = jdbcTemplate.queryForMap("""
+                SELECT nome, descricao, ativo, version
+                FROM categoria
+                WHERE nome = 'Categoria anterior a versao'
+                """);
+        assertThat(upgradedCategory.get("nome")).isEqualTo("Categoria anterior a versao");
+        assertThat(upgradedCategory.get("descricao")).isEqualTo("Dado criado na V6");
+        assertThat(upgradedCategory.get("ativo")).isEqualTo(false);
+        assertThat(((Number) upgradedCategory.get("version")).longValue()).isZero();
         assertThat(jdbcTemplate.queryForList(
                 "SELECT id FROM core_write_guard ORDER BY id", Long.class))
                 .containsExactly(1L);
@@ -200,14 +207,15 @@ class PersistenceIntegrationTest {
             executor.shutdownNow();
         }
 
-        assertThat(successfulMigrationVersions()).containsExactly("1", "2", "3", "4", "5", "6");
+        assertThat(successfulMigrationVersions())
+                .containsExactly("1", "2", "3", "4", "5", "6", "7");
         assertThat(jdbcTemplate.queryForList("""
                 SELECT version, COUNT(*) AS version_count
                 FROM flyway_schema_history
                 WHERE success = TRUE
                 GROUP BY version
                 """))
-                .hasSize(6)
+                .hasSize(7)
                 .allSatisfy(row ->
                         assertThat(((Number) row.get("version_count")).intValue()).isOne());
         assertThat(domainTableNames()).containsExactlyInAnyOrderElementsOf(DOMAIN_TABLES);
@@ -263,7 +271,7 @@ class PersistenceIntegrationTest {
         assertThat(columnNames("usuario"))
                 .containsExactly("id", "nome", "email", "senha", "perfil", "ativo", "criado_em");
         assertThat(columnNames("categoria"))
-                .containsExactly("id", "nome", "descricao", "ativo");
+                .containsExactly("id", "nome", "descricao", "ativo", "version");
         assertThat(columnNames("chamado")).containsExactly(
                 "id", "titulo", "descricao", "status", "prioridade", "solicitante_id",
                 "atendente_id", "categoria_id", "criado_em", "atualizado_em", "resolvido_em", "version");
@@ -277,6 +285,7 @@ class PersistenceIntegrationTest {
         assertColumn("usuario", "email", "varchar", 255L, "NO");
         assertColumn("usuario", "perfil", "varchar", 20L, "NO");
         assertColumn("categoria", "descricao", "text", 65_535L, "YES");
+        assertColumn("categoria", "version", "bigint", null, "NO");
         assertColumn("chamado", "titulo", "varchar", 200L, "NO");
         assertColumn("chamado", "status", "varchar", 20L, "NO");
         assertColumn("chamado", "prioridade", "varchar", 10L, "NO");
@@ -323,6 +332,7 @@ class PersistenceIntegrationTest {
             assertThat(reloaded.getResolvidoEm()).isNull();
             assertThat(reloaded.getVersion()).isZero();
             assertThat(categoriaRepository.findById(categoriaId).orElseThrow().getDescricao()).isNull();
+            assertThat(categoriaRepository.findById(categoriaId).orElseThrow().getVersion()).isZero();
 
             List<Comentario> ordered = comentarioRepository.findAll(
                     Sort.by(Sort.Order.asc("criadoEm"), Sort.Order.asc("id")));

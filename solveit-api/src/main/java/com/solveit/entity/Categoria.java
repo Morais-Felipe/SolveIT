@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "categoria")
@@ -24,6 +25,10 @@ public class Categoria {
 
     @Column(name = "ativo", nullable = false)
     private Boolean ativo = true;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     protected Categoria() {
     }
@@ -59,5 +64,9 @@ public class Categoria {
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 }

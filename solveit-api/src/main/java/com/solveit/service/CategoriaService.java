@@ -8,6 +8,9 @@ import com.solveit.exception.ApiErrorCode;
 import com.solveit.exception.DomainException;
 import com.solveit.repository.CategoriaRepository;
 import com.solveit.repository.UsuarioRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import java.util.Objects;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -29,14 +32,17 @@ public class CategoriaService {
     private final CategoriaRepository categoriaRepository;
     private final UsuarioRepository usuarioRepository;
     private final CoreWriteCoordinator coreWriteCoordinator;
+    private final EntityManager entityManager;
 
     public CategoriaService(
             CategoriaRepository categoriaRepository,
             UsuarioRepository usuarioRepository,
-            CoreWriteCoordinator coreWriteCoordinator) {
+            CoreWriteCoordinator coreWriteCoordinator,
+            EntityManager entityManager) {
         this.categoriaRepository = categoriaRepository;
         this.usuarioRepository = usuarioRepository;
         this.coreWriteCoordinator = coreWriteCoordinator;
+        this.entityManager = entityManager;
     }
 
     @Transactional(readOnly = true)
@@ -91,6 +97,66 @@ public class CategoriaService {
         }
     }
 
+    @Transactional(timeout = 10)
+    public CategoriaDtos.Resposta editar(
+            Long usuarioId,
+            Long categoriaId,
+            CategoriaDtos.Editar request) {
+        coreWriteCoordinator.adquirir();
+        validarAdminAtual(usuarioId, "Category editing requires administrator profile");
+        Categoria categoria = carregarCategoriaBloqueada(categoriaId);
+        validarVersao(categoria, request.versaoEsperada());
+
+        categoria.setNome(request.nome());
+        categoria.setDescricao(request.descricao());
+        try {
+            return toResponse(categoriaRepository.saveAndFlush(categoria));
+        } catch (DataIntegrityViolationException exception) {
+            if (isCategoryNameUniqueConstraintViolation(exception)) {
+                throw categoryNameAlreadyExists();
+            }
+            throw exception;
+        }
+    }
+
+    @Transactional(timeout = 10)
+    public CategoriaDtos.Resposta alterarAtivo(
+            Long usuarioId,
+            Long categoriaId,
+            CategoriaDtos.AlterarAtivo request) {
+        coreWriteCoordinator.adquirir();
+        validarAdminAtual(usuarioId, "Category activation requires administrator profile");
+        Categoria categoria = carregarCategoriaBloqueada(categoriaId);
+        validarVersao(categoria, request.versaoEsperada());
+
+        if (Objects.equals(categoria.getAtivo(), request.ativo())) {
+            return toResponse(categoria);
+        }
+
+        categoria.setAtivo(request.ativo());
+        return toResponse(categoriaRepository.saveAndFlush(categoria));
+    }
+
+    private void validarAdminAtual(Long usuarioId, String accessDeniedMessage) {
+        Usuario usuario = coreWriteCoordinator.carregarUsuarioAtual(usuarioId);
+        if (usuario.getPerfil() != PerfilUsuario.ADMIN) {
+            throw new AccessDeniedException(accessDeniedMessage);
+        }
+    }
+
+    private Categoria carregarCategoriaBloqueada(Long categoriaId) {
+        Categoria categoria = categoriaRepository.findById(categoriaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        entityManager.refresh(categoria, LockModeType.PESSIMISTIC_WRITE);
+        return categoria;
+    }
+
+    private static void validarVersao(Categoria categoria, Long versaoEsperada) {
+        if (!Objects.equals(categoria.getVersion(), versaoEsperada)) {
+            throw staleResource();
+        }
+    }
+
     private Usuario carregarUsuarioAtivo(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new AccessDeniedException("Authenticated user no longer exists"));
@@ -105,7 +171,8 @@ public class CategoriaService {
                 categoria.getId(),
                 categoria.getNome(),
                 categoria.getDescricao(),
-                categoria.getAtivo());
+                categoria.getAtivo(),
+                categoria.getVersion());
     }
 
     private static DomainException categoryNameAlreadyExists() {
@@ -114,6 +181,14 @@ public class CategoriaService {
                 HttpStatus.CONFLICT,
                 "Conflito de categoria",
                 "Já existe uma categoria com este nome.");
+    }
+
+    private static DomainException staleResource() {
+        return new DomainException(
+                ApiErrorCode.STALE_RESOURCE,
+                HttpStatus.CONFLICT,
+                "Recurso desatualizado",
+                "O recurso foi alterado por outra operação. Atualize os dados e tente novamente.");
     }
 
     private static boolean isCategoryNameUniqueConstraintViolation(

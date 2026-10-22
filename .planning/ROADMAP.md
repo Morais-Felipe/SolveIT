@@ -96,10 +96,10 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   4. Cada mudança confirmada cria exatamente um histórico na mesma transação e concorrência não sobrescreve o estado silenciosamente.
   5. Usuários autorizados adicionam e leem comentários imutáveis e consultam comentários e histórico cronologicamente.
 
-**Plans**: 1/10 planos executados; os tickets restantes seguem a ordem sequencial aprovada
+**Plans**: 2/10 planos executados; os tickets restantes seguem a ordem sequencial aprovada
 
 - [x] 03-01-PLAN.md
-- [ ] 03-02-PLAN.md
+- [x] 03-02-PLAN.md
 - [ ] 03-03-PLAN.md
 - [ ] 03-04-PLAN.md
 - [ ] 03-05-PLAN.md
@@ -115,7 +115,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 **Wave 2** *(bloqueada pela conclusão e integração da Wave 1)*
 
-- [ ] `03-02-PLAN.md` — Editar e ativar/desativar categorias sem perder vínculos
+- [x] `03-02-PLAN.md` — Editar e ativar/desativar categorias sem perder vínculos
 
 **Wave 3** *(bloqueada pela conclusão e integração da Wave 2)*
 
@@ -220,7 +220,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 |-------|----------------|--------|-----------|
 | 1. Base do Projeto | 5/5 | Complete    | 2026-09-04 |
 | 2. Autenticação | 8/8 | Complete | 2026-09-10 |
-| 3. Core de Chamados | 1/10 | In Progress |  |
+| 3. Core de Chamados | 2/10 | In Progress |  |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
 | 5. Dashboard | 0/TBD | Not started | - |
 | 6. Front-end (React + Tailwind) | 0/TBD | Not started | - |
