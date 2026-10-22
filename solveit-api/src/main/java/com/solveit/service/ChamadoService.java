@@ -11,10 +11,17 @@ import com.solveit.exception.ApiErrorCode;
 import com.solveit.exception.DomainException;
 import com.solveit.repository.CategoriaRepository;
 import com.solveit.repository.ChamadoRepository;
+import com.solveit.repository.ChamadoSpecifications;
 import com.solveit.repository.HistoricoStatusRepository;
 import com.solveit.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import java.util.Locale;
+import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -23,6 +30,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ChamadoService {
+
+    private static final Set<String> CAMPOS_ORDENAVEIS = Set.of("criadoEm", "atualizadoEm", "id");
 
     private final ChamadoRepository chamadoRepository;
     private final HistoricoStatusRepository historicoStatusRepository;
@@ -74,6 +83,62 @@ public class ChamadoService {
         historicoStatusRepository.saveAndFlush(HistoricoStatus.abertura(chamado, solicitante));
 
         return toDetalhe(chamado);
+    }
+
+    @Transactional(readOnly = true)
+    public ChamadoDtos.Pagina listar(
+            Long usuarioId,
+            ChamadoDtos.Filtros filtros,
+            int page,
+            int size,
+            String sort) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new AccessDeniedException("Authenticated user no longer exists"));
+
+        Specification<Chamado> consulta = Specification
+                .where(ChamadoSpecifications.visivelPara(usuario))
+                .and(ChamadoSpecifications.comStatus(filtros.status()))
+                .and(ChamadoSpecifications.comPrioridade(filtros.prioridade()))
+                .and(ChamadoSpecifications.daCategoria(filtros.categoriaId()))
+                .and(ChamadoSpecifications.doAtendente(filtros.atendenteId()))
+                .and(ChamadoSpecifications.doSolicitante(filtros.solicitanteId()));
+        Page<Chamado> chamados = chamadoRepository.findAll(
+                consulta,
+                PageRequest.of(page, size, ordenacao(sort)));
+
+        return new ChamadoDtos.Pagina(
+                chamados.getContent().stream().map(ChamadoService::toDetalhe).toList(),
+                chamados.getNumber(),
+                chamados.getSize(),
+                chamados.getTotalElements(),
+                chamados.getTotalPages());
+    }
+
+    /**
+     * Aceita somente "campo,direcao" com campos de uma lista fechada. O id entra sempre
+     * como desempate na mesma direção, para que chamados com a mesma data não troquem
+     * de página entre consultas.
+     */
+    private static Sort ordenacao(String sort) {
+        String[] partes = sort.split(",", -1);
+        if (partes.length != 2 || !CAMPOS_ORDENAVEIS.contains(partes[0])) {
+            throw parametroInvalido();
+        }
+        Sort.Direction direcao = switch (partes[1].toLowerCase(Locale.ROOT)) {
+            case "asc" -> Sort.Direction.ASC;
+            case "desc" -> Sort.Direction.DESC;
+            default -> throw parametroInvalido();
+        };
+        Sort principal = Sort.by(direcao, partes[0]);
+        return "id".equals(partes[0]) ? principal : principal.and(Sort.by(direcao, "id"));
+    }
+
+    private static DomainException parametroInvalido() {
+        return new DomainException(
+                ApiErrorCode.VALIDATION_ERROR,
+                HttpStatus.BAD_REQUEST,
+                "Requisição inválida",
+                "Ordenação aceita criadoEm, atualizadoEm ou id, com asc ou desc.");
     }
 
     @Transactional(readOnly = true)

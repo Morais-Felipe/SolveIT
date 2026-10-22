@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class ChamadoDtos {
@@ -61,6 +62,22 @@ public final class ChamadoDtos {
             LocalDateTime atualizadoEm,
             LocalDateTime resolvidoEm,
             Long versao) {
+    }
+
+    public record Filtros(
+            StatusChamado status,
+            Prioridade prioridade,
+            Long categoriaId,
+            Long atendenteId,
+            Long solicitanteId) {
+    }
+
+    public record Pagina(
+            List<Detalhe> items,
+            int page,
+            int size,
+            long totalElements,
+            int totalPages) {
     }
 
     public record Pessoa(Long id, String nome) {

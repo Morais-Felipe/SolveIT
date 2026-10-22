@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solveit.entity.Categoria;
 import com.solveit.entity.Chamado;
@@ -16,6 +17,8 @@ import com.solveit.enums.StatusChamado;
 import com.solveit.repository.CategoriaRepository;
 import com.solveit.repository.ChamadoRepository;
 import com.solveit.repository.UsuarioRepository;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,6 +205,158 @@ class ChamadoConsultaIntegrationTest {
 
         assertThat(statusOf(atendenteY, filaDeA.getId())).isEqualTo(403);
         assertThat(statusOf(atendenteX, filaDeA.getId())).isEqualTo(200);
+    }
+
+    @Test
+    void listShowsExactlyTheTicketsTheDetailPolicyAllows() throws Exception {
+        Map<Login, List<Chamado>> visiveis = new LinkedHashMap<>();
+        visiveis.put(solicitanteA, List.of(filaDeA, andamentoDeAComX));
+        visiveis.put(solicitanteB, List.of(fechadoDeBComX, andamentoDeBComY));
+        visiveis.put(atendenteX, List.of(filaDeA, andamentoDeAComX, fechadoDeBComX));
+        visiveis.put(atendenteY, List.of(filaDeA, andamentoDeBComY));
+        visiveis.put(admin, List.of(filaDeA, andamentoDeAComX, fechadoDeBComX, andamentoDeBComY));
+
+        for (Map.Entry<Login, List<Chamado>> entry : visiveis.entrySet()) {
+            JsonNode page = list(entry.getKey(), "size", "100");
+            assertThat(ids(page))
+                    .as("lista de %s", entry.getKey().email())
+                    .containsExactlyInAnyOrderElementsOf(
+                            entry.getValue().stream().map(Chamado::getId).toList());
+            assertThat(page.path("totalElements").asLong()).isEqualTo(entry.getValue().size());
+            for (Long id : ids(page)) {
+                assertThat(statusOf(entry.getKey(), id)).isEqualTo(200);
+            }
+        }
+    }
+
+    @Test
+    void filtersNarrowButNeverWidenTheScope() throws Exception {
+        assertThat(ids(list(admin, "status", "EM_ANDAMENTO")))
+                .containsExactlyInAnyOrder(andamentoDeAComX.getId(), andamentoDeBComY.getId());
+        assertThat(ids(list(admin, "atendenteId", atendenteX.usuarioId().toString())))
+                .containsExactlyInAnyOrder(andamentoDeAComX.getId(), fechadoDeBComX.getId());
+        assertThat(ids(list(admin,
+                "status", "EM_ANDAMENTO",
+                "solicitanteId", solicitanteB.usuarioId().toString())))
+                .containsExactly(andamentoDeBComY.getId());
+        assertThat(ids(list(admin, "prioridade", "CRITICA"))).isEmpty();
+
+        JsonNode outroSolicitante = list(
+                solicitanteA, "solicitanteId", solicitanteB.usuarioId().toString());
+        assertThat(ids(outroSolicitante)).isEmpty();
+        assertThat(outroSolicitante.path("totalElements").asLong()).isZero();
+
+        assertThat(ids(list(atendenteX, "atendenteId", atendenteY.usuarioId().toString())))
+                .isEmpty();
+        assertThat(ids(list(atendenteY, "status", "ABERTO")))
+                .containsExactly(filaDeA.getId());
+    }
+
+    @Test
+    void paginatesInTheDatabaseWithIdAsTieBreakerInTheSameDirection() throws Exception {
+        jdbcTemplate.update("UPDATE chamado SET criado_em = '2026-10-01 12:00:00.000000'");
+        List<Long> todosPorId = List.of(
+                filaDeA.getId(), andamentoDeAComX.getId(),
+                fechadoDeBComX.getId(), andamentoDeBComY.getId());
+
+        List<Long> desc = new ArrayList<>();
+        for (int page = 0; page < 4; page++) {
+            JsonNode body = list(admin, "page", String.valueOf(page), "size", "1");
+            assertThat(body.path("totalElements").asLong()).isEqualTo(4);
+            assertThat(body.path("totalPages").asInt()).isEqualTo(4);
+            desc.addAll(ids(body));
+        }
+        List<Long> todosPorIdDesc = new ArrayList<>(todosPorId);
+        Collections.reverse(todosPorIdDesc);
+        assertThat(desc).containsExactlyElementsOf(todosPorIdDesc);
+
+        assertThat(ids(list(admin, "sort", "criadoEm,asc", "size", "100")))
+                .containsExactlyElementsOf(todosPorId);
+        assertThat(ids(list(admin, "sort", "id,desc", "size", "2")))
+                .containsExactly(andamentoDeBComY.getId(), fechadoDeBComX.getId());
+        assertThat(ids(list(admin, "page", "9"))).isEmpty();
+    }
+
+    @Test
+    void rejectsInvalidListParameters() throws Exception {
+        List<String[]> invalidos = List.of(
+                new String[] {"status", "INEXISTENTE"},
+                new String[] {"prioridade", "URGENTISSIMA"},
+                new String[] {"categoriaId", "0"},
+                new String[] {"atendenteId", "-1"},
+                new String[] {"solicitanteId", "abc"},
+                new String[] {"size", "101"},
+                new String[] {"page", "-1"},
+                new String[] {"sort", "titulo,asc"},
+                new String[] {"sort", "solicitante.senha,asc"},
+                new String[] {"sort", "criadoEm,lateral"},
+                new String[] {"sort", "criadoEm,asc,extra"});
+
+        for (String[] parametro : invalidos) {
+            mockMvc.perform(get("/api/chamados")
+                            .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                            .queryParam(parametro[0], parametro[1]))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+    }
+
+    @Test
+    void inactiveCategoryIsReadableByAdminOrWhoeverSeesALinkedTicket() throws Exception {
+        Categoria historica = categoriaRepository.saveAndFlush(new Categoria("Historica", null));
+        jdbcTemplate.update(
+                "UPDATE chamado SET categoria_id = ? WHERE id = ?",
+                historica.getId(), andamentoDeBComY.getId());
+        jdbcTemplate.update("UPDATE categoria SET ativo = FALSE WHERE id = ?", historica.getId());
+        Login semChamados = registerAndLogin(
+                "sem-chamados@example.com", "Sem Chamados", PerfilUsuario.SOLICITANTE);
+
+        Map<Login, Integer> esperado = new LinkedHashMap<>();
+        esperado.put(admin, 200);
+        esperado.put(solicitanteB, 200);
+        esperado.put(atendenteY, 200);
+        esperado.put(solicitanteA, 403);
+        esperado.put(atendenteX, 403);
+        esperado.put(semChamados, 403);
+
+        for (Map.Entry<Login, Integer> entry : esperado.entrySet()) {
+            int status = mockMvc.perform(get("/api/categorias/{id}", historica.getId())
+                            .header(HttpHeaders.AUTHORIZATION, bearer(entry.getKey())))
+                    .andReturn().getResponse().getStatus();
+            assertThat(status).as("%s lendo categoria inativa", entry.getKey().email())
+                    .isEqualTo(entry.getValue());
+        }
+
+        // A relação é recalculada: reatribuído a X, Y perde e X ganha a leitura.
+        jdbcTemplate.update(
+                "UPDATE chamado SET atendente_id = ? WHERE id = ?",
+                atendenteX.usuarioId(), andamentoDeBComY.getId());
+        assertThat(categoryStatus(atendenteY, historica.getId())).isEqualTo(403);
+        assertThat(categoryStatus(atendenteX, historica.getId())).isEqualTo(200);
+        assertThat(categoryStatus(solicitanteA, 999_999L)).isEqualTo(404);
+    }
+
+    private int categoryStatus(Login login, Long categoriaId) throws Exception {
+        return mockMvc.perform(get("/api/categorias/{id}", categoriaId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(login)))
+                .andReturn().getResponse().getStatus();
+    }
+
+    private JsonNode list(Login login, String... params) throws Exception {
+        var request = get("/api/chamados").header(HttpHeaders.AUTHORIZATION, bearer(login));
+        for (int i = 0; i < params.length; i += 2) {
+            request.queryParam(params[i], params[i + 1]);
+        }
+        MvcResult result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+        return objectMapper.readTree(result.getResponse().getContentAsString());
+    }
+
+    private static List<Long> ids(JsonNode page) {
+        List<Long> ids = new ArrayList<>();
+        page.path("items").forEach(item -> ids.add(item.path("id").asLong()));
+        return ids;
     }
 
     private Map<Chamado, Integer> expected(int fila, int andamentoA, int fechadoB, int andamentoB) {
