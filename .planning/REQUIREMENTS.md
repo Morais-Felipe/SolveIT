@@ -32,7 +32,7 @@
 
 ### Chamados e Fluxo
 
-- [ ] **TICK-01**: Um solicitante pode abrir chamado com título, descrição, prioridade e categoria ativa; o chamado nasce ABERTO, sem atendente e com datas automáticas.
+- [x] **TICK-01**: Um solicitante pode abrir chamado com título, descrição, prioridade e categoria ativa; o chamado nasce ABERTO, sem atendente e com datas automáticas.
 - [ ] **TICK-02**: Usuários autenticados podem listar somente os chamados que seu perfil e relação permitem, com paginação e ordenação determinística.
 - [ ] **TICK-03**: A listagem aceita filtros opcionais por status, prioridade, categoria, atendente e solicitante sem carregar todos os registros em memória.
 - [ ] **TICK-04**: Um usuário autorizado pode consultar o detalhe completo de um chamado por id.
@@ -131,7 +131,7 @@
 | ADMN-04 | Phase 3 | Pending |
 | ADMN-05 | Phase 3 | Complete |
 | ADMN-06 | Phase 3 | Complete |
-| TICK-01 | Phase 3 | Pending |
+| TICK-01 | Phase 3 | Complete |
 | TICK-02 | Phase 3 | Pending |
 | TICK-03 | Phase 3 | Pending |
 | TICK-04 | Phase 3 | Pending |
@@ -141,8 +141,8 @@
 | TICK-08 | Phase 3 | Pending |
 | TICK-09 | Phase 3 | Pending |
 | TICK-10 | Phase 3 | Pending |
-| TICK-11 | Phase 3 | Pending |
-| TICK-12 | Phase 3 | Pending |
+| TICK-11 | Phase 3 | Partial (abertura em 03-04) |
+| TICK-12 | Phase 3 | Partial (abertura em 03-04) |
 | COLL-01 | Phase 3 | Pending |
 | COLL-02 | Phase 3 | Pending |
 | COLL-03 | Phase 3 | Pending |
