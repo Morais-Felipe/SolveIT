@@ -3,6 +3,8 @@ package com.solveit.exception;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,6 +23,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.transaction.TransactionTimedOutException;
 
 @RestControllerAdvice
@@ -47,6 +50,45 @@ public final class GlobalExceptionHandler {
                 ApiErrorCode.VALIDATION_ERROR,
                 "Requisição inválida",
                 "Um ou mais campos estão inválidos.",
+                requestUri(request),
+                errors);
+
+        return problemResponse(HttpStatus.BAD_REQUEST, problem);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ProblemDetail> handleParameterValidation(
+            ConstraintViolationException exception,
+            HttpServletRequest request) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        exception.getConstraintViolations().forEach(violation ->
+                errors.putIfAbsent(
+                        lastPathNode(violation.getPropertyPath()),
+                        violation.getMessage()));
+
+        ProblemDetail problem = problemDetailFactory.create(
+                HttpStatus.BAD_REQUEST,
+                ApiErrorCode.VALIDATION_ERROR,
+                "Requisição inválida",
+                "Um ou mais parâmetros estão inválidos.",
+                requestUri(request),
+                errors);
+
+        return problemResponse(HttpStatus.BAD_REQUEST, problem);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleParameterTypeMismatch(
+            MethodArgumentTypeMismatchException exception,
+            HttpServletRequest request) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        errors.put(exception.getName(), "O valor informado não tem o formato esperado");
+
+        ProblemDetail problem = problemDetailFactory.create(
+                HttpStatus.BAD_REQUEST,
+                ApiErrorCode.VALIDATION_ERROR,
+                "Requisição inválida",
+                "Um ou mais parâmetros estão inválidos.",
                 requestUri(request),
                 errors);
 
@@ -171,6 +213,14 @@ public final class GlobalExceptionHandler {
                 null);
 
         return problemResponse(HttpStatus.INTERNAL_SERVER_ERROR, problem);
+    }
+
+    private static String lastPathNode(Path propertyPath) {
+        String name = null;
+        for (Path.Node node : propertyPath) {
+            name = node.getName();
+        }
+        return name;
     }
 
     private static URI requestUri(HttpServletRequest request) {

@@ -36,8 +36,13 @@ public class CategoriaController {
     @GetMapping
     public CategoriaDtos.Pagina listar(
             @AuthenticationPrincipal UsuarioPrincipal principal,
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "A página não pode ser negativa")
+            int page,
+            @RequestParam(defaultValue = "20")
+            @Min(value = 1, message = "O tamanho da página deve ser entre 1 e 100")
+            @Max(value = 100, message = "O tamanho da página deve ser entre 1 e 100")
+            int size) {
         return categoriaService.listarAtivas(principal.getId(), page, size);
     }
 

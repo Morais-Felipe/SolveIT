@@ -190,6 +190,53 @@ class CategoriaIntegrationTest {
     }
 
     @Test
+    void rejectsOutOfRangePaginationWithValidationProblem() throws Exception {
+        LoginResult solicitante = registerAndLogin(
+                "pagina-invalida@example.com",
+                "Pagina Invalida");
+
+        mockMvc.perform(get("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(solicitante))
+                        .queryParam("page", "-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.page")
+                        .value("A página não pode ser negativa"));
+
+        for (String size : List.of("0", "101")) {
+            mockMvc.perform(get("/api/categorias")
+                            .header(HttpHeaders.AUTHORIZATION, bearer(solicitante))
+                            .queryParam("size", size))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.errors.size")
+                            .value("O tamanho da página deve ser entre 1 e 100"));
+        }
+    }
+
+    @Test
+    void rejectsMalformedParametersWithoutEchoingTheValue() throws Exception {
+        LoginResult solicitante = registerAndLogin(
+                "formato-invalido@example.com",
+                "Formato Invalido");
+
+        MvcResult result = mockMvc.perform(get("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(solicitante))
+                        .queryParam("page", "abc<script>"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.page").exists())
+                .andReturn();
+        assertThat(result.getResponse().getContentAsString()).doesNotContain("abc<script>");
+
+        mockMvc.perform(get("/api/categorias/{id}", "nao-numerico")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(solicitante)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors.id").exists());
+    }
+
+    @Test
     void createsAnActiveCategoryAsAdmin() throws Exception {
         LoginResult admin = registerAndLogin("admin-cria@example.com", "Admin Cria");
         promoteToAdmin(admin.usuarioId());
