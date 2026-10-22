@@ -3,6 +3,7 @@ package com.solveit.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -12,7 +13,9 @@ import com.solveit.entity.Usuario;
 import com.solveit.enums.PerfilUsuario;
 import com.solveit.repository.UsuarioRepository;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.containers.MySQLContainer;
@@ -37,6 +41,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class UsuarioIntegrationTest {
 
     private static final String RAW_PASSWORD = "senha segura para usuarios 123";
+    private static final String NEW_PASSWORD = "outra senha forte para usuarios 456";
 
     @Container
     @ServiceConnection
@@ -53,6 +58,9 @@ class UsuarioIntegrationTest {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void cleanDatabase() {
@@ -116,7 +124,7 @@ class UsuarioIntegrationTest {
         JsonNode firstItem = objectMapper.readTree(firstPage.getResponse().getContentAsString())
                 .path("items")
                 .get(0);
-        assertItemFields(firstItem, "id", "nome", "email", "perfil", "ativo", "criadoEm");
+        assertItemFields(firstItem, "id", "nome", "email", "perfil", "ativo", "criadoEm", "versao");
 
         mockMvc.perform(get("/api/usuarios")
                         .header(HttpHeaders.AUTHORIZATION, bearer(admin))
@@ -179,7 +187,7 @@ class UsuarioIntegrationTest {
                 .andExpect(jsonPath("$.ativo").value(true))
                 .andReturn();
 
-        assertResponseFields(result, "id", "nome", "email", "perfil", "ativo", "criadoEm");
+        assertResponseFields(result, "id", "nome", "email", "perfil", "ativo", "criadoEm", "versao");
         assertThat(result.getResponse().getContentAsString())
                 .doesNotContain(RAW_PASSWORD)
                 .doesNotContain("$2");
@@ -210,6 +218,360 @@ class UsuarioIntegrationTest {
                         .header(HttpHeaders.AUTHORIZATION, bearer(admin)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void adminCreatesActiveUsersForEveryProfileWithBcryptHash() throws Exception {
+        LoginResult admin = registerAndLogin("admin-cria@example.com", "Admin Cria");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+
+        for (PerfilUsuario perfil : PerfilUsuario.values()) {
+            String email = "novo-" + perfil.name().toLowerCase() + "@example.com";
+            MvcResult result = mockMvc.perform(post("/api/usuarios")
+                            .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json(Map.of(
+                                    "nome", "  Novo " + perfil.name() + "  ",
+                                    "email", email,
+                                    "senha", NEW_PASSWORD,
+                                    "perfil", perfil.name()))))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.nome").value("Novo " + perfil.name()))
+                    .andExpect(jsonPath("$.email").value(email))
+                    .andExpect(jsonPath("$.perfil").value(perfil.name()))
+                    .andExpect(jsonPath("$.ativo").value(true))
+                    .andExpect(jsonPath("$.versao").value(0))
+                    .andReturn();
+
+            assertResponseFields(
+                    result, "id", "nome", "email", "perfil", "ativo", "criadoEm", "versao");
+            Long id = objectMapper.readTree(result.getResponse().getContentAsString())
+                    .path("id")
+                    .asLong();
+            assertThat(result.getResponse().getHeader(HttpHeaders.LOCATION))
+                    .isEqualTo("/api/usuarios/" + id);
+            Usuario stored = usuarioRepository.findById(id).orElseThrow();
+            assertThat(stored.getSenha()).startsWith("$2").isNotEqualTo(NEW_PASSWORD);
+            assertThat(passwordEncoder.matches(NEW_PASSWORD, stored.getSenha())).isTrue();
+            assertThat(login(email, NEW_PASSWORD)).isEqualTo(200);
+        }
+    }
+
+    @Test
+    void createdUserIsAlwaysActiveEvenWhenClientSendsInactive() throws Exception {
+        LoginResult admin = registerAndLogin("admin-ativo@example.com", "Admin Ativo");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+
+        mockMvc.perform(post("/api/usuarios")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Forcado Ativo",
+                                "email", "forcado@example.com",
+                                "senha", NEW_PASSWORD,
+                                "perfil", "ATENDENTE",
+                                "ativo", false))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.ativo").value(true));
+    }
+
+    @Test
+    void normalizesEmailAndRejectsDuplicatesWithoutCreatingAnotherUser() throws Exception {
+        LoginResult admin = registerAndLogin("admin-dup@example.com", "Admin Dup");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+
+        mockMvc.perform(post("/api/usuarios")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Normalizado",
+                                "email", "  Normalizado@Example.COM ",
+                                "senha", NEW_PASSWORD,
+                                "perfil", "SOLICITANTE"))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value("normalizado@example.com"));
+        long total = usuarioRepository.count();
+
+        MvcResult duplicate = mockMvc.perform(post("/api/usuarios")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Duplicado",
+                                "email", "NORMALIZADO@example.com",
+                                "senha", NEW_PASSWORD,
+                                "perfil", "ADMIN"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_REGISTERED"))
+                .andReturn();
+
+        assertThat(usuarioRepository.count()).isEqualTo(total);
+        assertThat(duplicate.getResponse().getContentAsString())
+                .doesNotContain("uk_usuario_email")
+                .doesNotContain(NEW_PASSWORD);
+    }
+
+    @Test
+    void rejectsInvalidCreationPayloads() throws Exception {
+        LoginResult admin = registerAndLogin("admin-invalido@example.com", "Admin Invalido");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+        long total = usuarioRepository.count();
+
+        List<Map<String, Object>> payloads = List.of(
+                Map.of("nome", "Sem Perfil", "email", "sem-perfil@example.com",
+                        "senha", NEW_PASSWORD),
+                Map.of("nome", "Perfil Falso", "email", "perfil-falso@example.com",
+                        "senha", NEW_PASSWORD, "perfil", "ROOT"),
+                Map.of("nome", "Senha Curta", "email", "senha-curta@example.com",
+                        "senha", "curta", "perfil", "SOLICITANTE"),
+                Map.of("nome", " ", "email", "nome-vazio@example.com",
+                        "senha", NEW_PASSWORD, "perfil", "SOLICITANTE"),
+                Map.of("nome", "Email Ruim", "email", "nao-e-email",
+                        "senha", NEW_PASSWORD, "perfil", "SOLICITANTE"));
+
+        for (Map<String, Object> payload : payloads) {
+            mockMvc.perform(post("/api/usuarios")
+                            .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json(payload)))
+                    .andExpect(status().isBadRequest());
+        }
+        assertThat(usuarioRepository.count()).isEqualTo(total);
+    }
+
+    @Test
+    void forbidsNonAdminFromCreatingAndEditingUsers() throws Exception {
+        LoginResult atendente = registerAndLogin("atendente-cria@example.com", "Atendente");
+        changeProfile(atendente.usuarioId(), PerfilUsuario.ATENDENTE);
+        Usuario alvo = usuarioRepository.findById(atendente.usuarioId()).orElseThrow();
+
+        mockMvc.perform(post("/api/usuarios")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(atendente))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Escalada",
+                                "email", "escalada@example.com",
+                                "senha", NEW_PASSWORD,
+                                "perfil", "ADMIN"))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+
+        mockMvc.perform(put("/api/usuarios/{id}", alvo.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(atendente))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Outro Nome",
+                                "email", "atendente-cria@example.com",
+                                "versaoEsperada", alvo.getVersion()))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+
+        assertThat(usuarioRepository.existsByEmail("escalada@example.com")).isFalse();
+        assertThat(usuarioRepository.findById(alvo.getId()).orElseThrow().getNome())
+                .isEqualTo("Atendente");
+    }
+
+    @Test
+    void publicRegistrationStillCreatesOnlySolicitante() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Tentou Admin",
+                                "email", "tentou-admin@example.com",
+                                "senha", RAW_PASSWORD,
+                                "perfil", "ADMIN"))))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        Long id = objectMapper.readTree(result.getResponse().getContentAsString())
+                .path("id")
+                .asLong();
+        assertThat(usuarioRepository.findById(id).orElseThrow().getPerfil())
+                .isEqualTo(PerfilUsuario.SOLICITANTE);
+    }
+
+    @Test
+    void editsOnlyPersonalDataWithCurrentVersionAndPreservesPasswordWhenAbsent()
+            throws Exception {
+        LoginResult admin = registerAndLogin("admin-edita@example.com", "Admin Edita");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+        LoginResult alvoLogin = registerAndLogin("alvo-edita@example.com", "Alvo Edita");
+        changeProfile(alvoLogin.usuarioId(), PerfilUsuario.ATENDENTE);
+        Usuario antes = usuarioRepository.findById(alvoLogin.usuarioId()).orElseThrow();
+
+        mockMvc.perform(put("/api/usuarios/{id}", antes.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "  Nome Corrigido ",
+                                "email", " Corrigido@Example.com",
+                                "versaoEsperada", antes.getVersion()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Nome Corrigido"))
+                .andExpect(jsonPath("$.email").value("corrigido@example.com"))
+                .andExpect(jsonPath("$.perfil").value("ATENDENTE"))
+                .andExpect(jsonPath("$.ativo").value(true))
+                .andExpect(jsonPath("$.versao").value(antes.getVersion() + 1));
+
+        Usuario depois = usuarioRepository.findById(antes.getId()).orElseThrow();
+        assertThat(depois.getSenha()).isEqualTo(antes.getSenha());
+        assertThat(depois.getPerfil()).isEqualTo(PerfilUsuario.ATENDENTE);
+        assertThat(login("corrigido@example.com", RAW_PASSWORD)).isEqualTo(200);
+    }
+
+    @Test
+    void replacesPasswordWhenProvided() throws Exception {
+        LoginResult admin = registerAndLogin("admin-senha@example.com", "Admin Senha");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+        LoginResult alvoLogin = registerAndLogin("alvo-senha@example.com", "Alvo Senha");
+        Usuario alvo = usuarioRepository.findById(alvoLogin.usuarioId()).orElseThrow();
+
+        mockMvc.perform(put("/api/usuarios/{id}", alvo.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Alvo Senha",
+                                "email", "alvo-senha@example.com",
+                                "senha", NEW_PASSWORD,
+                                "versaoEsperada", alvo.getVersion()))))
+                .andExpect(status().isOk());
+
+        assertThat(login("alvo-senha@example.com", NEW_PASSWORD)).isEqualTo(200);
+        assertThat(login("alvo-senha@example.com", RAW_PASSWORD)).isEqualTo(401);
+    }
+
+    @Test
+    void rejectsStaleVersionWithoutChangingTheUser() throws Exception {
+        LoginResult admin = registerAndLogin("admin-stale@example.com", "Admin Stale");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+        LoginResult alvoLogin = registerAndLogin("alvo-stale@example.com", "Alvo Stale");
+        Usuario alvo = usuarioRepository.findById(alvoLogin.usuarioId()).orElseThrow();
+        long versaoVista = alvo.getVersion();
+
+        mockMvc.perform(put("/api/usuarios/{id}", alvo.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Primeira Edicao",
+                                "email", "alvo-stale@example.com",
+                                "versaoEsperada", versaoVista))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/api/usuarios/{id}", alvo.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Edicao Atrasada",
+                                "email", "alvo-stale@example.com",
+                                "versaoEsperada", versaoVista))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STALE_RESOURCE"));
+
+        assertThat(usuarioRepository.findById(alvo.getId()).orElseThrow().getNome())
+                .isEqualTo("Primeira Edicao");
+    }
+
+    @Test
+    void rejectsProfileOrActivityChangesThroughDataEdition() throws Exception {
+        LoginResult admin = registerAndLogin("admin-atalho@example.com", "Admin Atalho");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+        LoginResult alvoLogin = registerAndLogin("alvo-atalho@example.com", "Alvo Atalho");
+        Usuario alvo = usuarioRepository.findById(alvoLogin.usuarioId()).orElseThrow();
+
+        for (Map.Entry<String, Object> proibido : List.<Map.Entry<String, Object>>of(
+                Map.entry("perfil", "ADMIN"),
+                Map.entry("ativo", false))) {
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("nome", "Alvo Atalho");
+            payload.put("email", "alvo-atalho@example.com");
+            payload.put("versaoEsperada", alvo.getVersion());
+            payload.put(proibido.getKey(), proibido.getValue());
+
+            mockMvc.perform(put("/api/usuarios/{id}", alvo.getId())
+                            .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json(payload)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.errors." + proibido.getKey()).exists());
+        }
+
+        Usuario depois = usuarioRepository.findById(alvo.getId()).orElseThrow();
+        assertThat(depois.getPerfil()).isEqualTo(PerfilUsuario.SOLICITANTE);
+        assertThat(depois.getAtivo()).isTrue();
+        assertThat(depois.getVersion()).isEqualTo(alvo.getVersion());
+    }
+
+    @Test
+    void rejectsInvalidEditionPayloads() throws Exception {
+        LoginResult admin = registerAndLogin("admin-put-invalido@example.com", "Admin Put");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+        Usuario alvo = usuarioRepository.findById(admin.usuarioId()).orElseThrow();
+
+        List<Map<String, Object>> payloads = List.of(
+                Map.of("nome", "Sem Versao", "email", "admin-put-invalido@example.com"),
+                Map.of("nome", "Senha Curta", "email", "admin-put-invalido@example.com",
+                        "senha", "curta", "versaoEsperada", alvo.getVersion()),
+                Map.of("nome", " ", "email", "admin-put-invalido@example.com",
+                        "versaoEsperada", alvo.getVersion()));
+
+        for (Map<String, Object> payload : payloads) {
+            mockMvc.perform(put("/api/usuarios/{id}", alvo.getId())
+                            .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json(payload)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+    }
+
+    @Test
+    void rejectsEditionToAnEmailAlreadyInUse() throws Exception {
+        LoginResult admin = registerAndLogin("admin-email@example.com", "Admin Email");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+        registerAndLogin("ocupado@example.com", "Ocupado");
+        LoginResult alvoLogin = registerAndLogin("livre@example.com", "Livre");
+        Usuario alvo = usuarioRepository.findById(alvoLogin.usuarioId()).orElseThrow();
+
+        mockMvc.perform(put("/api/usuarios/{id}", alvo.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Livre",
+                                "email", "OCUPADO@example.com",
+                                "versaoEsperada", alvo.getVersion()))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_REGISTERED"));
+
+        assertThat(usuarioRepository.findById(alvo.getId()).orElseThrow().getEmail())
+                .isEqualTo("livre@example.com");
+    }
+
+    @Test
+    void returnsNotFoundWhenEditingMissingUser() throws Exception {
+        LoginResult admin = registerAndLogin("admin-put-404@example.com", "Admin Put 404");
+        changeProfile(admin.usuarioId(), PerfilUsuario.ADMIN);
+
+        mockMvc.perform(put("/api/usuarios/{id}", 999_999L)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "nome", "Fantasma",
+                                "email", "fantasma@example.com",
+                                "versaoEsperada", 0))))
+                .andExpect(status().isNotFound());
+    }
+
+    private String json(Object payload) throws Exception {
+        return objectMapper.writeValueAsString(payload);
+    }
+
+    private int login(String email, String senha) throws Exception {
+        return mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(new LoginPayload(email, senha))))
+                .andReturn()
+                .getResponse()
+                .getStatus();
     }
 
     private LoginResult registerAndLogin(String email, String nome) throws Exception {

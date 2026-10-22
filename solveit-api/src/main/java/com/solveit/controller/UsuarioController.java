@@ -3,13 +3,19 @@ package com.solveit.controller;
 import com.solveit.dto.usuario.UsuarioDtos;
 import com.solveit.security.UsuarioPrincipal;
 import com.solveit.service.UsuarioService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.net.URI;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,5 +50,23 @@ public class UsuarioController {
             @PathVariable Long id,
             @AuthenticationPrincipal UsuarioPrincipal principal) {
         return usuarioService.buscarPorId(principal.getId(), id);
+    }
+
+    @PostMapping
+    public ResponseEntity<UsuarioDtos.Resposta> criar(
+            @AuthenticationPrincipal UsuarioPrincipal principal,
+            @Valid @RequestBody UsuarioDtos.Criar request) {
+        UsuarioDtos.Resposta response = usuarioService.criar(principal.getId(), request);
+        return ResponseEntity
+                .created(URI.create("/api/usuarios/" + response.id()))
+                .body(response);
+    }
+
+    @PutMapping("/{id}")
+    public UsuarioDtos.Resposta editarDados(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UsuarioPrincipal principal,
+            @Valid @RequestBody UsuarioDtos.EditarDados request) {
+        return usuarioService.editarDados(principal.getId(), id, request);
     }
 }

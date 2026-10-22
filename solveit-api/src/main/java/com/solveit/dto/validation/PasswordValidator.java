@@ -9,10 +9,17 @@ public final class PasswordValidator implements ConstraintValidator<ValidPasswor
     private static final int MINIMUM_CODE_POINTS = 15;
     private static final int MAXIMUM_UTF8_BYTES = 72;
 
+    private boolean optional;
+
+    @Override
+    public void initialize(ValidPassword constraintAnnotation) {
+        optional = constraintAnnotation.optional();
+    }
+
     @Override
     public boolean isValid(String password, ConstraintValidatorContext context) {
         if (password == null) {
-            return false;
+            return optional;
         }
 
         int codePointCount = password.codePointCount(0, password.length());

@@ -16,6 +16,11 @@ public @interface ValidPassword {
 
     String message() default "A senha deve ter no mínimo 15 caracteres e no máximo 72 bytes UTF-8";
 
+    /**
+     * Quando verdadeiro, {@code null} significa "senha não informada" e é aceito.
+     */
+    boolean optional() default false;
+
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
