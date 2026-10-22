@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -83,6 +84,15 @@ public class ChamadoController {
             @AuthenticationPrincipal UsuarioPrincipal principal,
             @Valid @RequestBody ChamadoDtos.Editar request) {
         return chamadoService.editar(principal.getId(), id, request);
+    }
+
+    @PatchMapping("/{id}/atendente")
+    @PreAuthorize("hasAnyRole('ATENDENTE', 'ADMIN')")
+    public ChamadoDtos.Detalhe atribuir(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UsuarioPrincipal principal,
+            @Valid @RequestBody ChamadoDtos.Atribuir request) {
+        return chamadoService.atribuir(principal.getId(), id, request);
     }
 
     @GetMapping("/{id}")

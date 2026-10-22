@@ -193,6 +193,78 @@ public class ChamadoService {
         return toDetalhe(chamadoRepository.saveAndFlush(chamado));
     }
 
+    /**
+     * Tira o chamado da fila: ABERTO sem responsável → EM_ANDAMENTO com atendente.
+     * Ordem: guard → ator e destino travados por ID crescente → chamado travado →
+     * versão → estado. A primeira atribuição confirmada vence; a outra recebe 409.
+     */
+    @Transactional(timeout = 10)
+    public ChamadoDtos.Detalhe atribuir(
+            Long usuarioId,
+            Long chamadoId,
+            ChamadoDtos.Atribuir request) {
+        coreWriteCoordinator.adquirir();
+        Long destinoId = request.atendenteId();
+
+        Usuario ator;
+        Usuario destino;
+        if (usuarioId.equals(destinoId)) {
+            ator = coreWriteCoordinator.carregarUsuarioAtual(usuarioId);
+            destino = ator;
+        } else if (usuarioId < destinoId) {
+            ator = coreWriteCoordinator.carregarUsuarioAtual(usuarioId);
+            destino = entityManager.find(Usuario.class, destinoId, LockModeType.PESSIMISTIC_WRITE);
+        } else {
+            destino = entityManager.find(Usuario.class, destinoId, LockModeType.PESSIMISTIC_WRITE);
+            ator = coreWriteCoordinator.carregarUsuarioAtual(usuarioId);
+        }
+
+        boolean assumeParaSi = ator.getPerfil() == PerfilUsuario.ATENDENTE
+                && ator.getId().equals(destinoId);
+        if (ator.getPerfil() != PerfilUsuario.ADMIN && !assumeParaSi) {
+            throw new AccessDeniedException(
+                    "Attendants assume only for themselves; administrators assign anyone");
+        }
+        if (destino == null
+                || destino.getPerfil() != PerfilUsuario.ATENDENTE
+                || !Boolean.TRUE.equals(destino.getAtivo())) {
+            throw new DomainException(
+                    ApiErrorCode.INVALID_STATE,
+                    HttpStatus.CONFLICT,
+                    "Atendente inválido",
+                    "O chamado só pode ser atribuído a um atendente ativo.");
+        }
+
+        Chamado chamado = chamadoRepository.findById(chamadoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        entityManager.refresh(chamado, LockModeType.PESSIMISTIC_WRITE);
+        if (!Objects.equals(chamado.getVersion(), request.versaoEsperada())) {
+            throw new DomainException(
+                    ApiErrorCode.STALE_RESOURCE,
+                    HttpStatus.CONFLICT,
+                    "Recurso desatualizado",
+                    "O recurso foi alterado por outra operação. Atualize os dados e tente novamente.");
+        }
+        if (chamado.getStatus() != StatusChamado.ABERTO || chamado.getAtendente() != null) {
+            throw new DomainException(
+                    ApiErrorCode.INVALID_STATE,
+                    HttpStatus.CONFLICT,
+                    "Chamado fora da fila",
+                    "O chamado já foi assumido ou não está mais aberto.");
+        }
+
+        chamado.setAtendente(destino);
+        chamado.setStatus(StatusChamado.EM_ANDAMENTO);
+        Chamado atualizado = chamadoRepository.saveAndFlush(chamado);
+        historicoStatusRepository.saveAndFlush(HistoricoStatus.transicao(
+                atualizado,
+                StatusChamado.ABERTO,
+                ator,
+                request.observacao()));
+
+        return toDetalhe(atualizado);
+    }
+
     private Categoria carregarCategoriaAtivaBloqueada(Long categoriaId) {
         Categoria categoria = categoriaRepository.findById(categoriaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));

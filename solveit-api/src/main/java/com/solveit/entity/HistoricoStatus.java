@@ -82,6 +82,28 @@ public class HistoricoStatus {
         return historico;
     }
 
+    /**
+     * Registro de uma transição confirmada. Exige o chamado já atualizado no banco, para
+     * que {@code alteradoEm} seja o mesmo instante de {@code atualizadoEm} do chamado.
+     */
+    public static HistoricoStatus transicao(
+            Chamado chamado,
+            StatusChamado statusAnterior,
+            Usuario autor,
+            String observacao) {
+        if (chamado.getAtualizadoEm() == null) {
+            throw new IllegalStateException("Transition history requires a flushed ticket");
+        }
+        HistoricoStatus historico = new HistoricoStatus(
+                chamado,
+                statusAnterior,
+                chamado.getStatus(),
+                autor,
+                observacao);
+        historico.alteradoEm = chamado.getAtualizadoEm();
+        return historico;
+    }
+
     @PrePersist
     private void preencherDataDeAlteracao() {
         if (alteradoEm == null) {
