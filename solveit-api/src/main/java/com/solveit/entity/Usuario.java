@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -41,6 +42,10 @@ public class Usuario {
 
     @Column(name = "criado_em", nullable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime criadoEm;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     protected Usuario() {
     }
@@ -105,5 +110,9 @@ public class Usuario {
 
     public LocalDateTime getCriadoEm() {
         return criadoEm;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 }

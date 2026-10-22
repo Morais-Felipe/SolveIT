@@ -136,7 +136,7 @@ class PersistenceIntegrationTest {
 
     @Test
     @Order(1)
-    void versionSixDatabaseUpgradesToVersionSevenWithoutLosingCategoryData() {
+    void versionSixDatabaseUpgradesToCurrentWithoutLosingCategoryOrUserData() {
         Flyway versionSix = Flyway.configure()
                 .dataSource(MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword())
                 .locations("classpath:db/migration")
@@ -151,12 +151,17 @@ class PersistenceIntegrationTest {
                 INSERT INTO categoria (nome, descricao, ativo)
                 VALUES ('Categoria anterior a versao', 'Dado criado na V6', FALSE)
                 """);
+        jdbcTemplate.update("""
+                INSERT INTO usuario (nome, email, senha, perfil, ativo, criado_em)
+                VALUES ('Usuario anterior a versao', 'legado@example.com',
+                        '$2a$12$hashpreexistente', 'ADMIN', FALSE, UTC_TIMESTAMP(6))
+                """);
 
         MigrateResult upgradeResult = flywayForContainer().migrate();
 
-        assertThat(upgradeResult.migrationsExecuted).isOne();
+        assertThat(upgradeResult.migrationsExecuted).isEqualTo(2);
         assertThat(successfulMigrationVersions())
-                .containsExactly("1", "2", "3", "4", "5", "6", "7");
+                .containsExactly("1", "2", "3", "4", "5", "6", "7", "8");
         Map<String, Object> upgradedCategory = jdbcTemplate.queryForMap("""
                 SELECT nome, descricao, ativo, version
                 FROM categoria
@@ -166,6 +171,16 @@ class PersistenceIntegrationTest {
         assertThat(upgradedCategory.get("descricao")).isEqualTo("Dado criado na V6");
         assertThat(upgradedCategory.get("ativo")).isEqualTo(false);
         assertThat(((Number) upgradedCategory.get("version")).longValue()).isZero();
+        Map<String, Object> upgradedUser = jdbcTemplate.queryForMap("""
+                SELECT nome, senha, perfil, ativo, version
+                FROM usuario
+                WHERE email = 'legado@example.com'
+                """);
+        assertThat(upgradedUser.get("nome")).isEqualTo("Usuario anterior a versao");
+        assertThat(upgradedUser.get("senha")).isEqualTo("$2a$12$hashpreexistente");
+        assertThat(upgradedUser.get("perfil")).isEqualTo("ADMIN");
+        assertThat(upgradedUser.get("ativo")).isEqualTo(false);
+        assertThat(((Number) upgradedUser.get("version")).longValue()).isZero();
         assertThat(jdbcTemplate.queryForList(
                 "SELECT id FROM core_write_guard ORDER BY id", Long.class))
                 .containsExactly(1L);
@@ -208,14 +223,14 @@ class PersistenceIntegrationTest {
         }
 
         assertThat(successfulMigrationVersions())
-                .containsExactly("1", "2", "3", "4", "5", "6", "7");
+                .containsExactly("1", "2", "3", "4", "5", "6", "7", "8");
         assertThat(jdbcTemplate.queryForList("""
                 SELECT version, COUNT(*) AS version_count
                 FROM flyway_schema_history
                 WHERE success = TRUE
                 GROUP BY version
                 """))
-                .hasSize(7)
+                .hasSize(8)
                 .allSatisfy(row ->
                         assertThat(((Number) row.get("version_count")).intValue()).isOne());
         assertThat(domainTableNames()).containsExactlyInAnyOrderElementsOf(DOMAIN_TABLES);
@@ -268,8 +283,8 @@ class PersistenceIntegrationTest {
                 """, String.class);
         assertThat(deleteRules).hasSize(7).containsOnly("RESTRICT");
 
-        assertThat(columnNames("usuario"))
-                .containsExactly("id", "nome", "email", "senha", "perfil", "ativo", "criado_em");
+        assertThat(columnNames("usuario")).containsExactly(
+                "id", "nome", "email", "senha", "perfil", "ativo", "criado_em", "version");
         assertThat(columnNames("categoria"))
                 .containsExactly("id", "nome", "descricao", "ativo", "version");
         assertThat(columnNames("chamado")).containsExactly(
@@ -286,6 +301,7 @@ class PersistenceIntegrationTest {
         assertColumn("usuario", "perfil", "varchar", 20L, "NO");
         assertColumn("categoria", "descricao", "text", 65_535L, "YES");
         assertColumn("categoria", "version", "bigint", null, "NO");
+        assertColumn("usuario", "version", "bigint", null, "NO");
         assertColumn("chamado", "titulo", "varchar", 200L, "NO");
         assertColumn("chamado", "status", "varchar", 20L, "NO");
         assertColumn("chamado", "prioridade", "varchar", 10L, "NO");

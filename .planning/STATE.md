@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 03
 current_phase_name: Core de Chamados
 status: executing
-stopped_at: Plan 03-02 shipped in PR #14; awaiting review and explicit merge approval
-last_updated: "2026-09-30T10:44:52.656Z"
-last_activity: 2026-09-30
-last_activity_desc: Plan 03-02 shipped in PR #14 after verification and security audit
+stopped_at: Plan 03-03 complete on ticket/13-gestao-usuarios; awaiting push approval
+last_updated: "2026-10-22T12:00:00.000Z"
+last_activity: 2026-10-22
+last_activity_desc: Plan 03-03 implemented and verified locally (111/115; 4 loopback failures are environmental)
 state_head: 92d1879
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 23
-  completed_plans: 15
+  completed_plans: 16
   percent: 29
 ---
 
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (Core de Chamados) — EXECUTING
-Plan: 2 of 10 complete
-Status: PR #14 open; awaiting review and explicit merge approval
-Last activity: 2026-09-30 — Plan 03-02 shipped with verification and security audit complete
+Plan: 3 of 10 complete
+Status: ticket/13-gestao-usuarios committed locally; awaiting push approval
+Last activity: 2026-10-22 — Plan 03-03 implemented with Claude Code (GSD no longer used)
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
-Plan progress: 15/23 plans complete (65%); Phase 03 has 2/10 implementation tickets complete
+Plan progress: 16/23 plans complete (70%); Phase 03 has 3/10 implementation tickets complete
 
 ## Performance Metrics
 
@@ -125,11 +125,18 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 03]: Toda escrita recarrega perfil e atividade do ator depois de adquirir o guard. — Impede que autoridade revogada durante a espera produza uma escrita.
 - [Phase 03]: Categoria usa @Version e o cliente envia versaoEsperada; comparação ocorre depois do guard e do lock pessimista. — Impede sobrescrita silenciosa por formulário desatualizado.
 - [Phase 03]: Ativação sem mudança valida a versão mas não executa UPDATE; desativação nunca remove a categoria ou seus vínculos. — Preserva idempotência, auditoria relacional e versão significativa.
+- [Phase 03 / 03-03]: BCrypt é calculado antes do guard global; o hash não lê estado do banco e não deve segurar o lock.
+- [Phase 03 / 03-03]: Campos de autoridade fora do contrato (perfil/ativo no PUT) são declarados com @Null para gerar 400; @JsonIgnoreProperties(ignoreUnknown = false) não sobrepõe a configuração global do Spring Boot.
+- [Phase 03 / 03-03]: Usuários são travados em ordem crescente de ID; o 404 do alvo só aparece após confirmar o ator ADMIN.
+- [Phase 03 / 03-03]: Parâmetros de query/path inválidos respondem 400 VALIDATION_ERROR sem ecoar o valor.
+- [Process]: A partir de 2026-10-22 o projeto segue os planos em .planning com Claude Code, sem GSD; fluxo Git por ticket e modo pedagógico permanecem.
 
 ### Pending Todos
 
-- PR [#14](https://github.com/Morais-Felipe/SolveIT/pull/14): plano 03-02 concluído, verificado e em revisão.
-- Integrar o PR #14 na `main` somente após confirmação explícita do responsável.
+- PR [#14](https://github.com/Morais-Felipe/SolveIT/pull/14) (plano 03-02) integrado na `main` em 2026-10-22 (a3fc265).
+- Ticket 13 (`ticket/13-gestao-usuarios`, plano 03-03): 7 commits locais; push, PR e merge exigem aprovações separadas.
+- Investigar `Unable to establish loopback connection` no AuthHttpErrorIntegrationTest nesta máquina (reproduz na `main`).
+- Remover do AGENTS.md e do docs/GIT-WORKFLOW.md as instruções que exigem GSD (decisão de 2026-10-22: GSD descontinuado).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
@@ -159,5 +166,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 03-02 shipped in PR #14; awaiting review and explicit merge approval
+Stopped at: Plan 03-03 complete on ticket/13-gestao-usuarios; awaiting push approval
 Resume file: none
