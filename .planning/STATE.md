@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 03
 current_phase_name: Core de Chamados
 status: executing
-stopped_at: Plan 03-05 complete on ticket/15-consulta-chamados; awaiting push approval
+stopped_at: Plan 03-06 complete on ticket/16-transicoes-status; awaiting push approval
 last_updated: "2026-10-22T12:00:00.000Z"
 last_activity: 2026-10-22
-last_activity_desc: Plan 03-05 implemented and verified locally (141/145; 4 loopback failures are environmental)
+last_activity_desc: Plan 03-06 implemented and verified locally (157/161; 4 loopback failures are environmental)
 state_head: 92d1879
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 23
-  completed_plans: 18
+  completed_plans: 19
   percent: 29
 ---
 
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (Core de Chamados) — EXECUTING
-Plan: 5 of 10 complete
-Status: ticket/15-consulta-chamados committed locally; awaiting push approval
-Last activity: 2026-10-22 — Plan 03-05 implemented with Claude Code
+Plan: 6 of 10 complete
+Status: ticket/16-transicoes-status committed locally; awaiting push approval
+Last activity: 2026-10-22 — Plan 03-06 implemented with Claude Code
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
-Plan progress: 18/23 plans complete (78%); Phase 03 has 5/10 implementation tickets complete
+Plan progress: 19/23 plans complete (83%); Phase 03 has 6/10 implementation tickets complete
 
 ## Performance Metrics
 
@@ -135,6 +135,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 03 / 03-05]: Checkpoint humano decidido em 2026-10-22: linked-visible-ticket. Categoria inativa por ID é legível por ADMIN ou por quem hoje vê ao menos um chamado vinculado.
 - [Phase 03 / 03-05]: A regra de leitura de chamados existe em Java (ChamadoAuthorizationService) e em SQL (ChamadoSpecifications.visivelPara) e deve mudar nas duas juntas.
 - [Phase 03 / 03-05]: Edição de chamado verifica papel/relação antes de versão e estado e não gera HistoricoStatus.
+- [Phase 03 / 03-06]: Histórico de transição usa alteradoEm = atualizadoEm do chamado (HistoricoStatus.transicao).
+- [Phase 03 / 03-06]: Chamado já assumido responde 409; destino inválido responde 409 INVALID_STATE; versão é conferida antes do estado.
 - [Process]: A partir de 2026-10-22 o projeto segue os planos em .planning com Claude Code, sem GSD; fluxo Git por ticket e modo pedagógico permanecem.
 
 ### Pending Todos
@@ -142,7 +144,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#14](https://github.com/Morais-Felipe/SolveIT/pull/14) (plano 03-02) integrado na `main` em 2026-10-22 (a3fc265).
 - PR [#15](https://github.com/Morais-Felipe/SolveIT/pull/15) (plano 03-03) integrado na `main` em 2026-10-22 (8e376c7).
 - PR [#16](https://github.com/Morais-Felipe/SolveIT/pull/16) (plano 03-04) integrado na `main` em 2026-10-22 (bee398b).
-- Ticket 15 (`ticket/15-consulta-chamados`, plano 03-05): commits locais; push, PR e merge exigem aprovações separadas.
+- PR [#17](https://github.com/Morais-Felipe/SolveIT/pull/17) (plano 03-05) integrado na `main` em 2026-10-22 (e1fb47e).
+- Ticket 16 (`ticket/16-transicoes-status`, plano 03-06): commits locais; push, PR e merge exigem aprovações separadas.
+- A suíte completa passou de 10 minutos localmente; considerar CI no GitHub Actions.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
 - TICK-11 e TICK-12 seguem parciais até os planos de transição.
 - Investigar `Unable to establish loopback connection` no AuthHttpErrorIntegrationTest nesta máquina (reproduz na `main`).
@@ -175,5 +179,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 03-05 complete on ticket/15-consulta-chamados; awaiting push approval
+Stopped at: Plan 03-06 complete on ticket/16-transicoes-status; awaiting push approval
 Resume file: none

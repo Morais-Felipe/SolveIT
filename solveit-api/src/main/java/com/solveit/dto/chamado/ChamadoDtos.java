@@ -78,6 +78,32 @@ public final class ChamadoDtos {
         }
     }
 
+    public record Atribuir(
+            @NotNull(message = "O atendente é obrigatório")
+            @Positive(message = "O atendente deve ser um identificador positivo")
+            Long atendenteId,
+            @NotNull(message = "A versão esperada é obrigatória")
+            @PositiveOrZero(message = "A versão esperada não pode ser negativa")
+            Long versaoEsperada,
+            @Size(max = 500, message = "A observação deve ter no máximo 500 caracteres")
+            String observacao,
+            @JsonAnySetter
+            @Size(max = 0, message = "Envie somente atendenteId, versaoEsperada e observacao")
+            Map<String, Object> camposNaoPermitidos) {
+
+        public Atribuir {
+            if (observacao != null) {
+                observacao = observacao.trim();
+                if (observacao.isEmpty()) {
+                    observacao = null;
+                }
+            }
+            camposNaoPermitidos = camposNaoPermitidos == null
+                    ? Map.of()
+                    : Collections.unmodifiableMap(new LinkedHashMap<>(camposNaoPermitidos));
+        }
+    }
+
     public record Detalhe(
             Long id,
             String titulo,

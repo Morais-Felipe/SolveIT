@@ -1,6 +1,7 @@
 package com.solveit.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -172,6 +173,30 @@ class ChamadoEdicaoIntegrationTest {
                 .andExpect(jsonPath("$.code").value("STALE_RESOURCE"));
 
         assertThat(row(chamado.getId()).get("titulo")).isEqualTo("Mudanca confirmada");
+    }
+
+    @Test
+    void editionStartedBeforeAssignmentDoesNotOverwriteTheService() throws Exception {
+        Chamado chamado = chamado(StatusChamado.ABERTO, null);
+        Map<String, Object> atribuicao = new LinkedHashMap<>();
+        atribuicao.put("atendenteId", atendente.usuarioId());
+        atribuicao.put("versaoEsperada", 0L);
+
+        mockMvc.perform(patch("/api/chamados/{id}/atendente", chamado.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + atendente.accessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(atribuicao)))
+                .andExpect(status().isOk());
+
+        edit(dono, chamado.getId(), payload("Formulario aberto antes", "x", 0L))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STALE_RESOURCE"));
+
+        Map<String, Object> depois = row(chamado.getId());
+        assertThat(depois.get("titulo")).isEqualTo("Titulo original");
+        assertThat(depois.get("status")).isEqualTo("EM_ANDAMENTO");
+        assertThat(((Number) depois.get("atendente_id")).longValue())
+                .isEqualTo(atendente.usuarioId());
     }
 
     @Test
