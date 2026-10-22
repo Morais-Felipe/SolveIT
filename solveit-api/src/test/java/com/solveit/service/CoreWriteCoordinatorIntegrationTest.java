@@ -18,6 +18,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.annotation.Transactional;
@@ -147,7 +148,11 @@ class CoreWriteCoordinatorIntegrationTest {
                 () -> probe.create("Categoria que deve expirar")));
         Throwable timeoutFailure = waiter.get(8, TimeUnit.SECONDS);
 
-        assertThat(timeoutFailure).isInstanceOf(PessimisticLockingFailureException.class);
+        // innodb_lock_wait_timeout e setQueryTimeout valem 5 s; qualquer um pode vencer.
+        // Ambos viram 503 CORE_BUSY no GlobalExceptionHandler.
+        assertThat(timeoutFailure).isInstanceOfAny(
+                PessimisticLockingFailureException.class,
+                QueryTimeoutException.class);
         assertThat(categoriaRepository.existsByNome("Categoria que deve expirar")).isFalse();
 
         releaseHolder.countDown();
