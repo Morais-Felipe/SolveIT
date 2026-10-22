@@ -38,9 +38,9 @@
 - [x] **TICK-04**: Um usuário autorizado pode consultar o detalhe completo de um chamado por id.
 - [x] **TICK-05**: O solicitante proprietário ou um administrador pode editar título e descrição somente enquanto o chamado estiver ABERTO.
 - [x] **TICK-06**: Um administrador ou o próprio atendente pode atribuir um atendente ativo a um chamado ABERTO, alterando-o automaticamente para EM_ANDAMENTO.
-- [ ] **TICK-07**: Somente o atendente responsável ou um administrador pode alterar EM_ANDAMENTO para RESOLVIDO, preenchendo `resolvidoEm`.
-- [ ] **TICK-08**: Somente o solicitante proprietário pode alterar RESOLVIDO para FECHADO.
-- [ ] **TICK-09**: Somente o solicitante proprietário pode cancelar um chamado ABERTO, e somente um administrador pode cancelar um chamado EM_ANDAMENTO.
+- [x] **TICK-07**: Somente o atendente responsável ou um administrador pode alterar EM_ANDAMENTO para RESOLVIDO, preenchendo `resolvidoEm`.
+- [x] **TICK-08**: Somente o solicitante proprietário pode alterar RESOLVIDO para FECHADO.
+- [x] **TICK-09**: Somente o solicitante proprietário pode cancelar um chamado ABERTO, e somente um administrador pode cancelar um chamado EM_ANDAMENTO.
 - [ ] **TICK-10**: Transições não previstas, inclusive reabertura de FECHADO ou CANCELADO, são rejeitadas. EM_ANDAMENTO → ABERTO é permitido exclusivamente pela desativação ou retirada do perfil do atendente, com devolução à fila conforme ADMN-03; as regras de edição de ABERTO voltam a valer.
 - [ ] **TICK-11**: A abertura registra autor, data e estado inicial ABERTO no histórico. Toda transição confirmada cria exatamente um HistoricoStatus na mesma transação, com ator, estados, data e observação manual opcional; devoluções administrativas têm motivo automático obrigatório. Tentativas rejeitadas não geram histórico de status.
 - [ ] **TICK-12**: Atualizações concorrentes do mesmo chamado não podem sobrescrever silenciosamente uma transição já confirmada.
@@ -137,12 +137,12 @@
 | TICK-04 | Phase 3 | Complete |
 | TICK-05 | Phase 3 | Complete |
 | TICK-06 | Phase 3 | Complete |
-| TICK-07 | Phase 3 | Pending |
-| TICK-08 | Phase 3 | Pending |
-| TICK-09 | Phase 3 | Pending |
-| TICK-10 | Phase 3 | Pending |
-| TICK-11 | Phase 3 | Partial (abertura 03-04, atribuição 03-06) |
-| TICK-12 | Phase 3 | Partial (abertura 03-04, edição 03-05, atribuição 03-06) |
+| TICK-07 | Phase 3 | Complete |
+| TICK-08 | Phase 3 | Complete |
+| TICK-09 | Phase 3 | Complete |
+| TICK-10 | Phase 3 | Partial (manuais 03-07; devolução 03-10) |
+| TICK-11 | Phase 3 | Partial (falta devolução 03-10) |
+| TICK-12 | Phase 3 | Partial (falta devolução 03-10) |
 | COLL-01 | Phase 3 | Pending |
 | COLL-02 | Phase 3 | Pending |
 | COLL-03 | Phase 3 | Pending |

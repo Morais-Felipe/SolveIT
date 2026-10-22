@@ -95,6 +95,15 @@ public class ChamadoController {
         return chamadoService.atribuir(principal.getId(), id, request);
     }
 
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("isAuthenticated()")
+    public ChamadoDtos.Detalhe alterarStatus(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UsuarioPrincipal principal,
+            @Valid @RequestBody ChamadoDtos.AlterarStatus request) {
+        return chamadoService.alterarStatus(principal.getId(), id, request);
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ChamadoDtos.Detalhe buscarPorId(
