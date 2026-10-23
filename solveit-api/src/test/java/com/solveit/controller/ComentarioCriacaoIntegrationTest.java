@@ -1,6 +1,8 @@
 package com.solveit.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -232,6 +234,53 @@ class ComentarioCriacaoIntegrationTest {
     }
 
     @Test
+    void commentingDoesNotReserveNorPreserveAccessAfterAnotherAttendantAssumes()
+            throws Exception {
+        Login maria = outroAtendente;
+        Login joao = responsavel;
+        Chamado chamado = chamado(StatusChamado.ABERTO, null);
+
+        comment(maria, chamado.getId(), Map.of("texto", "Maria olhando"))
+                .andExpect(status().isCreated());
+        assertThat(((Number) row(chamado.getId()).get("version")).longValue()).isZero();
+
+        // A atribuição continua aceitando a versão original: comentar não mexe no chamado.
+        assign(joao, chamado.getId(), 0L)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.atendente.id").value(joao.usuarioId()));
+
+        List<Map<String, Object>> comentarios = comments(chamado.getId());
+        assertThat(comentarios).hasSize(1);
+        assertThat(((Number) comentarios.get(0).get("autor_id")).longValue())
+                .isEqualTo(maria.usuarioId());
+
+        assertThat(detailStatus(maria, chamado.getId())).isEqualTo(403);
+        comment(maria, chamado.getId(), Map.of("texto", "Ainda posso?"))
+                .andExpect(status().isForbidden());
+        assertThat(detailStatus(joao, chamado.getId())).isEqualTo(200);
+        comment(joao, chamado.getId(), Map.of("texto", "Assumi"))
+                .andExpect(status().isCreated());
+
+        Map<String, Object> estado = row(chamado.getId());
+        assertThat(estado.get("status")).isEqualTo("EM_ANDAMENTO");
+        assertThat(((Number) estado.get("version")).longValue()).isEqualTo(1);
+        assertThat(historyCount()).isOne();
+        assertThat(comments(chamado.getId())).hasSize(2);
+    }
+
+    @Test
+    void attendantWhoLostTheQueueCannotCommentAfterwards() throws Exception {
+        Chamado chamado = chamado(StatusChamado.ABERTO, null);
+
+        assign(responsavel, chamado.getId(), 0L).andExpect(status().isOk());
+        comment(outroAtendente, chamado.getId(), Map.of("texto", "Cheguei tarde"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+
+        assertThat(commentCount()).isZero();
+    }
+
+    @Test
     void returnsNotFoundForMissingTicket() throws Exception {
         comment(admin, 999_999L, Map.of("texto", "Fantasma"))
                 .andExpect(status().isNotFound());
@@ -243,6 +292,19 @@ class ComentarioCriacaoIntegrationTest {
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.accessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(body)));
+    }
+
+    private ResultActions assign(Login atendente, Long chamadoId, Long versao) throws Exception {
+        return mockMvc.perform(patch("/api/chamados/{id}/atendente", chamadoId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + atendente.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(Map.of("atendenteId", atendente.usuarioId(), "versaoEsperada", versao))));
+    }
+
+    private int detailStatus(Login login, Long chamadoId) throws Exception {
+        return mockMvc.perform(get("/api/chamados/{id}", chamadoId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.accessToken()))
+                .andReturn().getResponse().getStatus();
     }
 
     private Chamado chamado(StatusChamado status, Login atendente) {
