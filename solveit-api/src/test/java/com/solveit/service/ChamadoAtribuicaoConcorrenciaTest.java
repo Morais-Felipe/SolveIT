@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.solveit.dto.chamado.ChamadoDtos;
+import com.solveit.dto.comentario.ComentarioDtos;
 import com.solveit.entity.Categoria;
 import com.solveit.entity.Chamado;
 import com.solveit.entity.Usuario;
@@ -65,6 +66,9 @@ class ChamadoAtribuicaoConcorrenciaTest {
 
     @Autowired
     ChamadoService chamadoService;
+
+    @Autowired
+    ComentarioService comentarioService;
 
     @Autowired
     UsuarioRepository usuarioRepository;
@@ -152,6 +156,32 @@ class ChamadoAtribuicaoConcorrenciaTest {
         assertThat(((Number) estado.get("atendente_id")).longValue())
                 .isEqualTo(atendenteX.getId());
         assertThat(historyCount()).isOne();
+    }
+
+    @Test
+    void commentConfirmedFirstDoesNotReserveNorInvalidateTheAssignment() throws Exception {
+        // Maria (Y) comenta e segura o guard; João (X) tenta assumir com a versão 0.
+        Future<ChamadoDtos.Detalhe> atribuicao = holdFirstThenRun(
+                () -> {
+                    comentarioService.adicionar(
+                            atendenteY.getId(),
+                            chamado.getId(),
+                            new ComentarioDtos.Criar("Maria olhando", Map.of()));
+                    return null;
+                },
+                () -> assumir(atendenteX));
+
+        ChamadoDtos.Detalhe resultado = atribuicao.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        assertThat(resultado.atendente().id()).isEqualTo(atendenteX.getId());
+
+        Map<String, Object> estado = row();
+        assertThat(estado.get("status")).isEqualTo("EM_ANDAMENTO");
+        assertThat(((Number) estado.get("version")).longValue()).isEqualTo(1);
+        assertThat(historyCount()).isOne();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT autor_id FROM comentario WHERE chamado_id = ?",
+                Long.class,
+                chamado.getId())).isEqualTo(atendenteY.getId());
     }
 
     @Test
