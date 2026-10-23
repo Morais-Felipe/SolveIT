@@ -142,8 +142,8 @@
 | TICK-09 | Phase 3 | Complete |
 | TICK-10 | Phase 3 | Partial (manuais 03-07; devolução 03-10) |
 | TICK-11 | Phase 3 | Partial (falta devolução 03-10) |
-| TICK-12 | Phase 3 | Partial (falta devolução 03-10) |
-| COLL-01 | Phase 3 | Pending |
+| TICK-12 | Phase 3 | Partial (comentários 03-08; falta devolução 03-10) |
+| COLL-01 | Phase 3 | Partial (escrita 03-08; leitura 03-09) |
 | COLL-02 | Phase 3 | Pending |
 | COLL-03 | Phase 3 | Pending |
 | COLL-04 | Phase 3 | Pending |
