@@ -2,6 +2,7 @@ package com.solveit.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,6 +31,8 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -161,6 +164,134 @@ class ComentarioHistoricoConsultaIntegrationTest {
                 .isEqualTo(403);
         assertThat(statusOf(admin, "/api/chamados/{id}/comentarios", 999_999L)).isEqualTo(404);
         assertThat(statusOf(null, "/api/chamados/{id}/comentarios", chamado.getId())).isEqualTo(401);
+    }
+
+    @Test
+    void historyReturnsOpeningAndEveryConfirmedTransitionExactlyOnce() throws Exception {
+        long chamadoId = openTicket(dono);
+        send(patch("/api/chamados/{id}/atendente", chamadoId), joao,
+                Map.of("atendenteId", joao.usuarioId(), "versaoEsperada", 0))
+                .andExpect(status().isOk());
+        // Tentativa recusada: não pode aparecer no histórico.
+        send(patch("/api/chamados/{id}/status", chamadoId), dono,
+                Map.of("status", "RESOLVIDO", "versaoEsperada", 1))
+                .andExpect(status().isForbidden());
+        send(patch("/api/chamados/{id}/status", chamadoId), joao,
+                Map.of("status", "RESOLVIDO", "versaoEsperada", 1, "observacao", "Cabo trocado"))
+                .andExpect(status().isOk());
+        send(patch("/api/chamados/{id}/status", chamadoId), dono,
+                Map.of("status", "FECHADO", "versaoEsperada", 2))
+                .andExpect(status().isOk());
+
+        JsonNode historico = read(dono, "/api/chamados/{id}/historico", chamadoId);
+
+        assertThat(ids(historico)).containsExactlyElementsOf(jdbcTemplate.queryForList(
+                "SELECT id FROM historico_status WHERE chamado_id = ? ORDER BY alterado_em, id",
+                Long.class,
+                chamadoId));
+        assertThat(historico).hasSize(4);
+        assertFields(historico.get(0),
+                "id", "statusAnterior", "statusNovo", "alteradoPor", "alteradoEm", "observacao");
+        assertFields(historico.get(0).path("alteradoPor"), "id", "nome");
+
+        assertTransition(historico.get(0), null, "ABERTO", dono, null);
+        assertTransition(historico.get(1), "ABERTO", "EM_ANDAMENTO", joao, null);
+        assertTransition(historico.get(2), "EM_ANDAMENTO", "RESOLVIDO", joao, "Cabo trocado");
+        assertTransition(historico.get(3), "RESOLVIDO", "FECHADO", dono, null);
+        assertThat(historico.toString()).doesNotContain("@example.com");
+    }
+
+    @Test
+    void cancelledTicketHistoryStaysReadable() throws Exception {
+        long chamadoId = openTicket(dono);
+        send(patch("/api/chamados/{id}/status", chamadoId), dono,
+                Map.of("status", "CANCELADO", "versaoEsperada", 0))
+                .andExpect(status().isOk());
+
+        for (Login login : List.of(dono, admin)) {
+            JsonNode historico = read(login, "/api/chamados/{id}/historico", chamadoId);
+            assertThat(historico).hasSize(2);
+            assertTransition(historico.get(1), "ABERTO", "CANCELADO", dono, null);
+        }
+    }
+
+    @Test
+    void historyTiesAreOrderedById() throws Exception {
+        Chamado chamado = chamado(StatusChamado.EM_ANDAMENTO, joao);
+        long depois = insertHistory(chamado, "EM_ANDAMENTO", "RESOLVIDO", "2026-10-02 08:00:00.000000");
+        long empateA = insertHistory(chamado, null, "ABERTO", "2026-10-01 08:00:00.000000");
+        long empateB = insertHistory(chamado, "ABERTO", "EM_ANDAMENTO", "2026-10-01 08:00:00.000000");
+
+        assertThat(ids(read(admin, "/api/chamados/{id}/historico", chamado.getId())))
+                .containsExactly(empateA, empateB, depois);
+    }
+
+    @Test
+    void historyFollowsTheSameAccessAsTheTicket() throws Exception {
+        Chamado chamado = chamado(StatusChamado.ABERTO, null);
+
+        assertThat(read(maria, "/api/chamados/{id}/historico", chamado.getId())).isEmpty();
+        jdbcTemplate.update(
+                "UPDATE chamado SET atendente_id = ?, status = 'EM_ANDAMENTO' WHERE id = ?",
+                joao.usuarioId(), chamado.getId());
+
+        assertThat(statusOf(maria, "/api/chamados/{id}/historico", chamado.getId())).isEqualTo(403);
+        assertThat(statusOf(outroSolicitante, "/api/chamados/{id}/historico", chamado.getId()))
+                .isEqualTo(403);
+        assertThat(statusOf(joao, "/api/chamados/{id}/historico", chamado.getId())).isEqualTo(200);
+        assertThat(statusOf(admin, "/api/chamados/{id}/historico", 999_999L)).isEqualTo(404);
+        assertThat(statusOf(null, "/api/chamados/{id}/historico", chamado.getId())).isEqualTo(401);
+    }
+
+    private void assertTransition(
+            JsonNode registro,
+            String anterior,
+            String novo,
+            Login autor,
+            String observacao) {
+        if (anterior == null) {
+            assertThat(registro.path("statusAnterior").isNull()).isTrue();
+        } else {
+            assertThat(registro.path("statusAnterior").asText()).isEqualTo(anterior);
+        }
+        assertThat(registro.path("statusNovo").asText()).isEqualTo(novo);
+        assertThat(registro.path("alteradoPor").path("id").asLong()).isEqualTo(autor.usuarioId());
+        assertThat(registro.path("alteradoEm").asText()).isNotBlank();
+        if (observacao == null) {
+            assertThat(registro.path("observacao").isNull()).isTrue();
+        } else {
+            assertThat(registro.path("observacao").asText()).isEqualTo(observacao);
+        }
+    }
+
+    private long openTicket(Login solicitante) throws Exception {
+        MvcResult result = send(post("/api/chamados"), solicitante, Map.of(
+                        "titulo", "Sem rede",
+                        "descricao", "Cabo solto",
+                        "prioridade", "ALTA",
+                        "categoriaId", categoria.getId()))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readTree(result.getResponse().getContentAsString()).path("id").asLong();
+    }
+
+    private ResultActions send(
+            MockHttpServletRequestBuilder request,
+            Login login,
+            Map<String, ?> body) throws Exception {
+        return mockMvc.perform(request
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + login.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)));
+    }
+
+    private long insertHistory(Chamado chamado, String anterior, String novo, String alteradoEm) {
+        jdbcTemplate.update("""
+                INSERT INTO historico_status (
+                    chamado_id, status_anterior, status_novo, alterado_por_id, alterado_em)
+                VALUES (?, ?, ?, ?, ?)
+                """, chamado.getId(), anterior, novo, admin.usuarioId(), alteradoEm);
+        return jdbcTemplate.queryForObject("SELECT MAX(id) FROM historico_status", Long.class);
     }
 
     private JsonNode read(Login login, String uri, Long chamadoId) throws Exception {
