@@ -47,10 +47,10 @@
 
 ### Colaboração e Auditoria
 
-- [ ] **COLL-01**: Um usuário com acesso pode comentar com sua identidade autenticada somente em ABERTO, EM_ANDAMENTO ou RESOLVIDO. FECHADO/CANCELADO permitem apenas leitura das mensagens anteriores e histórico por usuários autorizados; validar o estado atual inclusive em envios concorrentes ao encerramento.
-- [ ] **COLL-02**: Um usuário com acesso ao chamado pode listar comentários em ordem cronológica.
-- [ ] **COLL-03**: Comentários não podem ser editados nem excluídos por nenhuma rota da aplicação.
-- [ ] **COLL-04**: Um usuário com acesso ao chamado pode consultar todo o histórico de status em ordem cronológica.
+- [x] **COLL-01**: Um usuário com acesso pode comentar com sua identidade autenticada somente em ABERTO, EM_ANDAMENTO ou RESOLVIDO. FECHADO/CANCELADO permitem apenas leitura das mensagens anteriores e histórico por usuários autorizados; validar o estado atual inclusive em envios concorrentes ao encerramento.
+- [x] **COLL-02**: Um usuário com acesso ao chamado pode listar comentários em ordem cronológica.
+- [x] **COLL-03**: Comentários não podem ser editados nem excluídos por nenhuma rota da aplicação.
+- [x] **COLL-04**: Um usuário com acesso ao chamado pode consultar todo o histórico de status em ordem cronológica.
 
 ### Notificações
 
@@ -143,10 +143,10 @@
 | TICK-10 | Phase 3 | Partial (manuais 03-07; devolução 03-10) |
 | TICK-11 | Phase 3 | Partial (falta devolução 03-10) |
 | TICK-12 | Phase 3 | Partial (comentários 03-08; falta devolução 03-10) |
-| COLL-01 | Phase 3 | Partial (escrita 03-08; leitura 03-09) |
-| COLL-02 | Phase 3 | Pending |
-| COLL-03 | Phase 3 | Pending |
-| COLL-04 | Phase 3 | Pending |
+| COLL-01 | Phase 3 | Complete |
+| COLL-02 | Phase 3 | Complete |
+| COLL-03 | Phase 3 | Complete |
+| COLL-04 | Phase 3 | Complete |
 | MAIL-01 | Phase 4 | Pending |
 | MAIL-02 | Phase 4 | Pending |
 | MAIL-03 | Phase 4 | Pending |

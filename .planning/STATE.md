@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 current_phase: 03
 current_phase_name: Core de Chamados
 status: executing
-stopped_at: Plan 03-08 complete on ticket/18-comentarios; awaiting push approval
-last_updated: "2026-10-23T12:00:00.000Z"
-last_activity: 2026-10-23
-last_activity_desc: Plan 03-08 implemented and verified locally (191/195; 4 loopback failures are environmental)
+stopped_at: Plan 03-09 complete on ticket/19-leitura-comentarios-historico; awaiting push approval
+last_updated: "2026-10-29T12:00:00.000Z"
+last_activity: 2026-10-29
+last_activity_desc: Plan 03-09 implemented and verified locally (203/207; 4 loopback failures are environmental)
 state_head: 92d1879
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 23
-  completed_plans: 21
+  completed_plans: 22
   percent: 29
 ---
 
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (Core de Chamados) — EXECUTING
-Plan: 8 of 10 complete
-Status: ticket/18-comentarios committed locally; awaiting push approval
-Last activity: 2026-10-23 — Plan 03-08 implemented with Claude Code
+Plan: 9 of 10 complete
+Status: ticket/19-leitura-comentarios-historico committed locally; awaiting push approval
+Last activity: 2026-10-29 — Plan 03-09 implemented with Claude Code
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
-Plan progress: 21/23 plans complete (91%); Phase 03 has 8/10 implementation tickets complete
+Plan progress: 22/23 plans complete (96%); Phase 03 has 9/10 implementation tickets complete
 
 ## Performance Metrics
 
@@ -140,6 +140,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 03 / 03-07]: Transições manuais vivem em ChamadoTransitionPolicy (tabela origem→destino→regra); ordem leitura → versão → tabela.
 - [Phase 03 / 03-07]: Chamado.transicionar aplica um instante do Clock a atualizadoEm/resolvidoEm; @Transient atualizacaoDatada impede o @PreUpdate de sobrescrevê-lo.
 - [Phase 03 / 03-08]: Comentário usa a política de leitura de chamados, verifica acesso antes do status encerrado e trava o chamado só para ler; não altera chamado nem versão.
+- [Phase 03 / 03-09]: Comentários e histórico são lidos sem paginação, ordenados no SQL (data, id) e com a mesma política do detalhe; comentários não têm rota de edição ou exclusão.
 - [Process]: A partir de 2026-10-22 o projeto segue os planos em .planning com Claude Code, sem GSD; fluxo Git por ticket e modo pedagógico permanecem.
 
 ### Pending Todos
@@ -150,7 +151,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#17](https://github.com/Morais-Felipe/SolveIT/pull/17) (plano 03-05) integrado na `main` em 2026-10-22 (e1fb47e).
 - PR [#18](https://github.com/Morais-Felipe/SolveIT/pull/18) (plano 03-06) integrado na `main` em 2026-10-22 (d1ca0c9).
 - PR [#19](https://github.com/Morais-Felipe/SolveIT/pull/19) (plano 03-07) integrado na `main` em 2026-10-22 (d4545e5) com autorização conjunta explícita, condicionada à suíte sem falhas além do loopback.
-- Ticket 18 (`ticket/18-comentarios`, plano 03-08): commits locais; push, PR e merge exigem aprovações separadas.
+- PR [#20](https://github.com/Morais-Felipe/SolveIT/pull/20) (plano 03-08) integrado na `main` em 2026-10-23 (1d88cd1).
+- Ticket 19 (`ticket/19-leitura-comentarios-historico`, plano 03-09): commits locais; push, PR e merge exigem aprovações separadas.
 - A suíte completa passou de 10 minutos localmente; considerar CI no GitHub Actions.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
 - TICK-10, TICK-11 e TICK-12 seguem parciais até a devolução administrativa do plano 03-10.
@@ -184,5 +186,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 03-08 complete on ticket/18-comentarios; awaiting push approval
+Stopped at: Plan 03-09 complete on ticket/19-leitura-comentarios-historico; awaiting push approval
 Resume file: none
