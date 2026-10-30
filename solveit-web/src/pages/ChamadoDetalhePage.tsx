@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { CampoAreaTexto } from '@/components/CampoAreaTexto'
 import { CampoTexto } from '@/components/CampoTexto'
@@ -52,7 +52,11 @@ export function ChamadoDetalhePage() {
   const idValido = Number.isInteger(id) && id > 0
   const [busca, setBusca] = useState<{ id: number; resultado: Resultado } | null>(null)
   const [recarga, setRecarga] = useState(0)
-  const [aviso, setAviso] = useState<Aviso | null>(null)
+  // Um aviso pode chegar pela navegação (ex.: "Você assumiu o chamado #7." vindo da fila).
+  const avisoRecebido = (useLocation().state as { aviso?: string } | null)?.aviso
+  const [aviso, setAviso] = useState<Aviso | null>(
+    avisoRecebido ? { tipo: 'sucesso', texto: avisoRecebido } : null,
+  )
 
   useEffect(() => {
     if (!idValido) return
