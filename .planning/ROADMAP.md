@@ -179,6 +179,10 @@ Nenhum requisito foi apagado; os que mudaram de forma estão anotados em `REQUIR
 
 **Abordagem (revisão 2026-10-30)**: eventos publicados na transação e enviados depois do commit, fora da requisição; sem outbox. Estimativa: 1–2 planos.
 
+Plans:
+
+- [ ] `04-01-PLAN.md` — Eventos de domínio, envio após commit e assíncrono, destinatários e mensagens (MAIL-01..06)
+
 **Plans**: TBD
 
 ### Phase 5: Dashboard
