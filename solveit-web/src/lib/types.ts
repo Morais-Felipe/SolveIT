@@ -40,7 +40,7 @@ export type Prioridade = 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA'
 /** Espelha ChamadoDtos.Pessoa. */
 export type Pessoa = { id: number; nome: string }
 
-/** Espelha ChamadoDtos.Detalhe. Datas chegam como LocalDateTime sem fuso (ex.: 2026-10-30T10:00:00). */
+/** Espelha ChamadoDtos.Detalhe. Datas chegam em UTC sem fuso (ex.: 2026-10-30T10:00:00); use lerDataDaApi. */
 export type Chamado = {
   id: number
   titulo: string
@@ -72,4 +72,22 @@ export type Categoria = {
   descricao: string | null
   ativo: boolean
   versao: number
+}
+
+/** Espelha ComentarioDtos.Resposta. Comentários são imutáveis: não há edição nem exclusão. */
+export type Comentario = {
+  id: number
+  texto: string
+  autor: Pessoa
+  criadoEm: string
+}
+
+/** Espelha HistoricoStatusDtos.Resposta. O registro de abertura tem statusAnterior nulo. */
+export type HistoricoStatus = {
+  id: number
+  statusAnterior: StatusChamado | null
+  statusNovo: StatusChamado
+  alteradoPor: Pessoa
+  alteradoEm: string
+  observacao: string | null
 }

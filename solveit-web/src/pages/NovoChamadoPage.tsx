@@ -1,11 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { CampoAreaTexto } from '@/components/CampoAreaTexto'
 import { CampoSelecao } from '@/components/CampoSelecao'
 import { CampoTexto } from '@/components/CampoTexto'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
 import { toApiError } from '@/lib/api'
 import { abrirChamado, listarCategoriasAtivas, PRIORIDADES, ROTULO_PRIORIDADE } from '@/lib/chamados'
 import type { Categoria, Prioridade } from '@/lib/types'
@@ -112,30 +112,15 @@ export function NovoChamadoPage() {
               ajuda="Resumo em uma frase, até 200 caracteres."
             />
 
-            <div className="grid gap-1.5">
-              <Label htmlFor="descricao">Descrição</Label>
-              <textarea
-                id="descricao"
-                rows={6}
-                maxLength={MAX_DESCRICAO}
-                value={descricao}
-                onChange={(e) => alterar('descricao', () => setDescricao(e.target.value))}
-                aria-invalid={erros.descricao ? true : undefined}
-                aria-describedby={erros.descricao ? 'descricao-erro' : 'descricao-contador'}
-                className={cn(
-                  'w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30',
-                )}
-              />
-              {erros.descricao ? (
-                <p id="descricao-erro" className="text-xs text-destructive">
-                  {erros.descricao}
-                </p>
-              ) : (
-                <p id="descricao-contador" className="text-right text-xs text-muted-foreground">
-                  {descricao.length.toLocaleString('pt-BR')} / {MAX_DESCRICAO.toLocaleString('pt-BR')}
-                </p>
-              )}
-            </div>
+            <CampoAreaTexto
+              id="descricao"
+              rotulo="Descrição"
+              rows={6}
+              maximo={MAX_DESCRICAO}
+              value={descricao}
+              onChange={(e) => alterar('descricao', () => setDescricao(e.target.value))}
+              erro={erros.descricao}
+            />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <CampoSelecao

@@ -211,7 +211,11 @@ function ListaChamados({ chamados }: { chamados: Chamado[] }) {
             {chamados.map((c) => (
               <tr key={c.id} className="border-t border-border">
                 <td className="px-4 py-3 text-muted-foreground">{c.id}</td>
-                <td className="px-4 py-3 font-medium">{c.titulo}</td>
+                <td className="px-4 py-3 font-medium">
+                  <Link to={`/chamados/${c.id}`} className="hover:text-primary hover:underline">
+                    {c.titulo}
+                  </Link>
+                </td>
                 <td className="px-4 py-3">{c.categoria.nome}</td>
                 <td className="px-4 py-3">
                   <SeloPrioridade prioridade={c.prioridade} />
@@ -230,7 +234,9 @@ function ListaChamados({ chamados }: { chamados: Chamado[] }) {
         {chamados.map((c) => (
           <li key={c.id} className="grid gap-2 rounded-lg border border-border p-4">
             <div className="flex items-start justify-between gap-2">
-              <span className="font-medium">{c.titulo}</span>
+              <Link to={`/chamados/${c.id}`} className="font-medium hover:text-primary hover:underline">
+                {c.titulo}
+              </Link>
               <SeloStatus status={c.status} />
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">

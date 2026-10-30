@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/layout/AppLayout'
 import { CadastroPage } from '@/pages/CadastroPage'
+import { ChamadoDetalhePage } from '@/pages/ChamadoDetalhePage'
 import { ChamadosPage } from '@/pages/ChamadosPage'
 import { EmBreve, NaoEncontrado } from '@/pages/EmBreve'
 import { NovoChamadoPage } from '@/pages/NovoChamadoPage'
@@ -20,6 +21,7 @@ export default function App() {
       <Route element={<RotaProtegida><AppLayout /></RotaProtegida>}>
         <Route index element={<RedirecionarParaInicial />} />
         <Route path="chamados" element={<ChamadosPage />} />
+        <Route path="chamados/:id" element={<ChamadoDetalhePage />} />
         <Route
           path="chamados/novo"
           element={
