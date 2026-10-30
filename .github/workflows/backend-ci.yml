@@ -1,0 +1,54 @@
+# Integração contínua do back-end: compila e executa toda a suíte de testes em uma
+# máquina Linux limpa a cada pull request e a cada push na main. O runner do GitHub já
+# tem Docker, usado pelo Testcontainers (MySQL 8.4) e pelos testes com GreenMail.
+name: Back-end CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "solveit-api/**"
+      - ".github/workflows/backend-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "solveit-api/**"
+      - ".github/workflows/backend-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Testes (Java 17, MySQL 8.4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: solveit-api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Compilar e testar
+        run: ./mvnw -B -ntp verify
+
+      - name: Publicar relatórios de teste
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: solveit-api/target/surefire-reports/
+          retention-days: 7
