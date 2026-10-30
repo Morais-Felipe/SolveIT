@@ -29,11 +29,19 @@ describe('toApiError', () => {
     expect(erro.message).toMatch(/conectar ao servidor/)
   })
 
-  it('usa uma mensagem genérica quando a resposta não é Problem Details', () => {
+  it('trata 5xx sem Problem Details como servidor indisponível', () => {
     const erro = toApiError({ response: { status: 502, data: '<html>Bad gateway</html>' } })
 
     expect(erro.status).toBe(502)
-    expect(erro.code).toBe('UNEXPECTED_ERROR')
+    expect(erro.code).toBe('SERVER_UNAVAILABLE')
+    expect(erro.message).toMatch(/servidor não respondeu/)
     expect(erro.message).not.toContain('<html>')
+  })
+
+  it('usa uma mensagem genérica para 4xx sem Problem Details', () => {
+    const erro = toApiError({ response: { status: 404, data: '' } })
+
+    expect(erro.code).toBe('UNEXPECTED_ERROR')
+    expect(erro.message).toMatch(/erro inesperado/)
   })
 })

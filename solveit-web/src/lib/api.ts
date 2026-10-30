@@ -57,7 +57,16 @@ export function toApiError(error: unknown): ApiError {
   if (!response) {
     return new ApiError(0, 'NETWORK_ERROR', 'Não foi possível conectar ao servidor. Tente novamente.', {})
   }
-  const problem = response.data ?? {}
+  const problem = (typeof response.data === 'object' && response.data) || {}
+  if (response.status >= 500 && !problem.code) {
+    // Sem Problem Details: a API está fora do ar ou um proxy respondeu no lugar dela.
+    return new ApiError(
+      response.status,
+      'SERVER_UNAVAILABLE',
+      'O servidor não respondeu. Tente novamente em instantes.',
+      {},
+    )
+  }
   return new ApiError(
     response.status,
     problem.code ?? 'UNEXPECTED_ERROR',
