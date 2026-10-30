@@ -102,6 +102,7 @@ describe('fila do atendente', () => {
     expect(await screen.findByRole('heading', { name: 'VPN cai' })).toBeInTheDocument()
   })
 
+  // O servidor checa a versão antes do estado: quem perde a corrida recebe STALE_RESOURCE.
   it('avisa quando outro atendente assumiu primeiro e recarrega a fila', async () => {
     const usuarioEvento = userEvent.setup()
     let leituras = 0
@@ -110,13 +111,15 @@ describe('fila do atendente', () => {
       return { data: pagina(leituras === 1 ? [chamado(7, 'VPN cai')] : []) }
     })
     vi.spyOn(api, 'patch').mockRejectedValue(
-      new ApiError(409, 'INVALID_STATE', 'O chamado já foi assumido ou não está mais aberto.', {}),
+      new ApiError(409, 'STALE_RESOURCE', 'O recurso foi alterado por outra operação.', {}),
     )
     renderApp('/fila')
 
     await usuarioEvento.click(await screen.findByRole('button', { name: 'Assumir VPN cai' }))
 
-    expect(await screen.findByText('Outro atendente assumiu este chamado primeiro.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Este chamado mudou ou já foi assumido por outro atendente. A fila foi atualizada.'),
+    ).toBeInTheDocument()
     expect(await screen.findByText('A fila está vazia: nenhum chamado aguardando atendimento.')).toBeInTheDocument()
   })
 

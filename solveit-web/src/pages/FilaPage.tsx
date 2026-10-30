@@ -17,8 +17,12 @@ type Resultado =
   | { tipo: 'erro'; mensagem: string }
   | { tipo: 'pronto'; pagina: Pagina<Chamado> }
 
-const CORRIDA = 'Outro atendente assumiu este chamado primeiro.'
-const MUDOU = 'O chamado mudou enquanto você olhava a fila. A lista foi atualizada.'
+/**
+ * O servidor checa a versão antes do estado: quem perde a corrida pela fila recebe 409
+ * STALE_RESOURCE, o mesmo código de quando o solicitante edita o chamado. A tela não
+ * distingue os dois casos, então a mensagem cobre ambos.
+ */
+const CONFLITO_NA_FILA = 'Este chamado mudou ou já foi assumido por outro atendente. A fila foi atualizada.'
 
 /** Na aba "meus", sem status na URL mostra o trabalho em curso; "TODOS" tira o filtro. */
 function statusDosMeus(valor: string | null): StatusChamado | undefined {
@@ -91,8 +95,12 @@ export function FilaPage() {
     } catch (falha) {
       const erro = toApiError(falha)
       // D-4: perdeu a corrida (ou o chamado mudou): avisa e recarrega, sem reenviar nada.
-      setAviso(erro.code === 'INVALID_STATE' ? CORRIDA : erro.code === 'STALE_RESOURCE' ? MUDOU : erro.message)
-      if (erro.status === 409) setRecarga((n) => n + 1)
+      if (erro.status === 409) {
+        setAviso(CONFLITO_NA_FILA)
+        setRecarga((n) => n + 1)
+      } else {
+        setAviso(erro.message)
+      }
       setAssumindo(null)
     }
   }
