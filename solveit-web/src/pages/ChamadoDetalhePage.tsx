@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { CampoAreaTexto } from '@/components/CampoAreaTexto'
+import { CampoSelecao } from '@/components/CampoSelecao'
 import { CampoTexto } from '@/components/CampoTexto'
 import { SeloPrioridade, SeloStatus } from '@/components/Selos'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -11,15 +12,17 @@ import { acoesDisponiveis, DESTINO, type Acao } from '@/lib/acoes'
 import { toApiError, type ApiError } from '@/lib/api'
 import {
   alterarStatus,
+  atribuir,
   buscarChamado,
   comentar,
   editarChamado,
   formatarDataHora,
+  listarAtendentesAtivos,
   listarComentarios,
   listarHistorico,
   ROTULO_STATUS,
 } from '@/lib/chamados'
-import type { Chamado, Comentario, HistoricoStatus } from '@/lib/types'
+import type { Chamado, Comentario, HistoricoStatus, Pessoa } from '@/lib/types'
 
 // Mesmos limites dos DTOs da API.
 const MAX_TITULO = 200
@@ -52,7 +55,11 @@ export function ChamadoDetalhePage() {
   const idValido = Number.isInteger(id) && id > 0
   const [busca, setBusca] = useState<{ id: number; resultado: Resultado } | null>(null)
   const [recarga, setRecarga] = useState(0)
-  const [aviso, setAviso] = useState<Aviso | null>(null)
+  // Um aviso pode chegar pela navegação (ex.: "Você assumiu o chamado #7." vindo da fila).
+  const avisoRecebido = (useLocation().state as { aviso?: string } | null)?.aviso
+  const [aviso, setAviso] = useState<Aviso | null>(
+    avisoRecebido ? { tipo: 'sucesso', texto: avisoRecebido } : null,
+  )
 
   useEffect(() => {
     if (!idValido) return
@@ -102,15 +109,14 @@ export function ChamadoDetalhePage() {
     )
   }
 
-  /** Falha de uma ação: conflito de versão recarrega (D-3); o resto vira aviso de erro. */
+  /**
+   * Falha de uma ação vira aviso. Todo 409 recarrega (D-3): ou a versão ficou velha, ou o
+   * estado mudou (ex.: outro atendente assumiu antes) e a tela precisa mostrar o atual.
+   */
   function tratarFalha(falha: unknown) {
     const erro = toApiError(falha)
-    if (erro.code === 'STALE_RESOURCE') {
-      setAviso({ tipo: 'erro', texto: CONFLITO })
-      setRecarga((n) => n + 1)
-    } else {
-      setAviso({ tipo: 'erro', texto: erro.message })
-    }
+    setAviso({ tipo: 'erro', texto: erro.code === 'STALE_RESOURCE' ? CONFLITO : erro.message })
+    if (erro.status === 409) setRecarga((n) => n + 1)
   }
 
   // Cada handler devolve true quando a operação deu certo, para o formulário se fechar/limpar.
@@ -130,6 +136,20 @@ export function ChamadoDetalhePage() {
     try {
       const novo = await comentar(chamado.id, texto)
       atualizarDados((d) => ({ ...d, comentarios: [...d.comentarios, novo] }))
+      return true
+    } catch (falha) {
+      tratarFalha(falha)
+      return false
+    }
+  }
+
+  /** Assumir (atendente, para si) e atribuir (ADMIN) usam a mesma rota da API. */
+  async function tirarDaFila(atendente: Pessoa, observacao: string, mensagem: string): Promise<boolean> {
+    try {
+      await atribuir(chamado, atendente.id, observacao)
+      setAviso({ tipo: 'sucesso', texto: mensagem })
+      // O histórico ganhou "Aberto → Em andamento": recarrega tudo.
+      setRecarga((n) => n + 1)
       return true
     } catch (falha) {
       tratarFalha(falha)
@@ -185,7 +205,22 @@ export function ChamadoDetalhePage() {
           <div className="order-4 lg:order-none">
             <FichaChamado chamado={chamado} />
           </div>
-          <div className="order-2 empty:hidden lg:order-none">
+          <div className="order-2 grid gap-2 empty:hidden lg:order-none">
+            {acoes.has('ASSUMIR') && (
+              <Button
+                className="w-full"
+                onClick={() => tirarDaFila(sessao.usuario, '', 'Você assumiu o chamado.')}
+              >
+                Assumir
+              </Button>
+            )}
+            {acoes.has('ATRIBUIR') && (
+              <Atribuir
+                aoConfirmar={(atendente, observacao) =>
+                  tirarDaFila(atendente, observacao, `Chamado atribuído a ${atendente.nome}.`)
+                }
+              />
+            )}
             <Acoes acoes={acoes} aoConfirmar={confirmarAcao} />
           </div>
           <div className="order-5 lg:order-none">
@@ -481,5 +516,94 @@ function Historico({ historico }: { historico: HistoricoStatus[] }) {
         ))}
       </ol>
     </section>
+  )
+}
+
+/** D-5: o ADMIN escolhe um atendente ativo para um chamado da fila. A lista só carrega ao abrir. */
+function Atribuir({ aoConfirmar }: { aoConfirmar: (atendente: Pessoa, observacao: string) => Promise<boolean> }) {
+  const [aberto, setAberto] = useState(false)
+  const [atendentes, setAtendentes] = useState<Pessoa[] | null>(null)
+  const [escolhido, setEscolhido] = useState('')
+  const [observacao, setObservacao] = useState('')
+  const [erro, setErro] = useState<string | null>(null)
+  const [enviando, setEnviando] = useState(false)
+
+  useEffect(() => {
+    if (!aberto) return
+    const controle = new AbortController()
+    listarAtendentesAtivos(controle.signal)
+      .then(setAtendentes)
+      .catch((falha: unknown) => {
+        if (!controle.signal.aborted) {
+          setAtendentes([])
+          setErro(toApiError(falha).message)
+        }
+      })
+    return () => controle.abort()
+  }, [aberto])
+
+  if (!aberto) {
+    return (
+      <Button className="w-full" onClick={() => setAberto(true)}>
+        Atribuir
+      </Button>
+    )
+  }
+
+  async function confirmar() {
+    const atendente = atendentes?.find((a) => String(a.id) === escolhido)
+    if (!atendente) {
+      setErro('Escolha o atendente.')
+      return
+    }
+    setEnviando(true)
+    const ok = await aoConfirmar(atendente, observacao)
+    setEnviando(false)
+    if (ok) setAberto(false)
+  }
+
+  return (
+    <Card>
+      <CardContent className="grid gap-3">
+        <p className="font-medium">Atribuir a um atendente</p>
+        <CampoSelecao
+          id="atendente"
+          rotulo="Atendente"
+          value={escolhido}
+          onChange={(e) => {
+            setEscolhido(e.target.value)
+            setErro(null)
+          }}
+          erro={erro ?? undefined}
+          disabled={atendentes === null}
+        >
+          <option value="">{atendentes === null ? 'Carregando…' : 'Selecione'}</option>
+          {atendentes?.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.nome}
+            </option>
+          ))}
+        </CampoSelecao>
+        {atendentes?.length === 0 && !erro && (
+          <p className="text-sm text-muted-foreground">Não há atendentes ativos. Cadastre um em Usuários.</p>
+        )}
+        <CampoAreaTexto
+          id="observacao-atribuicao"
+          rotulo="Observação (opcional)"
+          rows={3}
+          maximo={MAX_OBSERVACAO}
+          value={observacao}
+          onChange={(e) => setObservacao(e.target.value)}
+        />
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button variant="outline" onClick={() => setAberto(false)} disabled={enviando}>
+            Voltar
+          </Button>
+          <Button onClick={confirmar} disabled={enviando}>
+            {enviando ? 'Enviando…' : 'Confirmar'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

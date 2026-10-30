@@ -4,6 +4,7 @@ import { CadastroPage } from '@/pages/CadastroPage'
 import { ChamadoDetalhePage } from '@/pages/ChamadoDetalhePage'
 import { ChamadosPage } from '@/pages/ChamadosPage'
 import { EmBreve, NaoEncontrado } from '@/pages/EmBreve'
+import { FilaPage } from '@/pages/FilaPage'
 import { NovoChamadoPage } from '@/pages/NovoChamadoPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RedirecionarParaInicial, RotaPorPerfil, RotaProtegida, SomenteAnonimo } from '@/routes/guards'
@@ -34,7 +35,7 @@ export default function App() {
           path="fila"
           element={
             <RotaPorPerfil perfis={['ATENDENTE']}>
-              <EmBreve titulo="Fila de atendimento" plano="06-04" />
+              <FilaPage />
             </RotaPorPerfil>
           }
         />

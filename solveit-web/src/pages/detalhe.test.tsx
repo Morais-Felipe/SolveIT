@@ -17,6 +17,15 @@ const SOLICITANTE: Usuario = {
   criadoEm: '2026-10-30T10:00:00',
 }
 const ATENDENTE: Usuario = { ...SOLICITANTE, id: 5, nome: 'Ari Atendente', email: 'ari@example.com', perfil: 'ATENDENTE' }
+const ADMIN: Usuario = { ...SOLICITANTE, id: 1, nome: 'Ana Admin', email: 'ana@example.com', perfil: 'ADMIN' }
+
+/** Usuários de /usuarios: só Ari é atendente ativo. */
+const USUARIOS: Usuario[] = [
+  ADMIN,
+  SOLICITANTE,
+  ATENDENTE,
+  { ...ATENDENTE, id: 6, nome: 'Bia Inativa', email: 'bia@example.com', ativo: false },
+]
 
 function chamado(extra: Partial<Chamado> = {}): Chamado {
   return {
@@ -65,6 +74,7 @@ function simularApi({ usuario = SOLICITANTE, detalhe, comentarios = COMENTARIOS 
     if (url === '/chamados/7/comentarios') return { data: comentarios }
     if (url === '/chamados/7/historico') return { data: HISTORICO }
     if (url === '/categorias') return { data: { items: [], page: 0, size: 100, totalElements: 0, totalPages: 0 } }
+    if (url === '/usuarios') return { data: { items: USUARIOS, page: 0, size: 100, totalElements: 4, totalPages: 1 } }
     if (url === '/chamados') {
       return { data: { items: [chamado()], page: 0, size: 10, totalElements: 1, totalPages: 1 } }
     }
@@ -227,5 +237,71 @@ describe('comentar e agir', () => {
       versaoEsperada: 3,
     })
     expect(await screen.findByRole('heading', { name: 'Impressora do 2º andar travada' })).toBeInTheDocument()
+  })
+})
+
+describe('assumir e atribuir pelo detalhe', () => {
+  it('o atendente assume um chamado da fila', async () => {
+    const usuarioEvento = userEvent.setup()
+    let leituras = 0
+    simularApi({
+      usuario: ATENDENTE,
+      detalhe: async () => {
+        leituras += 1
+        return {
+          data: chamado(leituras === 1 ? {} : { status: 'EM_ANDAMENTO', atendente: { id: 5, nome: 'Ari Atendente' }, versao: 4 }),
+        }
+      },
+    })
+    const patch = vi.spyOn(api, 'patch').mockResolvedValue({
+      data: chamado({ status: 'EM_ANDAMENTO', atendente: { id: 5, nome: 'Ari Atendente' }, versao: 4 }),
+    })
+    renderApp('/chamados/7')
+
+    await usuarioEvento.click(await screen.findByRole('button', { name: 'Assumir' }))
+
+    expect(patch).toHaveBeenCalledWith('/chamados/7/atendente', { atendenteId: 5, versaoEsperada: 3 })
+    expect(await screen.findByText('Você assumiu o chamado.')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Resolver' })).toBeInTheDocument()
+  })
+
+  it('o ADMIN escolhe entre atendentes ativos e atribui com observação', async () => {
+    const usuarioEvento = userEvent.setup()
+    simularApi({ usuario: ADMIN })
+    const patch = vi.spyOn(api, 'patch').mockResolvedValue({
+      data: chamado({ status: 'EM_ANDAMENTO', atendente: { id: 5, nome: 'Ari Atendente' }, versao: 4 }),
+    })
+    renderApp('/chamados/7')
+
+    await usuarioEvento.click(await screen.findByRole('button', { name: 'Atribuir' }))
+    const seletor = await screen.findByLabelText('Atendente')
+    await screen.findByRole('option', { name: 'Ari Atendente' })
+    expect(screen.queryByRole('option', { name: 'Bia Inativa' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: 'Sol' })).not.toBeInTheDocument()
+
+    await usuarioEvento.selectOptions(seletor, '5')
+    await usuarioEvento.type(screen.getByLabelText('Observação (opcional)'), 'Especialista em rede.')
+    await usuarioEvento.click(screen.getByRole('button', { name: 'Confirmar' }))
+
+    expect(patch).toHaveBeenCalledWith('/chamados/7/atendente', {
+      atendenteId: 5,
+      versaoEsperada: 3,
+      observacao: 'Especialista em rede.',
+    })
+    expect(await screen.findByText('Chamado atribuído a Ari Atendente.')).toBeInTheDocument()
+  })
+
+  it('não deixa confirmar a atribuição sem escolher o atendente', async () => {
+    const usuarioEvento = userEvent.setup()
+    simularApi({ usuario: ADMIN })
+    const patch = vi.spyOn(api, 'patch')
+    renderApp('/chamados/7')
+
+    await usuarioEvento.click(await screen.findByRole('button', { name: 'Atribuir' }))
+    await screen.findByRole('option', { name: 'Ari Atendente' })
+    await usuarioEvento.click(screen.getByRole('button', { name: 'Confirmar' }))
+
+    expect(screen.getByText('Escolha o atendente.')).toBeInTheDocument()
+    expect(patch).not.toHaveBeenCalled()
   })
 })
