@@ -21,7 +21,7 @@ ticket:
 
 actuals:
   tasks: 3
-  commits: 4
+  commits: 6
   executor: Claude Code (sem GSD)
 
 tech-stack:
@@ -72,8 +72,8 @@ coverage:
         ref: "solveit-web/src/pages/chamados.test.tsx"
         status: pass
       - kind: manual
-        ref: "Fluxo contra a API real e visual em 375 px"
-        status: pending
+        ref: "Fluxo contra a API real (MySQL 8.4 e API em containers Docker descartáveis) e visual em 375 px"
+        status: pass
     human_judgment: false
 ---
 
@@ -88,8 +88,14 @@ O solicitante vê "Meus chamados" com filtros por status, prioridade e categoria
 1. **Testes antigos com simulação genérica demais:** `respostaMe` devolvia o usuário para qualquer GET; com a lista real, `/categorias` recebia um usuário e a tela quebrava. A simulação agora responde por URL, e o título esperado passou a ser "Meus chamados".
 2. **Nome duplicado:** o menu já tinha o link "Abrir chamado"; o botão da página virou "Novo chamado" (encontrado pelo teste por papel).
 3. **Lint `set-state-in-effect`:** o "carregando" passou a ser derivado da chave dos filtros, em vez de `setState` no início do efeito.
+4. **Erro de campo que não sumia** (encontrado no teste manual): depois de um envio vazio, a mensagem continuava visível mesmo com o campo já preenchido. Agora o erro de cada campo é apagado assim que ele é editado; teste novo cobre o caso.
 
 ## Verificação
 
-- `npm test`: 22/22; `npm run typecheck` e `npm run build` limpos; `npm run lint` com o mesmo aviso pré-existente do componente gerado pelo shadcn.
-- **Pendente:** verificação manual contra a API real (exige MySQL e API locais, indisponíveis nesta máquina durante a execução).
+- `npm test`: 23/23; `npm run typecheck` e `npm run build` limpos; `npm run lint` com o mesmo aviso pré-existente do componente gerado pelo shadcn.
+- **Primeiro teste de ponta a ponta do front-end contra o back-end**, em 2026-10-30:
+  - Ambiente descartável: MySQL `mysql:8.4.11` e a API (`.jar` em `eclipse-temurin:17-jre`) em containers na mesma rede Docker; Flyway aplicou V1–V9. A API não sobe direto no Windows desta máquina (`Unable to establish loopback connection`, o mesmo bloqueio de loopback que afeta testes locais), por isso rodou em container.
+  - Dados: dois usuários cadastrados pela rota pública (ambos nasceram SOLICITANTE); um promovido a ADMIN seguindo `docs/PRIMEIRO-ADMIN.md` (0 admins antes, 1 linha alterada, COMMIT), com aprovação do responsável; ADMIN criou duas categorias pela API.
+  - Provado no navegador: login e sessão restaurada após recarga; lista vazia; validação do formulário; abertura com `POST /api/chamados` → 201 e aviso "Chamado #1 aberto com sucesso."; acentos preservados até o MySQL; filtros por prioridade e categoria feitos pelo servidor; filtros preservados na recarga; filtro sem resultado com mensagem própria; valores inválidos na URL ignorados; cartões e formulário sem rolagem horizontal em 375 px.
+  - Prova extra de servidor: `POST` com `status` extra devolve 400.
+  - Containers, rede e credenciais de teste removidos ao final.

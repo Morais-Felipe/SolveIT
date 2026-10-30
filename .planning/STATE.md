@@ -166,7 +166,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#25](https://github.com/Morais-Felipe/SolveIT/pull/25) (plano 04-01 + CI) integrado em 2026-10-30 (91b8e4d); Fase 4 concluída.
 - PR [#26](https://github.com/Morais-Felipe/SolveIT/pull/26) (plano 05-01) integrado em 2026-10-30 (1b2cd95); back-end do v1 concluído.
 - PR [#27](https://github.com/Morais-Felipe/SolveIT/pull/27) (ticket 25, plano 06-01) integrado em 2026-10-30 (803f479).
-- Ticket 26 (`ticket/26-frontend-solicitante`, plano 06-02): commits locais; verificação manual contra a API real pendente; publicação com uma autorização única.
+- Ticket 26 (`ticket/26-frontend-solicitante`, plano 06-02): commits locais; teste de ponta a ponta contra a API real aprovado (MySQL e API em Docker); publicação com uma autorização única.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
