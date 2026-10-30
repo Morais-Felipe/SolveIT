@@ -4,7 +4,7 @@
 
 ### Chamados de suporte com autorização correta, histórico auditável e comunicação clara
 
-![Status: Fase 3 em andamento](https://img.shields.io/badge/status-fase%203%20em%20andamento%20(9%2F10)-eab308)
+![Status: Fase 3 concluída](https://img.shields.io/badge/status-fase%203%20conclu%C3%ADda-22c55e)
 ![Abordagem: Build to Learn](https://img.shields.io/badge/abordagem-Build%20to%20Learn-f97316)
 ![Java 17](https://img.shields.io/badge/Java-17-007396)
 ![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3-6DB33F)
@@ -14,7 +14,7 @@
 </div>
 
 > [!IMPORTANT]
-> **Fase 3 com 9 de 10 planos integrados na `main`.** Além da autenticação JWT, a API já administra usuários e categorias e conduz o chamado por todo o fluxo: abertura, consulta e filtros, edição, atribuição, resolução, fechamento, cancelamento, comentários e histórico auditável. A suíte tem 207 testes contra MySQL 8.4 real (Testcontainers). Falta o plano 03-10 (ativação/perfil de usuários com devolução auditada à fila). Notificações, dashboard, telas e deploy continuam planejados.
+> **Fase 3 concluída.** Além da autenticação JWT, a API administra usuários (inclusive ativação e troca de perfil com devolução auditada dos chamados) e categorias e conduz o chamado por todo o fluxo: abertura, consulta e filtros, edição, atribuição, resolução, fechamento, cancelamento, comentários e histórico auditável. A suíte tem 216 testes contra MySQL 8.4 real (Testcontainers). Próximas fases: notificações por e-mail, dashboard, front-end React e polimento.
 
 ## O que é o SolveIT
 
@@ -34,10 +34,10 @@ O objetivo não é apenas chegar a uma aplicação funcional. A abordagem **Buil
 
 | Item | Situação |
 | --- | --- |
-| Estado do repositório | Fases 1 e 2 concluídas; Fase 3 com 9 de 10 planos integrados na `main` |
-| Fases | 2 de 7 concluídas; Fase 3 em andamento |
-| Requisitos do v1 | 28 de 55 concluídos; TICK-10, TICK-11 e TICK-12 parciais até o plano 03-10 |
-| Foco atual | Plano 03-10 — ativar/desativar e trocar perfil de usuários com prévia, devolução auditada e proteção do último ADMIN |
+| Estado do repositório | Fases 1, 2 e 3 concluídas e integradas na `main` |
+| Fases | 3 de 7 concluídas |
+| Requisitos do v1 | 32 de 55 concluídos (todo o back-end de chamados) |
+| Foco atual | Planejamento da Fase 4 — notificações por e-mail (escopo revisado em 2026-10-30) |
 | Aplicação executável | API Spring Boot executável localmente com MySQL configurado |
 | API disponível | Auth, usuários, categorias, chamados, comentários e histórico (ver [Contrato de API](#contrato-de-api)) |
 | Telas | Ainda não existem; a SPA React é a Fase 6 |
@@ -64,10 +64,10 @@ Set-Location solveit-api
 .\mvnw.cmd clean verify
 ```
 
-Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **207 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários e disputas concorrentes reais entre transações.
+Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **216 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários e disputas concorrentes reais entre transações.
 
 > [!NOTE]
-> Na máquina Windows de desenvolvimento atual, os 4 testes de `AuthHttpErrorIntegrationTest` falham com `Unable to establish loopback connection` ao criar o `HttpClient` do Java. A falha se reproduz na `main` sem nenhuma mudança e é do ambiente, não do código; os demais 203 testes passam.
+> Na máquina Windows de desenvolvimento atual, os 4 testes de `AuthHttpErrorIntegrationTest` falham com `Unable to establish loopback connection` ao criar o `HttpClient` do Java. A falha se reproduz na `main` sem nenhuma mudança e é do ambiente, não do código; os demais 212 testes passam.
 
 Para iniciar a aplicação localmente, crie antes o database `solveit` em uma instância MySQL e forneça as credenciais pelo ambiente. O Flyway cria e versiona as tabelas (V1 a V9), mas deliberadamente não cria o database nem armazena credenciais no repositório.
 
@@ -98,7 +98,7 @@ Toda escrita relevante passa por uma trava global no banco (`core_write_guard`),
 | `ATENDENTE` | Ver a fila (`ABERTO` sem responsável) e os chamados atribuídos a si, assumir chamados, comentar e resolver os que são seus | Só assume para si mesmo; não fecha nem cancela; perde o acesso quando o chamado passa a outro atendente |
 | `ADMIN` | Administrar usuários e categorias, ver todos os chamados, atribuir atendentes, resolver e cancelar chamados `EM_ANDAMENTO`, editar chamados `ABERTO` | Não fecha chamados nem cancela chamados `ABERTO` (decisões do solicitante); continua sujeito ao fluxo de status e à auditoria |
 
-O cadastro público cria exclusivamente usuários `SOLICITANTE`. Contas `ATENDENTE` e `ADMIN` são criadas por um administrador. Ativar/desativar usuários e trocar perfis chegam no plano 03-10.
+O cadastro público cria exclusivamente usuários `SOLICITANTE`. Contas `ATENDENTE` e `ADMIN` são criadas por um administrador. Ativar/desativar usuários e trocar perfis acontece numa única operação administrativa, que devolve à fila os chamados em andamento de um atendente desativado.
 
 ## Regras críticas
 
@@ -114,7 +114,8 @@ Todas as regras abaixo estão implementadas e provadas por testes de integraçã
 - Comentários são imutáveis: não existe rota para editar ou excluir comentário, e comentar não reserva o chamado.
 - Toda mudança de status cria exatamente um `HistoricoStatus`, atomicamente com a alteração do chamado; tentativas recusadas não geram histórico.
 - Atualizações concorrentes não sobrescrevem silenciosamente uma transição já confirmada.
-- *(Plano 03-10)* `EM_ANDAMENTO → ABERTO` só por devolução administrativa auditada, ao desativar ou retirar o perfil de um atendente.
+- `EM_ANDAMENTO → ABERTO` só acontece por devolução administrativa auditada, ao desativar ou retirar o perfil de um atendente.
+- O sistema nunca fica sem um `ADMIN` ativo, inclusive sob operações simultâneas.
 
 ## Fluxo de status
 
@@ -125,7 +126,7 @@ flowchart LR
     R -->|Solicitante proprietário| F[FECHADO]
     A -->|Cancelamento pelo solicitante| C[CANCELADO]
     E -->|Cancelamento pelo ADMIN| C
-    E -.->|Devolução administrativa - plano 03-10| A
+    E -.->|Devolução administrativa: atendente desativado ou sem perfil| A
     F --- X[Reabertura proibida]
     C --- X
     X --> N[Criar um novo chamado]
@@ -153,7 +154,7 @@ Os envios deverão ocorrer somente após a confirmação da transação. Uma fal
 | Persistência | MySQL 8.4, Spring Data JPA, Hibernate, Specifications | Implementado |
 | Migrações | Flyway (V1 a V9) | Implementado; único responsável pelo esquema |
 | Segurança | Spring Security, JWT (JJWT), BCrypt | Implementado |
-| Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL | Implementado (207 testes) |
+| Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL | Implementado (216 testes) |
 | Notificações | JavaMailSender via SMTP | Planejado — Fase 4 |
 | Front-end | React, Tailwind CSS, React Router, Axios, Vite | Planejado — Fase 6 |
 | Testes de interface | Vitest, React Testing Library, Playwright | Planejado — Fases 6 e 7 |
@@ -201,7 +202,7 @@ As rotas marcadas como ✅ estão implementadas e testadas; as demais documentam
 | Usuários | `GET /api/usuarios` · `GET /api/usuarios/{id}` | `ADMIN`; lista paginada e consulta por id | ✅ |
 | Usuários | `POST /api/usuarios` | `ADMIN`; cria qualquer perfil, sempre ativo | ✅ |
 | Usuários | `PUT /api/usuarios/{id}` | `ADMIN`; edita nome, e-mail e senha com versão esperada | ✅ |
-| Usuários | Ativação e troca de perfil | `ADMIN`; com prévia, devolução auditada e proteção do último ADMIN | Plano 03-10 |
+| Usuários | `PATCH /api/usuarios/{id}/operacao` | `ADMIN`; muda perfil e atividade numa operação atômica, devolve à fila os chamados em andamento do atendente e protege o último ADMIN | ✅ |
 | Categorias | `GET /api/categorias` · `GET /api/categorias/{id}` | Autenticado; ativas para todos; inativa por id para ADMIN ou quem vê chamado vinculado | ✅ |
 | Categorias | `POST /api/categorias` · `PUT /api/categorias/{id}` | `ADMIN`; nome único, edição com versão esperada | ✅ |
 | Categorias | `PATCH /api/categorias/{id}/ativo` | `ADMIN`; ativa ou desativa sem excluir | ✅ |
@@ -229,7 +230,7 @@ As sete fases são incrementos sequenciais.
 | --- | --- | --- |
 | 1 — Base do Projeto | Aplicação Spring inicial sobre esquema MySQL completo, versionado por Flyway e validado pelo JPA | Concluída — 5/5 planos |
 | 2 — Autenticação | Cadastro de solicitante, login JWT e autorização por perfil e relação | Concluída — 8/8 planos |
-| 3 — Core de Chamados | Administração, ciclo completo do chamado, comentários e histórico auditável | Em andamento — 9/10 planos |
+| 3 — Core de Chamados | Administração, ciclo completo do chamado, comentários e histórico auditável | Concluída — 10/10 planos |
 | 4 — Notificações por E-mail | Comunicação dos eventos confirmados aos envolvidos corretos | Pendente |
 | 5 — Dashboard | Indicadores autorizados para administradores e atendentes | Pendente |
 | 6 — Front-end (React + Tailwind) | Jornadas principais dos três perfis na SPA responsiva | Pendente |
@@ -248,7 +249,7 @@ As sete fases são incrementos sequenciais.
 | 03-07 | Resolver, fechar e cancelar | [#19](https://github.com/Morais-Felipe/SolveIT/pull/19) |
 | 03-08 | Comentários com acesso atual e concorrência segura | [#20](https://github.com/Morais-Felipe/SolveIT/pull/20) |
 | 03-09 | Leitura de comentários e histórico; imutabilidade | [#21](https://github.com/Morais-Felipe/SolveIT/pull/21) |
-| 03-10 | Ativação/perfil de usuários, devolução auditada e último ADMIN | Pendente |
+| 03-10 | Ativação/perfil de usuários, devolução auditada e último ADMIN (sem prévia, após revisão de escopo) | Ticket 22 |
 
 Metas, dependências, critérios de sucesso e rastreabilidade estão no [roadmap completo](.planning/ROADMAP.md). As Fases 4 a 7 ainda não foram detalhadas em planos.
 
@@ -279,7 +280,7 @@ Após testes e resumo, há três gates independentes: autorização para fazer p
 - JWTs são temporários e carregam só a identidade; perfil e atividade são relidos do banco a cada requisição.
 - Toda operação protegida verifica perfil e relação **atuais** com o recurso no servidor; autoria antiga de comentário não concede acesso.
 - O cadastro público não cria `ATENDENTE` nem `ADMIN`; o primeiro ADMIN segue um [procedimento manual auditável](docs/PRIMEIRO-ADMIN.md).
-- Categorias são desativadas sem exclusão; usuários seguirão o mesmo princípio no plano 03-10.
+- Categorias e usuários são desativados sem exclusão; o último ADMIN ativo é protegido.
 - Mudança de status e criação do respectivo histórico ocorrem na mesma transação; uma falha no histórico desfaz a mudança.
 - Escritas concorrentes são serializadas por uma trava no banco e por versão esperada, provadas com transações MySQL reais.
 - Comentários são imutáveis e atribuídos à identidade autenticada.

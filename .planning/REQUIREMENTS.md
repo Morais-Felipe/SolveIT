@@ -25,7 +25,7 @@
 
 - [x] **ADMN-01**: Um administrador pode listar usuários de forma paginada e consultar um usuário por id.
 - [x] **ADMN-02**: Um administrador pode criar e editar usuários com qualquer perfil sem permitir e-mails duplicados.
-- [ ] **ADMN-03**: Um administrador pode ativar ou desativar usuários sem excluí-los. Desativação ou retirada do perfil ATENDENTE devolve seus chamados EM_ANDAMENTO a ABERTO sem responsável, após confirmação explícita da quantidade, com histórico e operação atômica. Conflito exige nova revisão sem mudanças parciais. O último ADMIN ativo não pode ser desativado nem perder seu perfil.
+- [x] **ADMN-03**: Um administrador pode ativar ou desativar usuários sem excluí-los. Desativação ou retirada do perfil ATENDENTE devolve seus chamados EM_ANDAMENTO a ABERTO sem responsável, após confirmação explícita da quantidade, com histórico e operação atômica. Conflito exige nova revisão sem mudanças parciais. O último ADMIN ativo não pode ser desativado nem perder seu perfil.
   - *Revisão 2026-10-30:* sem prévia nem confirmação da quantidade. A operação é atômica, usa a versão esperada do usuário (conflito = 409, sem mudança parcial), devolve os chamados com histórico e informa na resposta quantos foram devolvidos.
 - [x] **ADMN-04**: Qualquer usuário autenticado pode listar categorias ativas e consultar uma categoria permitida por id.
 - [x] **ADMN-05**: Um administrador pode criar e editar categorias com nome único.
@@ -42,9 +42,9 @@
 - [x] **TICK-07**: Somente o atendente responsável ou um administrador pode alterar EM_ANDAMENTO para RESOLVIDO, preenchendo `resolvidoEm`.
 - [x] **TICK-08**: Somente o solicitante proprietário pode alterar RESOLVIDO para FECHADO.
 - [x] **TICK-09**: Somente o solicitante proprietário pode cancelar um chamado ABERTO, e somente um administrador pode cancelar um chamado EM_ANDAMENTO.
-- [ ] **TICK-10**: Transições não previstas, inclusive reabertura de FECHADO ou CANCELADO, são rejeitadas. EM_ANDAMENTO → ABERTO é permitido exclusivamente pela desativação ou retirada do perfil do atendente, com devolução à fila conforme ADMN-03; as regras de edição de ABERTO voltam a valer.
-- [ ] **TICK-11**: A abertura registra autor, data e estado inicial ABERTO no histórico. Toda transição confirmada cria exatamente um HistoricoStatus na mesma transação, com ator, estados, data e observação manual opcional; devoluções administrativas têm motivo automático obrigatório. Tentativas rejeitadas não geram histórico de status.
-- [ ] **TICK-12**: Atualizações concorrentes do mesmo chamado não podem sobrescrever silenciosamente uma transição já confirmada.
+- [x] **TICK-10**: Transições não previstas, inclusive reabertura de FECHADO ou CANCELADO, são rejeitadas. EM_ANDAMENTO → ABERTO é permitido exclusivamente pela desativação ou retirada do perfil do atendente, com devolução à fila conforme ADMN-03; as regras de edição de ABERTO voltam a valer.
+- [x] **TICK-11**: A abertura registra autor, data e estado inicial ABERTO no histórico. Toda transição confirmada cria exatamente um HistoricoStatus na mesma transação, com ator, estados, data e observação manual opcional; devoluções administrativas têm motivo automático obrigatório. Tentativas rejeitadas não geram histórico de status.
+- [x] **TICK-12**: Atualizações concorrentes do mesmo chamado não podem sobrescrever silenciosamente uma transição já confirmada.
 
 ### Colaboração e Auditoria
 
@@ -131,7 +131,7 @@
 | AUTH-06 | Phase 2 | Complete |
 | ADMN-01 | Phase 3 | Complete |
 | ADMN-02 | Phase 3 | Complete |
-| ADMN-03 | Phase 3 | Pending |
+| ADMN-03 | Phase 3 | Complete |
 | ADMN-04 | Phase 3 | Complete |
 | ADMN-05 | Phase 3 | Complete |
 | ADMN-06 | Phase 3 | Complete |
@@ -144,9 +144,9 @@
 | TICK-07 | Phase 3 | Complete |
 | TICK-08 | Phase 3 | Complete |
 | TICK-09 | Phase 3 | Complete |
-| TICK-10 | Phase 3 | Partial (manuais 03-07; devolução 03-10) |
-| TICK-11 | Phase 3 | Partial (falta devolução 03-10) |
-| TICK-12 | Phase 3 | Partial (comentários 03-08; falta devolução 03-10) |
+| TICK-10 | Phase 3 | Complete |
+| TICK-11 | Phase 3 | Complete |
+| TICK-12 | Phase 3 | Complete |
 | COLL-01 | Phase 3 | Complete |
 | COLL-02 | Phase 3 | Complete |
 | COLL-03 | Phase 3 | Complete |

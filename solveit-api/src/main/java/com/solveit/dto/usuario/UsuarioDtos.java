@@ -1,5 +1,6 @@
 package com.solveit.dto.usuario;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.solveit.dto.validation.ValidPassword;
 import com.solveit.enums.PerfilUsuario;
 import jakarta.validation.constraints.Email;
@@ -9,8 +10,11 @@ import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public final class UsuarioDtos {
 
@@ -73,6 +77,34 @@ public final class UsuarioDtos {
             Boolean ativo,
             LocalDateTime criadoEm,
             Long versao) {
+    }
+
+    /**
+     * Estado operacional desejado: perfil e atividade juntos, numa única operação
+     * atômica. Qualquer campo fora do contrato é rejeitado.
+     */
+    public record AlterarOperacao(
+            @NotNull(message = "O perfil é obrigatório")
+            PerfilUsuario perfil,
+            @NotNull(message = "O estado ativo é obrigatório")
+            Boolean ativo,
+            @NotNull(message = "A versão esperada é obrigatória")
+            @PositiveOrZero(message = "A versão esperada não pode ser negativa")
+            Long versaoEsperada,
+            @JsonAnySetter
+            @Size(max = 0, message = "Envie somente perfil, ativo e versaoEsperada")
+            Map<String, Object> camposNaoPermitidos) {
+
+        public AlterarOperacao {
+            camposNaoPermitidos = camposNaoPermitidos == null
+                    ? Map.of()
+                    : Collections.unmodifiableMap(new LinkedHashMap<>(camposNaoPermitidos));
+        }
+    }
+
+    public record ResultadoOperacao(
+            Resposta usuario,
+            int chamadosDevolvidos) {
     }
 
     public record Pagina(
