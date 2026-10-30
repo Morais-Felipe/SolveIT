@@ -3,12 +3,23 @@ spring:
     name: solveit-api
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  mail:
+    default-encoding: UTF-8
+    host: ${SOLVEIT_MAIL_HOST:localhost}
+    port: ${SOLVEIT_MAIL_PORT:1025}
+    properties:
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
 
 logging:
   level:
     org.hibernate.engine.jdbc.spi.SqlExceptionHelper: OFF
 
 solveit:
+  mail:
+    enabled: ${SOLVEIT_MAIL_ENABLED:true}
+    from: ${SOLVEIT_MAIL_FROM:solveit@localhost}
   security:
     bcrypt:
       strength: ${SOLVEIT_BCRYPT_STRENGTH:12}

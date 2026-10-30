@@ -10,6 +10,7 @@ import com.solveit.exception.DomainException;
 import com.solveit.repository.ChamadoRepository;
 import com.solveit.repository.ComentarioRepository;
 import com.solveit.repository.UsuarioRepository;
+import com.solveit.service.notificacao.NotificacaoPublisher;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.util.List;
@@ -32,6 +33,7 @@ public class ComentarioService {
     private final ChamadoAuthorizationService chamadoAuthorizationService;
     private final CoreWriteCoordinator coreWriteCoordinator;
     private final EntityManager entityManager;
+    private final NotificacaoPublisher notificacaoPublisher;
 
     public ComentarioService(
             ComentarioRepository comentarioRepository,
@@ -39,13 +41,15 @@ public class ComentarioService {
             UsuarioRepository usuarioRepository,
             ChamadoAuthorizationService chamadoAuthorizationService,
             CoreWriteCoordinator coreWriteCoordinator,
-            EntityManager entityManager) {
+            EntityManager entityManager,
+            NotificacaoPublisher notificacaoPublisher) {
         this.comentarioRepository = comentarioRepository;
         this.chamadoRepository = chamadoRepository;
         this.usuarioRepository = usuarioRepository;
         this.chamadoAuthorizationService = chamadoAuthorizationService;
         this.coreWriteCoordinator = coreWriteCoordinator;
         this.entityManager = entityManager;
+        this.notificacaoPublisher = notificacaoPublisher;
     }
 
     /**
@@ -90,8 +94,10 @@ public class ComentarioService {
                     "Este chamado foi encerrado e não aceita novos comentários.");
         }
 
-        return toResposta(comentarioRepository.saveAndFlush(
-                new Comentario(chamado, autor, request.texto())));
+        Comentario salvo = comentarioRepository.saveAndFlush(
+                new Comentario(chamado, autor, request.texto()));
+        notificacaoPublisher.comentarioAdicionado(salvo);
+        return toResposta(salvo);
     }
 
     private static ComentarioDtos.Resposta toResposta(Comentario comentario) {

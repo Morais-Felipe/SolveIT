@@ -5,3 +5,5 @@ solveit:
       issuer: solveit-api
       audience: solveit-api
       access-token-ttl: 1h
+  mail:
+    enabled: false

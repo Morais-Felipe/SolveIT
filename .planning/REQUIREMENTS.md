@@ -55,12 +55,12 @@
 
 ### Notificações
 
-- [ ] **MAIL-01**: Administradores recebem e-mail quando um novo chamado ABERTO é criado.
-- [ ] **MAIL-02**: Administradores recebem uma notificação urgente adicional ou claramente destacada quando o novo chamado é CRITICO.
-- [ ] **MAIL-03**: Atendente e solicitante recebem e-mail após a atribuição de atendente.
-- [ ] **MAIL-04**: O solicitante recebe e-mail após cada atualização de status.
-- [ ] **MAIL-05**: Todos os envolvidos no chamado recebem e-mail após novo comentário, sem duplicar destinatários.
-- [ ] **MAIL-06**: E-mails são disparados somente após confirmação da transação do evento e falhas SMTP não desfazem mudanças válidas do chamado.
+- [x] **MAIL-01**: Administradores recebem e-mail quando um novo chamado ABERTO é criado.
+- [x] **MAIL-02**: Administradores recebem uma notificação urgente adicional ou claramente destacada quando o novo chamado é CRITICO.
+- [x] **MAIL-03**: Atendente e solicitante recebem e-mail após a atribuição de atendente.
+- [x] **MAIL-04**: O solicitante recebe e-mail após cada atualização de status.
+- [x] **MAIL-05**: Todos os envolvidos no chamado recebem e-mail após novo comentário, sem duplicar destinatários.
+- [x] **MAIL-06**: E-mails são disparados somente após confirmação da transação do evento e falhas SMTP não desfazem mudanças válidas do chamado.
   - *Revisão 2026-10-30:* envio após o commit e fora da requisição, com falha registrada em log; sem outbox (reenvio durável segue em OPER-01, v2).
 
 ### Dashboard
@@ -151,12 +151,12 @@
 | COLL-02 | Phase 3 | Complete |
 | COLL-03 | Phase 3 | Complete |
 | COLL-04 | Phase 3 | Complete |
-| MAIL-01 | Phase 4 | Pending |
-| MAIL-02 | Phase 4 | Pending |
-| MAIL-03 | Phase 4 | Pending |
-| MAIL-04 | Phase 4 | Pending |
-| MAIL-05 | Phase 4 | Pending |
-| MAIL-06 | Phase 4 | Pending |
+| MAIL-01 | Phase 4 | Complete |
+| MAIL-02 | Phase 4 | Complete |
+| MAIL-03 | Phase 4 | Complete |
+| MAIL-04 | Phase 4 | Complete |
+| MAIL-05 | Phase 4 | Complete |
+| MAIL-06 | Phase 4 | Complete |
 | DASH-01 | Phase 5 | Pending |
 | DASH-02 | Phase 5 | Pending |
 | DASH-03 | Phase 5 | Pending |

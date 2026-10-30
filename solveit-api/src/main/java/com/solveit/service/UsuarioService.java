@@ -13,6 +13,7 @@ import com.solveit.exception.UniqueConstraints;
 import com.solveit.repository.ChamadoRepository;
 import com.solveit.repository.HistoricoStatusRepository;
 import com.solveit.repository.UsuarioRepository;
+import com.solveit.service.notificacao.NotificacaoPublisher;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.time.Clock;
@@ -43,6 +44,7 @@ public class UsuarioService {
     private final CoreWriteCoordinator coreWriteCoordinator;
     private final EntityManager entityManager;
     private final Clock clock;
+    private final NotificacaoPublisher notificacaoPublisher;
 
     public UsuarioService(
             UsuarioRepository usuarioRepository,
@@ -51,7 +53,8 @@ public class UsuarioService {
             PasswordEncoder passwordEncoder,
             CoreWriteCoordinator coreWriteCoordinator,
             EntityManager entityManager,
-            Clock clock) {
+            Clock clock,
+            NotificacaoPublisher notificacaoPublisher) {
         this.usuarioRepository = usuarioRepository;
         this.chamadoRepository = chamadoRepository;
         this.historicoStatusRepository = historicoStatusRepository;
@@ -59,6 +62,7 @@ public class UsuarioService {
         this.coreWriteCoordinator = coreWriteCoordinator;
         this.entityManager = entityManager;
         this.clock = clock;
+        this.notificacaoPublisher = notificacaoPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -210,6 +214,7 @@ public class UsuarioService {
                     StatusChamado.EM_ANDAMENTO,
                     ator,
                     motivo));
+            notificacaoPublisher.statusAlterado(atualizado, StatusChamado.EM_ANDAMENTO, ator, motivo);
         }
         return emAndamento.size();
     }
