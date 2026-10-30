@@ -1,15 +1,24 @@
 package com.solveit.service;
 
 import com.solveit.dto.usuario.UsuarioDtos;
+import com.solveit.entity.Chamado;
+import com.solveit.entity.HistoricoStatus;
 import com.solveit.entity.Usuario;
 import com.solveit.enums.PerfilUsuario;
+import com.solveit.enums.StatusChamado;
 import com.solveit.exception.ApiErrorCode;
 import com.solveit.exception.DomainException;
 import com.solveit.exception.EmailAlreadyRegisteredException;
 import com.solveit.exception.UniqueConstraints;
+import com.solveit.repository.ChamadoRepository;
+import com.solveit.repository.HistoricoStatusRepository;
 import com.solveit.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -28,19 +37,28 @@ public class UsuarioService {
     private static final Sort ORDEM_ADMINISTRATIVA = Sort.by(Sort.Order.asc("id"));
 
     private final UsuarioRepository usuarioRepository;
+    private final ChamadoRepository chamadoRepository;
+    private final HistoricoStatusRepository historicoStatusRepository;
     private final PasswordEncoder passwordEncoder;
     private final CoreWriteCoordinator coreWriteCoordinator;
     private final EntityManager entityManager;
+    private final Clock clock;
 
     public UsuarioService(
             UsuarioRepository usuarioRepository,
+            ChamadoRepository chamadoRepository,
+            HistoricoStatusRepository historicoStatusRepository,
             PasswordEncoder passwordEncoder,
             CoreWriteCoordinator coreWriteCoordinator,
-            EntityManager entityManager) {
+            EntityManager entityManager,
+            Clock clock) {
         this.usuarioRepository = usuarioRepository;
+        this.chamadoRepository = chamadoRepository;
+        this.historicoStatusRepository = historicoStatusRepository;
         this.passwordEncoder = passwordEncoder;
         this.coreWriteCoordinator = coreWriteCoordinator;
         this.entityManager = entityManager;
+        this.clock = clock;
     }
 
     @Transactional(readOnly = true)
@@ -113,6 +131,87 @@ public class UsuarioService {
             alvo.setSenha(novaSenhaHash);
         }
         return toResponse(salvarComEmailUnico(alvo));
+    }
+
+    /**
+     * Altera perfil e atividade numa única transação (revisão de escopo de 2026-10-30:
+     * sem prévia). Ordem: guard → ator e alvo por id → versão → mudança real → último
+     * ADMIN → devolução dos chamados EM_ANDAMENTO do atendente → usuário. Qualquer falha
+     * desfaz o usuário e todos os chamados.
+     */
+    @Transactional(timeout = 10)
+    public UsuarioDtos.ResultadoOperacao alterarOperacao(
+            Long usuarioId,
+            Long alvoId,
+            UsuarioDtos.AlterarOperacao request) {
+        coreWriteCoordinator.adquirir();
+        Usuario alvo = bloquearAtorEAlvoEmOrdemDeId(
+                usuarioId,
+                alvoId,
+                "User operation changes require administrator profile");
+        Usuario ator = entityManager.find(Usuario.class, usuarioId);
+        validarVersao(alvo, request.versaoEsperada());
+
+        PerfilUsuario novoPerfil = request.perfil();
+        boolean novoAtivo = request.ativo();
+        boolean ativoAtual = Boolean.TRUE.equals(alvo.getAtivo());
+        if (alvo.getPerfil() == novoPerfil && ativoAtual == novoAtivo) {
+            throw new DomainException(
+                    ApiErrorCode.INVALID_STATE,
+                    HttpStatus.CONFLICT,
+                    "Nenhuma alteração",
+                    "O usuário já possui o perfil e o estado solicitados.");
+        }
+
+        boolean deixaDeSerAdminAtivo = alvo.getPerfil() == PerfilUsuario.ADMIN
+                && ativoAtual
+                && !(novoPerfil == PerfilUsuario.ADMIN && novoAtivo);
+        if (deixaDeSerAdminAtivo
+                && usuarioRepository.countByPerfilAndAtivoTrue(PerfilUsuario.ADMIN) <= 1) {
+            throw new DomainException(
+                    ApiErrorCode.LAST_ACTIVE_ADMIN,
+                    HttpStatus.CONFLICT,
+                    "Último administrador",
+                    "O sistema precisa manter ao menos um administrador ativo.");
+        }
+
+        int devolvidos = 0;
+        boolean deixaDeAtender = alvo.getPerfil() == PerfilUsuario.ATENDENTE
+                && !(novoPerfil == PerfilUsuario.ATENDENTE && novoAtivo);
+        if (deixaDeAtender) {
+            String motivo = novoAtivo
+                    ? "Retorno à fila por mudança de perfil do atendente"
+                    : "Retorno à fila por desativação do atendente";
+            devolvidos = devolverChamadosAFila(alvo, ator, motivo);
+        }
+
+        alvo.setPerfil(novoPerfil);
+        alvo.setAtivo(novoAtivo);
+        Usuario salvo = usuarioRepository.saveAndFlush(alvo);
+        return new UsuarioDtos.ResultadoOperacao(toResponse(salvo), devolvidos);
+    }
+
+    /**
+     * Devolve cada chamado EM_ANDAMENTO do atendente à fila: ABERTO, sem responsável, com
+     * um histórico de autoria do ADMIN e motivo automático. Encerrados não mudam.
+     */
+    private int devolverChamadosAFila(Usuario atendente, Usuario ator, String motivo) {
+        List<Chamado> emAndamento = chamadoRepository.findByAtendenteIdAndStatusOrderByIdAsc(
+                atendente.getId(),
+                StatusChamado.EM_ANDAMENTO);
+        LocalDateTime instante = LocalDateTime.now(clock).truncatedTo(ChronoUnit.MICROS);
+        for (Chamado chamado : emAndamento) {
+            entityManager.refresh(chamado, LockModeType.PESSIMISTIC_WRITE);
+            chamado.setAtendente(null);
+            chamado.transicionar(StatusChamado.ABERTO, instante);
+            Chamado atualizado = chamadoRepository.saveAndFlush(chamado);
+            historicoStatusRepository.saveAndFlush(HistoricoStatus.transicao(
+                    atualizado,
+                    StatusChamado.EM_ANDAMENTO,
+                    ator,
+                    motivo));
+        }
+        return emAndamento.size();
     }
 
     /**
