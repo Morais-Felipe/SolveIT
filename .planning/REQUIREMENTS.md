@@ -65,11 +65,11 @@
 
 ### Dashboard
 
-- [ ] **DASH-01**: Administradores e atendentes podem consultar totais de chamados ABERTO, EM_ANDAMENTO, RESOLVIDO e CRITICO aberto.
-- [ ] **DASH-02**: Administradores e atendentes podem consultar a quantidade de chamados agrupada por categoria.
-- [ ] **DASH-03**: Administradores e atendentes podem consultar a carga ativa agrupada por atendente.
-- [ ] **DASH-04**: Administradores e atendentes podem consultar a distribuição de chamados abertos por prioridade.
-- [ ] **DASH-05**: Os agregados respeitam o escopo de acesso definido para o perfil e são calculados no banco.
+- [x] **DASH-01**: Administradores e atendentes podem consultar totais de chamados ABERTO, EM_ANDAMENTO, RESOLVIDO e CRITICO aberto.
+- [x] **DASH-02**: Administradores e atendentes podem consultar a quantidade de chamados agrupada por categoria.
+- [x] **DASH-03**: Administradores e atendentes podem consultar a carga ativa agrupada por atendente.
+- [x] **DASH-04**: Administradores e atendentes podem consultar a distribuição de chamados abertos por prioridade.
+- [x] **DASH-05**: Os agregados respeitam o escopo de acesso definido para o perfil e são calculados no banco.
 
 ### Aplicação Web
 
@@ -157,11 +157,11 @@
 | MAIL-04 | Phase 4 | Complete |
 | MAIL-05 | Phase 4 | Complete |
 | MAIL-06 | Phase 4 | Complete |
-| DASH-01 | Phase 5 | Pending |
-| DASH-02 | Phase 5 | Pending |
-| DASH-03 | Phase 5 | Pending |
-| DASH-04 | Phase 5 | Pending |
-| DASH-05 | Phase 5 | Pending |
+| DASH-01 | Phase 5 | Complete |
+| DASH-02 | Phase 5 | Complete |
+| DASH-03 | Phase 5 | Complete |
+| DASH-04 | Phase 5 | Complete |
+| DASH-05 | Phase 5 | Complete |
 | WEB-01 | Phase 6 | Pending |
 | WEB-02 | Phase 6 | Pending |
 | WEB-03 | Phase 6 | Pending |
