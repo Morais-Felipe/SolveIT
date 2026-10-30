@@ -56,9 +56,18 @@ export async function listarCategoriasAtivas(signal?: AbortSignal): Promise<Cate
   return resposta.data.items
 }
 
-/** Formata LocalDateTime (sem fuso) como data local curta, ex.: 30/10/2026. */
+/**
+ * A API grava as datas em UTC (LocalDateTime.now(ZoneOffset.UTC)) e as envia sem fuso,
+ * ex.: 2026-10-30T18:16:00. Sem o "Z", o navegador leria esse texto como horário local.
+ */
+export function lerDataDaApi(valor: string): Date {
+  const temFuso = /(Z|[+-]\d{2}:?\d{2})$/i.test(valor)
+  return new Date(temFuso ? valor : `${valor}Z`)
+}
+
+/** Formata uma data da API como data curta no fuso de quem vê, ex.: 30/10/2026. */
 export function formatarData(valor: string): string {
-  const data = new Date(valor)
+  const data = lerDataDaApi(valor)
   return Number.isNaN(data.getTime()) ? valor : data.toLocaleDateString('pt-BR')
 }
 
@@ -105,9 +114,9 @@ export async function editarChamado(chamado: Chamado, titulo: string, descricao:
   return resposta.data
 }
 
-/** Formata LocalDateTime como data e hora locais, ex.: 30/10/2026 14:05. */
+/** Formata uma data da API como data e hora no fuso de quem vê, ex.: 30/10/2026, 15:16. */
 export function formatarDataHora(valor: string): string {
-  const data = new Date(valor)
+  const data = lerDataDaApi(valor)
   return Number.isNaN(data.getTime())
     ? valor
     : data.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
