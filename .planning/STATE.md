@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 current_phase: 06
 current_phase_name: Front-end (React + Tailwind)
-status: planning
-stopped_at: Phase 5 complete on ticket/24-dashboard; next is planning phase 6
+status: executing
+stopped_at: Plan 06-01 complete on ticket/25-frontend-base; awaiting publish approval
 last_updated: "2026-10-30T12:00:00.000Z"
 last_activity: 2026-10-30
-last_activity_desc: Plan 05-01 implemented (dashboard summary aggregated in the database); back-end complete
+last_activity_desc: Plan 06-01 implemented (front-end base: TypeScript, shadcn/ui, auth, layout, CI)
 state_head: 92d1879
 progress:
   total_phases: 7
   completed_phases: 5
-  total_plans: 25
-  completed_plans: 25
+  total_plans: 30
+  completed_plans: 26
   percent: 71
 ---
 
@@ -27,13 +27,13 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 06 (Front-end React + Tailwind) — NOT PLANNED YET
-Plan: phase 5 complete (1 of 1); phase 6 plans not written yet
-Status: ticket/24-dashboard committed locally; awaiting publish approval
-Last activity: 2026-10-30 — Plan 05-01 implemented; back-end complete
+Phase: 06 (Front-end React + Tailwind) — EXECUTING
+Plan: 1 of 5 complete
+Status: ticket/25-frontend-base committed locally; awaiting publish approval
+Last activity: 2026-10-30 — Plan 06-01 implemented (front-end base)
 
 Progress by phase: [██████████████░░░░░░] 5/7 phases (71%)
-Plan progress: 25/25 known plans complete; Phase 05 has 1/1 implementation tickets complete
+Plan progress: 26/30 known plans complete; Phase 06 has 1/5 implementation tickets complete
 
 ## Performance Metrics
 
@@ -145,6 +145,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 04 / 04-01]: Notificações publicadas na transação e entregues por @TransactionalEventListener(AFTER_COMMIT) + @Async; autor e inativos excluídos; UTF-8 obrigatório.
 - [Process]: CI no GitHub Actions desde 2026-10-30 (antecipado da Fase 7). As falhas locais de loopback/SMTP são do ambiente Windows: o CI executa 229/229.
 - [Phase 05 / 05-01]: Dashboard no escopo de visivelPara (ATENDENTE = fila + seus); carga ativa = EM_ANDAMENTO; crítica aberta = ABERTO + CRITICA; por categoria = todos os status.
+- [Phase 06 / 06-01]: Front-end em TypeScript + shadcn/ui (Tailwind v4); token no localStorage validado por /auth/me; proxy do Vite para /api; versões do template oficial (TS 7, oxlint).
 - [Process]: A partir de 2026-10-22 o projeto segue os planos em .planning com Claude Code, sem GSD; fluxo Git por ticket e modo pedagógico permanecem.
 - [Process]: Revisão de escopo de 2026-10-30 (ver ROADMAP): sem prévia no 03-10; e-mail após commit sem outbox; dashboard em uma rota; Fase 7 com handler 500, CI, docker-compose e um E2E por perfil; testes proporcionais; uma autorização final por ticket para push + PR + merge.
 - [Phase 4]: Decidido em 2026-10-30 — envio após commit, fora da requisição, falha registrada em log; outbox fica para v2.
@@ -163,7 +164,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#23](https://github.com/Morais-Felipe/SolveIT/pull/23) (ticket 21, revisão de escopo) integrado em 2026-10-30 (13753a4).
 - PR [#24](https://github.com/Morais-Felipe/SolveIT/pull/24) (plano 03-10) integrado em 2026-10-30 (5352bf2); Fase 3 concluída.
 - PR [#25](https://github.com/Morais-Felipe/SolveIT/pull/25) (plano 04-01 + CI) integrado em 2026-10-30 (91b8e4d); Fase 4 concluída.
-- Ticket 24 (`ticket/24-dashboard`, plano 05-01): commits locais; publicação com uma autorização única.
+- PR [#26](https://github.com/Morais-Felipe/SolveIT/pull/26) (plano 05-01) integrado em 2026-10-30 (1b2cd95); back-end do v1 concluído.
+- Ticket 25 (`ticket/25-frontend-base`, plano 06-01): commits locais; publicação com uma autorização única.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
@@ -191,5 +193,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Phase 5 complete; next is planning phase 6
+Stopped at: Plan 06-01 complete; next is plan 06-02
 Resume file: none

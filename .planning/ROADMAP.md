@@ -229,7 +229,7 @@ Plans:
 
 Plans:
 
-- [ ] `06-01-PLAN.md` — Base: projeto, tema, cliente HTTP, autenticação, layout por perfil e CI (WEB-01)
+- [x] `06-01-PLAN.md` — Base: projeto, tema, cliente HTTP, autenticação, layout por perfil e CI (WEB-01)
 - [ ] `06-02-PLAN.md` — Solicitante: lista com filtros e abertura (WEB-02)
 - [ ] `06-03-PLAN.md` — Detalhe: comentários, histórico e ações permitidas (WEB-03)
 - [ ] `06-04-PLAN.md` — Atendente: fila, assumir, comentar e resolver (WEB-04)
@@ -265,5 +265,5 @@ Plans:
 | 3. Core de Chamados | 10/10 | Complete | 2026-10-30 |
 | 4. Notificações por E-mail | 1/1 | Complete | 2026-10-30 |
 | 5. Dashboard | 1/1 | Complete | 2026-10-30 |
-| 6. Front-end (React + Tailwind) | 0/TBD | Not started | - |
+| 6. Front-end (React + Tailwind) | 1/5 | In Progress |  |
 | 7. Polimento e Qualidade | 0/TBD | Not started | - |
