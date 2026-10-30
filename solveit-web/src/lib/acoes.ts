@@ -1,9 +1,9 @@
 import type { Chamado, StatusChamado, Usuario } from '@/lib/types'
 
 /**
- * O que a tela de detalhe pode oferecer. Assumir e atribuir ficam no plano 06-04.
+ * O que a tela de detalhe pode oferecer.
  */
-export type Acao = 'RESOLVER' | 'FECHAR' | 'CANCELAR' | 'EDITAR' | 'COMENTAR'
+export type Acao = 'RESOLVER' | 'FECHAR' | 'CANCELAR' | 'EDITAR' | 'COMENTAR' | 'ASSUMIR' | 'ATRIBUIR'
 
 /** Ações que mudam o status e para qual status levam. */
 export const DESTINO: Record<'RESOLVER' | 'FECHAR' | 'CANCELAR', StatusChamado> = {
@@ -28,6 +28,11 @@ export function acoesDisponiveis(usuario: Usuario, chamado: Chamado): Set<Acao> 
   if (chamado.status === 'RESOLVIDO' && solicitanteDono) acoes.add('FECHAR')
   if (chamado.status === 'ABERTO' && solicitanteDono) acoes.add('CANCELAR')
   if (chamado.status === 'EM_ANDAMENTO' && admin) acoes.add('CANCELAR')
+
+  // ChamadoService.atribuir: só tira da fila (ABERTO sem responsável); atendente para si, ADMIN para qualquer um
+  const naFila = chamado.status === 'ABERTO' && chamado.atendente === null
+  if (naFila && usuario.perfil === 'ATENDENTE') acoes.add('ASSUMIR')
+  if (naFila && admin) acoes.add('ATRIBUIR')
 
   // ChamadoService.editar: só ABERTO, pelo solicitante dono ou ADMIN
   if (chamado.status === 'ABERTO' && (admin || solicitanteDono)) acoes.add('EDITAR')

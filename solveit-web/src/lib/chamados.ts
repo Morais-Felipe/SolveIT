@@ -1,5 +1,15 @@
 import { api } from '@/lib/api'
-import type { Categoria, Chamado, Comentario, HistoricoStatus, Pagina, Prioridade, StatusChamado } from '@/lib/types'
+import type {
+  Categoria,
+  Chamado,
+  Comentario,
+  HistoricoStatus,
+  Pagina,
+  Pessoa,
+  Prioridade,
+  StatusChamado,
+  Usuario,
+} from '@/lib/types'
 
 export const ROTULO_STATUS: Record<StatusChamado, string> = {
   ABERTO: 'Aberto',
@@ -24,14 +34,22 @@ export type FiltrosChamados = {
   status?: StatusChamado
   prioridade?: Prioridade
   categoriaId?: number
+  atendenteId?: number
   page: number
 }
 
 export const TAMANHO_PAGINA = 10
 
-export async function listarChamados(filtros: FiltrosChamados, signal?: AbortSignal): Promise<Pagina<Chamado>> {
+/** A API só ordena por criadoEm, atualizadoEm e id. */
+export type Ordem = 'criadoEm,desc' | 'criadoEm,asc' | 'atualizadoEm,desc'
+
+export async function listarChamados(
+  filtros: FiltrosChamados,
+  signal?: AbortSignal,
+  ordem: Ordem = 'criadoEm,desc',
+): Promise<Pagina<Chamado>> {
   const resposta = await api.get<Pagina<Chamado>>('/chamados', {
-    params: { ...filtros, size: TAMANHO_PAGINA, sort: 'criadoEm,desc' },
+    params: { ...filtros, size: TAMANHO_PAGINA, sort: ordem },
     signal,
   })
   return resposta.data
@@ -120,4 +138,33 @@ export function formatarDataHora(valor: string): string {
   return Number.isNaN(data.getTime())
     ? valor
     : data.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+}
+
+/**
+ * Tira o chamado da fila. O atendente passa o próprio id (assumir); o ADMIN escolhe
+ * qualquer atendente ativo (atribuir). Se outro atendente chegou antes, a API devolve 409.
+ */
+export async function atribuir(chamado: Chamado, atendenteId: number, observacao = ''): Promise<Chamado> {
+  const resposta = await api.patch<Chamado>(`/chamados/${chamado.id}/atendente`, {
+    atendenteId,
+    versaoEsperada: chamado.versao,
+    observacao: observacao.trim() || undefined,
+  })
+  return resposta.data
+}
+
+/** Atendentes ativos, para o ADMIN escolher. Percorre todas as páginas de /usuarios (100 por vez). */
+export async function listarAtendentesAtivos(signal?: AbortSignal): Promise<Pessoa[]> {
+  const atendentes: Pessoa[] = []
+  let page = 0
+  let totalPages = 1
+  while (page < totalPages) {
+    const resposta = await api.get<Pagina<Usuario>>('/usuarios', { params: { page, size: 100 }, signal })
+    for (const u of resposta.data.items) {
+      if (u.perfil === 'ATENDENTE' && u.ativo) atendentes.push({ id: u.id, nome: u.nome })
+    }
+    totalPages = resposta.data.totalPages
+    page += 1
+  }
+  return atendentes.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
 }

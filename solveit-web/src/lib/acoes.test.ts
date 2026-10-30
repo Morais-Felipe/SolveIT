@@ -27,7 +27,7 @@ function chamado(status: StatusChamado, comResponsavel = status !== 'ABERTO'): C
   }
 }
 
-// Espelho de ChamadoTransitionPolicy, ChamadoService.editar e ComentarioService.
+// Espelho de ChamadoTransitionPolicy, ChamadoService.editar/atribuir e ComentarioService.
 // Cada linha: quem, status do chamado, ações esperadas (em ordem alfabética).
 const CENARIOS: [string, Usuario, StatusChamado, Acao[]][] = [
   ['solicitante dono, aberto', usuario(DONO, 'SOLICITANTE'), 'ABERTO', ['CANCELAR', 'COMENTAR', 'EDITAR']],
@@ -37,9 +37,9 @@ const CENARIOS: [string, Usuario, StatusChamado, Acao[]][] = [
   ['solicitante dono, cancelado', usuario(DONO, 'SOLICITANTE'), 'CANCELADO', []],
   ['atendente responsável, em andamento', usuario(RESPONSAVEL, 'ATENDENTE'), 'EM_ANDAMENTO', ['COMENTAR', 'RESOLVER']],
   ['atendente responsável, resolvido', usuario(RESPONSAVEL, 'ATENDENTE'), 'RESOLVIDO', ['COMENTAR']],
-  ['atendente na fila (aberto, sem responsável)', usuario(OUTRO, 'ATENDENTE'), 'ABERTO', ['COMENTAR']],
+  ['atendente na fila (aberto, sem responsável)', usuario(OUTRO, 'ATENDENTE'), 'ABERTO', ['ASSUMIR', 'COMENTAR']],
   ['outro atendente, em andamento', usuario(OUTRO, 'ATENDENTE'), 'EM_ANDAMENTO', ['COMENTAR']],
-  ['admin, aberto', usuario(OUTRO, 'ADMIN'), 'ABERTO', ['COMENTAR', 'EDITAR']],
+  ['admin, aberto', usuario(OUTRO, 'ADMIN'), 'ABERTO', ['ATRIBUIR', 'COMENTAR', 'EDITAR']],
   ['admin, em andamento', usuario(OUTRO, 'ADMIN'), 'EM_ANDAMENTO', ['CANCELAR', 'COMENTAR', 'RESOLVER']],
   ['admin, resolvido', usuario(OUTRO, 'ADMIN'), 'RESOLVIDO', ['COMENTAR']],
   ['admin, fechado', usuario(OUTRO, 'ADMIN'), 'FECHADO', []],
@@ -54,5 +54,23 @@ describe('acoesDisponiveis', () => {
     const atendenteDono = usuario(DONO, 'ATENDENTE')
     expect(acoesDisponiveis(atendenteDono, chamado('RESOLVIDO')).has('FECHAR')).toBe(false)
     expect(acoesDisponiveis(atendenteDono, chamado('ABERTO')).has('CANCELAR')).toBe(false)
+  })
+})
+
+describe('assumir e atribuir', () => {
+  it('só valem para chamados abertos sem responsável', () => {
+    const atendente = usuario(OUTRO, 'ATENDENTE')
+    const admin = usuario(OUTRO, 'ADMIN')
+    const jaAtribuido = { ...chamado('ABERTO'), atendente: { id: RESPONSAVEL, nome: 'Resp' } }
+
+    expect(acoesDisponiveis(atendente, jaAtribuido).has('ASSUMIR')).toBe(false)
+    expect(acoesDisponiveis(admin, jaAtribuido).has('ATRIBUIR')).toBe(false)
+    expect(acoesDisponiveis(admin, chamado('EM_ANDAMENTO')).has('ATRIBUIR')).toBe(false)
+  })
+
+  it('o solicitante nunca assume nem atribui', () => {
+    const acoes = acoesDisponiveis(usuario(DONO, 'SOLICITANTE'), chamado('ABERTO'))
+    expect(acoes.has('ASSUMIR')).toBe(false)
+    expect(acoes.has('ATRIBUIR')).toBe(false)
   })
 })
