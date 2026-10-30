@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 current_phase: 06
 current_phase_name: Front-end (React + Tailwind)
 status: executing
-stopped_at: Plan 06-03 complete on ticket/27-frontend-detalhe; awaiting publish approval
+stopped_at: Plan 06-04 in progress on ticket/28-frontend-fila
 last_updated: "2026-10-30T12:00:00.000Z"
 last_activity: 2026-10-30
 last_activity_desc: Plan 06-03 implemented (ticket detail, comments, history and allowed actions)
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 Phase: 06 (Front-end React + Tailwind) — EXECUTING
 Plan: 3 of 5 complete
-Status: ticket/27-frontend-detalhe committed locally; awaiting publish approval
+Status: ticket/28-frontend-fila in progress (plan 06-04)
 Last activity: 2026-10-30 — Plan 06-03 implemented (ticket detail)
 
 Progress by phase: [██████████████░░░░░░] 5/7 phases (71%)
@@ -167,7 +167,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#26](https://github.com/Morais-Felipe/SolveIT/pull/26) (plano 05-01) integrado em 2026-10-30 (1b2cd95); back-end do v1 concluído.
 - PR [#27](https://github.com/Morais-Felipe/SolveIT/pull/27) (ticket 25, plano 06-01) integrado em 2026-10-30 (803f479).
 - PR [#28](https://github.com/Morais-Felipe/SolveIT/pull/28) (ticket 26, plano 06-02) integrado em 2026-10-30 (1581708).
-- Ticket 27 (`ticket/27-frontend-detalhe`, plano 06-03): commits locais; teste de ponta a ponta contra a API real aprovado; publicação com uma autorização única.
+- PR [#29](https://github.com/Morais-Felipe/SolveIT/pull/29) (ticket 27, plano 06-03) integrado em 2026-10-30 (f5ad0ab).
+- Ticket 28 (`ticket/28-frontend-fila`, plano 06-04): em execução.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
