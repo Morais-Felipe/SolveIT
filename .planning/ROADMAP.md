@@ -223,7 +223,17 @@ Plans:
 
 **Abordagem (revisão 2026-10-30)**: telas objetivas; dashboard em cards e tabelas, gráficos opcionais. Estimativa: 4–5 planos.
 
-**Plans**: TBD
+**Stack (2026-10-30)**: TypeScript + shadcn/ui sobre Tailwind v4.
+
+**Plans**: 5 plans
+
+Plans:
+
+- [ ] `06-01-PLAN.md` — Base: projeto, tema, cliente HTTP, autenticação, layout por perfil e CI (WEB-01)
+- [ ] `06-02-PLAN.md` — Solicitante: lista com filtros e abertura (WEB-02)
+- [ ] `06-03-PLAN.md` — Detalhe: comentários, histórico e ações permitidas (WEB-03)
+- [ ] `06-04-PLAN.md` — Atendente: fila, assumir, comentar e resolver (WEB-04)
+- [ ] `06-05-PLAN.md` — Administrador: dashboard, usuários e categorias (WEB-05)
 **UI hint**: yes
 
 ### Phase 7: Polimento e Qualidade
