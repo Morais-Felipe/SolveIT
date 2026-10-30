@@ -14,6 +14,7 @@ import com.solveit.repository.ChamadoRepository;
 import com.solveit.repository.ChamadoSpecifications;
 import com.solveit.repository.HistoricoStatusRepository;
 import com.solveit.repository.UsuarioRepository;
+import com.solveit.service.notificacao.NotificacaoPublisher;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.time.Clock;
@@ -46,6 +47,7 @@ public class ChamadoService {
     private final CoreWriteCoordinator coreWriteCoordinator;
     private final EntityManager entityManager;
     private final Clock clock;
+    private final NotificacaoPublisher notificacaoPublisher;
 
     public ChamadoService(
             ChamadoRepository chamadoRepository,
@@ -56,7 +58,8 @@ public class ChamadoService {
             ChamadoTransitionPolicy chamadoTransitionPolicy,
             CoreWriteCoordinator coreWriteCoordinator,
             EntityManager entityManager,
-            Clock clock) {
+            Clock clock,
+            NotificacaoPublisher notificacaoPublisher) {
         this.chamadoRepository = chamadoRepository;
         this.historicoStatusRepository = historicoStatusRepository;
         this.categoriaRepository = categoriaRepository;
@@ -66,6 +69,7 @@ public class ChamadoService {
         this.coreWriteCoordinator = coreWriteCoordinator;
         this.entityManager = entityManager;
         this.clock = clock;
+        this.notificacaoPublisher = notificacaoPublisher;
     }
 
     /**
@@ -105,6 +109,7 @@ public class ChamadoService {
                 anterior,
                 ator,
                 request.observacao()));
+        notificacaoPublisher.statusAlterado(atualizado, anterior, ator, request.observacao());
 
         return toDetalhe(atualizado);
     }
@@ -132,6 +137,7 @@ public class ChamadoService {
                 null,
                 categoria));
         historicoStatusRepository.saveAndFlush(HistoricoStatus.abertura(chamado, solicitante));
+        notificacaoPublisher.chamadoAberto(chamado, solicitante);
 
         return toDetalhe(chamado);
     }
@@ -311,6 +317,7 @@ public class ChamadoService {
                 StatusChamado.ABERTO,
                 ator,
                 request.observacao()));
+        notificacaoPublisher.atendenteAtribuido(atualizado, ator);
 
         return toDetalhe(atualizado);
     }
