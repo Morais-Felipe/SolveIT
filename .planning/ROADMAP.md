@@ -8,7 +8,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 - [x] **Phase 1: Base do Projeto** - A API inicia sobre um esquema MySQL reproduzível e validado. (completed 2026-09-04)
 - [x] **Phase 2: Autenticação** - Usuários obtêm identidade segura e acesso autorizado. (completed 2026-09-10)
-- [ ] **Phase 3: Core de Chamados** - Os três perfis operam o ciclo auditável completo do chamado.
+- [x] **Phase 3: Core de Chamados** - Os três perfis operam o ciclo auditável completo do chamado. (completed 2026-10-30)
 - [ ] **Phase 4: Notificações por E-mail** - Eventos confirmados comunicam os envolvidos corretos.
 - [ ] **Phase 5: Dashboard** - Admins e atendentes consultam indicadores autorizados.
 - [ ] **Phase 6: Front-end (React + Tailwind)** - Cada perfil conclui suas jornadas principais na web.
@@ -122,7 +122,7 @@ Nenhum requisito foi apagado; os que mudaram de forma estão anotados em `REQUIR
 - [x] 03-07-PLAN.md
 - [x] 03-08-PLAN.md
 - [x] 03-09-PLAN.md
-- [ ] 03-10-PLAN.md
+- [x] 03-10-PLAN.md
 
 **Wave 1**
 
@@ -162,7 +162,7 @@ Nenhum requisito foi apagado; os que mudaram de forma estão anotados em `REQUIR
 
 **Wave 10** *(bloqueada pela conclusão e integração da Wave 9)*
 
-- [ ] `03-10-PLAN.md` — Alterar atividade/perfil com devolução auditada e proteção do último ADMIN (prévia removida na revisão de 2026-10-30)
+- [x] `03-10-PLAN.md` — Alterar atividade/perfil com devolução auditada e proteção do último ADMIN (prévia removida na revisão de 2026-10-30)
 
 ### Phase 4: Notificações por E-mail
 
@@ -244,7 +244,7 @@ Nenhum requisito foi apagado; os que mudaram de forma estão anotados em `REQUIR
 |-------|----------------|--------|-----------|
 | 1. Base do Projeto | 5/5 | Complete    | 2026-09-04 |
 | 2. Autenticação | 8/8 | Complete | 2026-09-10 |
-| 3. Core de Chamados | 9/10 | In Progress |  |
+| 3. Core de Chamados | 10/10 | Complete | 2026-10-30 |
 | 4. Notificações por E-mail | 0/TBD | Not started | - |
 | 5. Dashboard | 0/TBD | Not started | - |
 | 6. Front-end (React + Tailwind) | 0/TBD | Not started | - |

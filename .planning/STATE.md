@@ -1,19 +1,19 @@
 ---
 gsd_state_version: 1.0
-current_phase: 03
-current_phase_name: Core de Chamados
-status: executing
-stopped_at: Scope review recorded on ticket/21-revisao-escopo; next is plan 03-10 (ticket 22)
+current_phase: 04
+current_phase_name: Notificações por E-mail
+status: planning
+stopped_at: Phase 3 complete (plan 03-10 on ticket/22); next is planning phase 4
 last_updated: "2026-10-30T12:00:00.000Z"
 last_activity: 2026-10-30
-last_activity_desc: Scope review for portfolio delivery; README updated (PR #22)
+last_activity_desc: Plan 03-10 implemented and verified (212/216; 4 loopback failures are environmental); phase 3 complete
 state_head: 92d1879
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 23
-  completed_plans: 22
-  percent: 29
+  completed_plans: 23
+  percent: 43
 ---
 
 # Project State
@@ -27,13 +27,13 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 03 (Core de Chamados) — EXECUTING
-Plan: 9 of 10 complete
-Status: scope review on ticket/21-revisao-escopo; plan 03-10 not started
-Last activity: 2026-10-30 — Scope review recorded (ROADMAP, REQUIREMENTS, GIT-WORKFLOW, AGENTS)
+Phase: 04 (Notificações por E-mail) — NOT PLANNED YET
+Plan: phase 3 complete (10 of 10); phase 4 plans not written yet
+Status: ticket/22-atividade-perfil-usuarios committed locally; awaiting publish approval
+Last activity: 2026-10-30 — Plan 03-10 implemented; phase 3 complete
 
-Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
-Plan progress: 22/23 plans complete (96%); Phase 03 has 9/10 implementation tickets complete
+Progress by phase: [█████████░░░░░░░░░░░] 3/7 phases (43%)
+Plan progress: 23/23 known plans complete; Phase 03 has 10/10 implementation tickets complete
 
 ## Performance Metrics
 
@@ -141,6 +141,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 03 / 03-07]: Chamado.transicionar aplica um instante do Clock a atualizadoEm/resolvidoEm; @Transient atualizacaoDatada impede o @PreUpdate de sobrescrevê-lo.
 - [Phase 03 / 03-08]: Comentário usa a política de leitura de chamados, verifica acesso antes do status encerrado e trava o chamado só para ler; não altera chamado nem versão.
 - [Phase 03 / 03-09]: Comentários e histórico são lidos sem paginação, ordenados no SQL (data, id) e com a mesma política do detalhe; comentários não têm rota de edição ou exclusão.
+- [Phase 03 / 03-10]: Perfil e atividade mudam juntos em PATCH /api/usuarios/{id}/operacao; devolução EM_ANDAMENTO→ABERTO com motivo automático e histórico; último ADMIN protegido após o guard.
 - [Process]: A partir de 2026-10-22 o projeto segue os planos em .planning com Claude Code, sem GSD; fluxo Git por ticket e modo pedagógico permanecem.
 - [Process]: Revisão de escopo de 2026-10-30 (ver ROADMAP): sem prévia no 03-10; e-mail após commit sem outbox; dashboard em uma rota; Fase 7 com handler 500, CI, docker-compose e um E2E por perfil; testes proporcionais; uma autorização final por ticket para push + PR + merge.
 - [Phase 4]: Decidido em 2026-10-30 — envio após commit, fora da requisição, falha registrada em log; outbox fica para v2.
@@ -156,10 +157,10 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#20](https://github.com/Morais-Felipe/SolveIT/pull/20) (plano 03-08) integrado na `main` em 2026-10-23 (1d88cd1).
 - PR [#21](https://github.com/Morais-Felipe/SolveIT/pull/21) (plano 03-09) integrado na `main` em 2026-10-29 (77391a0).
 - PR [#22](https://github.com/Morais-Felipe/SolveIT/pull/22) (ticket 20, README) integrado em 2026-10-29 (ca9a739).
-- Ticket 21 (`ticket/21-revisao-escopo`): registro da revisão de escopo; o plano 03-10 passa a ser o ticket 22.
+- PR [#23](https://github.com/Morais-Felipe/SolveIT/pull/23) (ticket 21, revisão de escopo) integrado em 2026-10-30 (13753a4).
+- Ticket 22 (`ticket/22-atividade-perfil-usuarios`, plano 03-10): commits locais; publicação com uma autorização única.
 - A suíte completa passou de 10 minutos localmente; considerar CI no GitHub Actions.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
-- TICK-10, TICK-11 e TICK-12 seguem parciais até a devolução administrativa do plano 03-10.
 - Investigar `Unable to establish loopback connection` no AuthHttpErrorIntegrationTest nesta máquina (reproduz na `main`).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
@@ -188,5 +189,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Scope review recorded; next is plan 03-10 (ticket 22)
+Stopped at: Phase 3 complete; next is planning phase 4
 Resume file: none
