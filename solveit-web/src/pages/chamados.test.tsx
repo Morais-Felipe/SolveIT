@@ -218,4 +218,16 @@ describe('abertura de chamado', () => {
     expect(screen.getByText('Escolha a categoria.')).toBeInTheDocument()
     expect(post).not.toHaveBeenCalled()
   })
+
+  it('apaga o erro de um campo assim que ele é corrigido', async () => {
+    const usuarioEvento = userEvent.setup()
+    simularApi()
+    renderApp('/chamados/novo')
+
+    await usuarioEvento.click(await screen.findByRole('button', { name: 'Abrir chamado' }))
+    await usuarioEvento.type(screen.getByLabelText('Título'), 'Mouse')
+
+    expect(screen.queryByText('Informe o título.')).not.toBeInTheDocument()
+    expect(screen.getByText('Descreva o problema.')).toBeInTheDocument()
+  })
 })

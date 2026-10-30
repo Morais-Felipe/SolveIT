@@ -41,6 +41,17 @@ export function NovoChamadoPage() {
     return () => controle.abort()
   }, [])
 
+  /** Atualiza um campo e apaga só o erro dele: a mensagem some assim que a pessoa corrige. */
+  function alterar(campo: keyof Erros, definir: () => void) {
+    definir()
+    setErros((atuais) => {
+      if (!atuais[campo]) return atuais
+      const restantes = { ...atuais }
+      delete restantes[campo]
+      return restantes
+    })
+  }
+
   function validar(): Erros {
     const encontrados: Erros = {}
     if (!titulo.trim()) encontrados.titulo = 'Informe o título.'
@@ -96,7 +107,7 @@ export function NovoChamadoPage() {
               rotulo="Título"
               maxLength={MAX_TITULO}
               value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
+              onChange={(e) => alterar('titulo', () => setTitulo(e.target.value))}
               erro={erros.titulo}
               ajuda="Resumo em uma frase, até 200 caracteres."
             />
@@ -108,7 +119,7 @@ export function NovoChamadoPage() {
                 rows={6}
                 maxLength={MAX_DESCRICAO}
                 value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
+                onChange={(e) => alterar('descricao', () => setDescricao(e.target.value))}
                 aria-invalid={erros.descricao ? true : undefined}
                 aria-describedby={erros.descricao ? 'descricao-erro' : 'descricao-contador'}
                 className={cn(
@@ -131,7 +142,7 @@ export function NovoChamadoPage() {
                 id="prioridade"
                 rotulo="Prioridade"
                 value={prioridade}
-                onChange={(e) => setPrioridade(e.target.value as Prioridade)}
+                onChange={(e) => alterar('prioridade', () => setPrioridade(e.target.value as Prioridade))}
                 erro={erros.prioridade}
               >
                 {PRIORIDADES.map((p) => (
@@ -144,7 +155,7 @@ export function NovoChamadoPage() {
                 id="categoria"
                 rotulo="Categoria"
                 value={categoriaId}
-                onChange={(e) => setCategoriaId(e.target.value)}
+                onChange={(e) => alterar('categoriaId', () => setCategoriaId(e.target.value))}
                 erro={erros.categoriaId}
                 disabled={categorias === null}
               >
