@@ -6,6 +6,7 @@
 
 ![Status: Fase 5 concluída](https://img.shields.io/badge/status-fase%205%20conclu%C3%ADda-22c55e)
 [![Back-end CI](https://github.com/Morais-Felipe/SolveIT/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Morais-Felipe/SolveIT/actions/workflows/backend-ci.yml)
+[![Front-end CI](https://github.com/Morais-Felipe/SolveIT/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Morais-Felipe/SolveIT/actions/workflows/frontend-ci.yml)
 ![Abordagem: Build to Learn](https://img.shields.io/badge/abordagem-Build%20to%20Learn-f97316)
 ![Java 17](https://img.shields.io/badge/Java-17-007396)
 ![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3-6DB33F)
@@ -41,7 +42,7 @@ O objetivo não é apenas chegar a uma aplicação funcional. A abordagem **Buil
 | Foco atual | Fase 6 — front-end React + Tailwind (planejamento) |
 | Aplicação executável | API Spring Boot executável localmente com MySQL configurado |
 | API disponível | Auth, usuários, categorias, chamados, comentários e histórico (ver [Contrato de API](#contrato-de-api)) |
-| Telas | Ainda não existem; a SPA React é a Fase 6 |
+| Telas | Fase 6 em andamento: login, cadastro, sessão e menu por perfil prontos |
 | Processo | Planos em `.planning/` executados com Claude Code, um ticket/branch/PR por plano e modo pedagógico |
 
 Tudo o que aparece como implementado neste README está coberto por testes de integração com MySQL real. Front-end e polimento final continuam como **contratos planejados**.
@@ -101,6 +102,28 @@ docker run -d --name solveit-mailpit -p 1025:1025 -p 8025:8025 axllent/mailpit
 | `SOLVEIT_MAIL_ENABLED` | `true` | `false` desliga os envios sem afetar a API |
 
 Sem nenhum SMTP disponível a API continua funcionando normalmente: a falha de envio fica apenas no log. O `docker-compose` com aplicação, MySQL e Mailpit juntos está previsto para a Fase 7.
+
+## Como rodar o front-end
+
+O front-end fica em [`solveit-web/`](solveit-web/): React 19 + TypeScript, Vite, Tailwind CSS v4 e componentes [shadcn/ui](https://ui.shadcn.com/). Requer Node.js 22.12 ou superior.
+
+```powershell
+Set-Location solveit-web
+npm install
+npm run dev
+```
+
+Abra `http://localhost:5173`. Em desenvolvimento, o Vite repassa as chamadas `/api/*` para a API em `http://localhost:8080` (ajustável com `SOLVEIT_API_URL`), então a API precisa estar rodando para entrar no sistema. Sem ela, a tela de login mostra "O servidor não respondeu".
+
+| Comando | O que faz |
+| --- | --- |
+| `npm run dev` | Servidor de desenvolvimento com recarga automática |
+| `npm test` | Testes de componente (Vitest + Testing Library) |
+| `npm run typecheck` | Checagem de tipos do TypeScript |
+| `npm run lint` | Lint (oxlint) |
+| `npm run build` | Build de produção em `solveit-web/dist` |
+
+O token de acesso fica no `localStorage` para manter a sessão ao recarregar a página; ao abrir o app ele é validado com `GET /api/auth/me` e descartado se a API recusar. O GitHub Actions ([`frontend-ci.yml`](.github/workflows/frontend-ci.yml)) executa lint, tipos, testes e build a cada PR.
 
 ## Como funciona
 
@@ -188,10 +211,10 @@ Os números usam a mesma regra de visibilidade da lista de chamados: o ADMIN vê
 | Migrações | Flyway (V1 a V9) | Implementado; único responsável pelo esquema |
 | Segurança | Spring Security, JWT (JJWT), BCrypt | Implementado |
 | Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL, GreenMail | Implementado (235 testes) |
-| CI | GitHub Actions | Implementado — suíte completa a cada PR |
+| CI | GitHub Actions | Implementado — back-end e front-end a cada PR |
 | Notificações | JavaMailSender via SMTP, eventos após commit, `@Async` | Implementado |
-| Front-end | React, Tailwind CSS, React Router, Axios, Vite | Planejado — Fase 6 |
-| Testes de interface | Vitest, React Testing Library, Playwright | Planejado — Fases 6 e 7 |
+| Front-end | React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, React Router, Axios | Em construção — Fase 6 |
+| Testes de interface | Vitest, React Testing Library (Playwright na Fase 7) | Implementado para autenticação |
 
 Segredos de banco, JWT e SMTP vêm do ambiente ou de um cofre de segredos; não são versionados em arquivos de configuração.
 
@@ -222,7 +245,7 @@ solveit-api/
 - `security`: filtro JWT, identidade autenticada e handlers de 401/403.
 - `service`: transações, coordenação de escritas (`CoreWriteCoordinator`), política de leitura (`ChamadoAuthorizationService`), tabela de transições (`ChamadoTransitionPolicy`) e demais invariantes.
 
-O front-end será uma SPA React separada, consumindo a API por uma instância Axios centralizada. As telas planejadas incluem login e cadastro, lista e abertura de chamados do solicitante, detalhe com comentários e histórico, fila do atendente, dashboard administrativo e administração de usuários e categorias. Essas telas ainda não existem.
+O front-end será uma SPA React separada, consumindo a API por uma instância Axios centralizada. As telas planejadas incluem login e cadastro, lista e abertura de chamados do solicitante, detalhe com comentários e histórico, fila do atendente, dashboard administrativo e administração de usuários e categorias. Login, cadastro, restauração de sessão e o menu por perfil já existem; as demais telas chegam nos planos 06-02 a 06-05.
 
 ## Contrato de API
 
