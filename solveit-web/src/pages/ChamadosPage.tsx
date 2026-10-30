@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { CampoSelecao } from '@/components/CampoSelecao'
+import { Paginacao } from '@/components/Paginacao'
 import { SeloPrioridade, SeloStatus } from '@/components/Selos'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -249,29 +250,5 @@ function ListaChamados({ chamados }: { chamados: Chamado[] }) {
         ))}
       </ul>
     </>
-  )
-}
-
-function Paginacao({ pagina, aoMudar }: { pagina: Pagina<Chamado>; aoMudar: (numero: number) => void }) {
-  if (pagina.totalPages <= 1) {
-    return null
-  }
-  return (
-    <nav aria-label="Paginação" className="flex items-center justify-between gap-3 text-sm">
-      <Button variant="outline" size="sm" disabled={pagina.page === 0} onClick={() => aoMudar(pagina.page - 1)}>
-        Anterior
-      </Button>
-      <span className="text-muted-foreground">
-        Página {pagina.page + 1} de {pagina.totalPages}
-      </span>
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={pagina.page + 1 >= pagina.totalPages}
-        onClick={() => aoMudar(pagina.page + 1)}
-      >
-        Próxima
-      </Button>
-    </nav>
   )
 }
