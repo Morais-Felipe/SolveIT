@@ -73,3 +73,21 @@ export type Categoria = {
   ativo: boolean
   versao: number
 }
+
+/** Espelha ComentarioDtos.Resposta. Comentários são imutáveis: não há edição nem exclusão. */
+export type Comentario = {
+  id: number
+  texto: string
+  autor: Pessoa
+  criadoEm: string
+}
+
+/** Espelha HistoricoStatusDtos.Resposta. O registro de abertura tem statusAnterior nulo. */
+export type HistoricoStatus = {
+  id: number
+  statusAnterior: StatusChamado | null
+  statusNovo: StatusChamado
+  alteradoPor: Pessoa
+  alteradoEm: string
+  observacao: string | null
+}

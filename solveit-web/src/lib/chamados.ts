@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import type { Categoria, Chamado, Pagina, Prioridade, StatusChamado } from '@/lib/types'
+import type { Categoria, Chamado, Comentario, HistoricoStatus, Pagina, Prioridade, StatusChamado } from '@/lib/types'
 
 export const ROTULO_STATUS: Record<StatusChamado, string> = {
   ABERTO: 'Aberto',
@@ -60,4 +60,55 @@ export async function listarCategoriasAtivas(signal?: AbortSignal): Promise<Cate
 export function formatarData(valor: string): string {
   const data = new Date(valor)
   return Number.isNaN(data.getTime()) ? valor : data.toLocaleDateString('pt-BR')
+}
+
+export async function buscarChamado(id: number, signal?: AbortSignal): Promise<Chamado> {
+  const resposta = await api.get<Chamado>(`/chamados/${id}`, { signal })
+  return resposta.data
+}
+
+export async function listarComentarios(chamadoId: number, signal?: AbortSignal): Promise<Comentario[]> {
+  const resposta = await api.get<Comentario[]>(`/chamados/${chamadoId}/comentarios`, { signal })
+  return resposta.data
+}
+
+export async function comentar(chamadoId: number, texto: string): Promise<Comentario> {
+  const resposta = await api.post<Comentario>(`/chamados/${chamadoId}/comentarios`, { texto })
+  return resposta.data
+}
+
+export async function listarHistorico(chamadoId: number, signal?: AbortSignal): Promise<HistoricoStatus[]> {
+  const resposta = await api.get<HistoricoStatus[]>(`/chamados/${chamadoId}/historico`, { signal })
+  return resposta.data
+}
+
+/** versaoEsperada é a versão que a tela mostrou: se outra pessoa alterou antes, a API devolve 409. */
+export async function alterarStatus(
+  chamado: Chamado,
+  status: StatusChamado,
+  observacao: string,
+): Promise<Chamado> {
+  const resposta = await api.patch<Chamado>(`/chamados/${chamado.id}/status`, {
+    status,
+    versaoEsperada: chamado.versao,
+    observacao: observacao.trim() || undefined,
+  })
+  return resposta.data
+}
+
+export async function editarChamado(chamado: Chamado, titulo: string, descricao: string): Promise<Chamado> {
+  const resposta = await api.put<Chamado>(`/chamados/${chamado.id}`, {
+    titulo: titulo.trim(),
+    descricao,
+    versaoEsperada: chamado.versao,
+  })
+  return resposta.data
+}
+
+/** Formata LocalDateTime como data e hora locais, ex.: 30/10/2026 14:05. */
+export function formatarDataHora(valor: string): string {
+  const data = new Date(valor)
+  return Number.isNaN(data.getTime())
+    ? valor
+    : data.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 }
