@@ -4,7 +4,8 @@
 
 ### Chamados de suporte com autorização correta, histórico auditável e comunicação clara
 
-![Status: Fase 3 concluída](https://img.shields.io/badge/status-fase%203%20conclu%C3%ADda-22c55e)
+![Status: Fase 4 concluída](https://img.shields.io/badge/status-fase%204%20conclu%C3%ADda-22c55e)
+[![Back-end CI](https://github.com/Morais-Felipe/SolveIT/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Morais-Felipe/SolveIT/actions/workflows/backend-ci.yml)
 ![Abordagem: Build to Learn](https://img.shields.io/badge/abordagem-Build%20to%20Learn-f97316)
 ![Java 17](https://img.shields.io/badge/Java-17-007396)
 ![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3-6DB33F)
@@ -14,7 +15,7 @@
 </div>
 
 > [!IMPORTANT]
-> **Fase 3 concluída.** Além da autenticação JWT, a API administra usuários (inclusive ativação e troca de perfil com devolução auditada dos chamados) e categorias e conduz o chamado por todo o fluxo: abertura, consulta e filtros, edição, atribuição, resolução, fechamento, cancelamento, comentários e histórico auditável. A suíte tem 216 testes contra MySQL 8.4 real (Testcontainers). Próximas fases: notificações por e-mail, dashboard, front-end React e polimento.
+> **Fases 3 e 4 concluídas.** Além da autenticação JWT, a API administra usuários (inclusive ativação e troca de perfil com devolução auditada dos chamados) e categorias e conduz o chamado por todo o fluxo: abertura, consulta e filtros, edição, atribuição, resolução, fechamento, cancelamento, comentários e histórico auditável. Os eventos do chamado notificam os envolvidos por e-mail depois do commit. A suíte tem 229 testes contra MySQL 8.4 real (Testcontainers) e roda no GitHub Actions a cada PR. Próximas fases: dashboard, front-end React e polimento.
 
 ## O que é o SolveIT
 
@@ -34,16 +35,16 @@ O objetivo não é apenas chegar a uma aplicação funcional. A abordagem **Buil
 
 | Item | Situação |
 | --- | --- |
-| Estado do repositório | Fases 1, 2 e 3 concluídas e integradas na `main` |
-| Fases | 3 de 7 concluídas |
-| Requisitos do v1 | 32 de 55 concluídos (todo o back-end de chamados) |
-| Foco atual | Planejamento da Fase 4 — notificações por e-mail (escopo revisado em 2026-10-30) |
+| Estado do repositório | Fases 1 a 4 concluídas e integradas na `main`; CI no GitHub Actions |
+| Fases | 4 de 7 concluídas |
+| Requisitos do v1 | 38 de 55 concluídos (back-end de chamados e notificações) |
+| Foco atual | Fase 5 — dashboard com indicadores (uma rota, escopo revisado em 2026-10-30) |
 | Aplicação executável | API Spring Boot executável localmente com MySQL configurado |
 | API disponível | Auth, usuários, categorias, chamados, comentários e histórico (ver [Contrato de API](#contrato-de-api)) |
 | Telas | Ainda não existem; a SPA React é a Fase 6 |
 | Processo | Planos em `.planning/` executados com Claude Code, um ticket/branch/PR por plano e modo pedagógico |
 
-Tudo o que aparece como implementado neste README está coberto por testes de integração com MySQL real. Notificações por e-mail, dashboard, front-end e polimento final continuam como **contratos planejados**.
+Tudo o que aparece como implementado neste README está coberto por testes de integração com MySQL real. Dashboard, front-end e polimento final continuam como **contratos planejados**.
 
 ## Como acompanhar o projeto
 
@@ -64,10 +65,12 @@ Set-Location solveit-api
 .\mvnw.cmd clean verify
 ```
 
-Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **216 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários e disputas concorrentes reais entre transações.
+Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **229 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
+
+A mesma suíte roda automaticamente no **GitHub Actions** ([`backend-ci.yml`](.github/workflows/backend-ci.yml)) a cada pull request e a cada push na `main`, em uma máquina Linux limpa.
 
 > [!NOTE]
-> Na máquina Windows de desenvolvimento atual, os 4 testes de `AuthHttpErrorIntegrationTest` falham com `Unable to establish loopback connection` ao criar o `HttpClient` do Java. A falha se reproduz na `main` sem nenhuma mudança e é do ambiente, não do código; os demais 212 testes passam.
+> Em algumas máquinas Windows, softwares do próprio host (antivírus, firewall ou VPN) anulam conexões para `localhost`. Nesse caso, os testes de `AuthHttpErrorIntegrationTest` e alguns testes de e-mail podem falhar localmente com `Unable to establish loopback connection` ou "conexão anulada pelo software no computador host". No CI todos os 229 testes passam; a falha é do ambiente, não do código.
 
 Para iniciar a aplicação localmente, crie antes o database `solveit` em uma instância MySQL e forneça as credenciais pelo ambiente. O Flyway cria e versiona as tabelas (V1 a V9), mas deliberadamente não cria o database nem armazena credenciais no repositório.
 
@@ -81,6 +84,23 @@ Set-Location solveit-api
 `DB_URL` é opcional e, quando omitida, usa `jdbc:mysql://localhost:3306/solveit` com Unicode e UTC. Ainda não há `docker-compose.yml`; Docker é usado automaticamente pelos testes de integração.
 
 O cadastro público cria apenas `SOLICITANTE`. Para ter o primeiro administrador em um banco novo, siga o procedimento manual e auditável de [primeiro ADMIN](docs/PRIMEIRO-ADMIN.md); não existe endpoint, *seed* nem senha padrão para isso.
+
+### E-mails em ambiente local
+
+Por padrão a aplicação envia e-mails para um SMTP em `localhost:1025`. Para ver as mensagens sem enviar nada de verdade, suba o [Mailpit](https://mailpit.axllent.org/), que oferece uma caixa de entrada web em `http://localhost:8025`:
+
+```powershell
+docker run -d --name solveit-mailpit -p 1025:1025 -p 8025:8025 axllent/mailpit
+```
+
+| Variável | Padrão | Uso |
+| --- | --- | --- |
+| `SOLVEIT_MAIL_HOST` | `localhost` | Servidor SMTP |
+| `SOLVEIT_MAIL_PORT` | `1025` | Porta SMTP |
+| `SOLVEIT_MAIL_FROM` | `solveit@localhost` | Remetente |
+| `SOLVEIT_MAIL_ENABLED` | `true` | `false` desliga os envios sem afetar a API |
+
+Sem nenhum SMTP disponível a API continua funcionando normalmente: a falha de envio fica apenas no log. O `docker-compose` com aplicação, MySQL e Mailpit juntos está previsto para a Fase 7.
 
 ## Como funciona
 
@@ -134,17 +154,17 @@ flowchart LR
 
 Qualquer transição que não apareça no diagrama é rejeitada com `409 INVALID_STATE`; um ator sem permissão para a transição recebe `403`. A tabela de transições vive em `ChamadoTransitionPolicy` e é verificada por um teste que percorre todas as 150 combinações de origem, destino e ator.
 
-### Notificações previstas
+### Notificações por e-mail
 
-| Evento confirmado | Destinatários planejados |
+| Evento confirmado | Destinatários |
 | --- | --- |
-| Novo chamado `ABERTO` | Administradores |
-| Novo chamado `CRITICA` | Administradores, com destaque urgente adicional |
+| Novo chamado `ABERTO` | Administradores ativos |
+| Novo chamado `CRITICA` | Administradores ativos, com `[URGENTE]` no assunto |
 | Atendente atribuído | Atendente e solicitante |
-| Status atualizado | Solicitante |
-| Novo comentário | Todos os envolvidos, sem destinatários duplicados |
+| Status atualizado (inclui devolução à fila) | Solicitante |
+| Novo comentário | Solicitante e atendente atual, sem duplicatas |
 
-Os envios deverão ocorrer somente após a confirmação da transação. Uma falha de SMTP não poderá desfazer uma alteração válida do chamado; a estratégia definitiva de entrega (envio após commit ou outbox durável) será decidida no planejamento da Fase 4.
+Quem executa a ação não recebe e-mail dela, e usuários inativos nunca recebem. Os serviços publicam um evento dentro da transação; um listener com `@TransactionalEventListener(AFTER_COMMIT)` e `@Async` só envia depois que ela é confirmada, fora da thread da requisição. Uma transação desfeita não envia nada, e uma falha de SMTP é apenas registrada em log, sem desfazer nem atrasar a operação. Cada destinatário recebe uma mensagem própria, sem ver os demais endereços.
 
 ## Stack do projeto
 
@@ -154,8 +174,9 @@ Os envios deverão ocorrer somente após a confirmação da transação. Uma fal
 | Persistência | MySQL 8.4, Spring Data JPA, Hibernate, Specifications | Implementado |
 | Migrações | Flyway (V1 a V9) | Implementado; único responsável pelo esquema |
 | Segurança | Spring Security, JWT (JJWT), BCrypt | Implementado |
-| Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL | Implementado (216 testes) |
-| Notificações | JavaMailSender via SMTP | Planejado — Fase 4 |
+| Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL, GreenMail | Implementado (229 testes) |
+| CI | GitHub Actions | Implementado — suíte completa a cada PR |
+| Notificações | JavaMailSender via SMTP, eventos após commit, `@Async` | Implementado |
 | Front-end | React, Tailwind CSS, React Router, Axios, Vite | Planejado — Fase 6 |
 | Testes de interface | Vitest, React Testing Library, Playwright | Planejado — Fases 6 e 7 |
 
@@ -231,7 +252,7 @@ As sete fases são incrementos sequenciais.
 | 1 — Base do Projeto | Aplicação Spring inicial sobre esquema MySQL completo, versionado por Flyway e validado pelo JPA | Concluída — 5/5 planos |
 | 2 — Autenticação | Cadastro de solicitante, login JWT e autorização por perfil e relação | Concluída — 8/8 planos |
 | 3 — Core de Chamados | Administração, ciclo completo do chamado, comentários e histórico auditável | Concluída — 10/10 planos |
-| 4 — Notificações por E-mail | Comunicação dos eventos confirmados aos envolvidos corretos | Pendente |
+| 4 — Notificações por E-mail | Comunicação dos eventos confirmados aos envolvidos corretos | Concluída — 1/1 plano |
 | 5 — Dashboard | Indicadores autorizados para administradores e atendentes | Pendente |
 | 6 — Front-end (React + Tailwind) | Jornadas principais dos três perfis na SPA responsiva | Pendente |
 | 7 — Polimento e Qualidade | Estados de interface, responsividade, testes e revisão de segurança | Pendente |
@@ -256,8 +277,6 @@ Metas, dependências, critérios de sucesso e rastreabilidade estão no [roadmap
 ### Pendências técnicas conhecidas
 
 - Handler genérico de `Exception` que devolva `500 INTERNAL_ERROR` padronizado para falhas inesperadas.
-- Integração contínua (CI) no GitHub — hoje a única verificação é a suíte local.
-- Investigar a falha de loopback de `AuthHttpErrorIntegrationTest` no ambiente Windows atual.
 - Rate limiting de login e cadastro antes de qualquer exposição à internet.
 
 ## Referência visual

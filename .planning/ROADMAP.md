@@ -9,7 +9,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 - [x] **Phase 1: Base do Projeto** - A API inicia sobre um esquema MySQL reproduzível e validado. (completed 2026-09-04)
 - [x] **Phase 2: Autenticação** - Usuários obtêm identidade segura e acesso autorizado. (completed 2026-09-10)
 - [x] **Phase 3: Core de Chamados** - Os três perfis operam o ciclo auditável completo do chamado. (completed 2026-10-30)
-- [ ] **Phase 4: Notificações por E-mail** - Eventos confirmados comunicam os envolvidos corretos.
+- [x] **Phase 4: Notificações por E-mail** - Eventos confirmados comunicam os envolvidos corretos. (completed 2026-10-30)
 - [ ] **Phase 5: Dashboard** - Admins e atendentes consultam indicadores autorizados.
 - [ ] **Phase 6: Front-end (React + Tailwind)** - Cada perfil conclui suas jornadas principais na web.
 - [ ] **Phase 7: Polimento e Qualidade** - O v1 comprova usabilidade, segurança e fluxos críticos.
@@ -181,7 +181,7 @@ Nenhum requisito foi apagado; os que mudaram de forma estão anotados em `REQUIR
 
 Plans:
 
-- [ ] `04-01-PLAN.md` — Eventos de domínio, envio após commit e assíncrono, destinatários e mensagens (MAIL-01..06)
+- [x] `04-01-PLAN.md` — Eventos de domínio, envio após commit e assíncrono, destinatários e mensagens (MAIL-01..06)
 
 **Plans**: TBD
 
@@ -249,7 +249,7 @@ Plans:
 | 1. Base do Projeto | 5/5 | Complete    | 2026-09-04 |
 | 2. Autenticação | 8/8 | Complete | 2026-09-10 |
 | 3. Core de Chamados | 10/10 | Complete | 2026-10-30 |
-| 4. Notificações por E-mail | 0/TBD | Not started | - |
+| 4. Notificações por E-mail | 1/1 | Complete | 2026-10-30 |
 | 5. Dashboard | 0/TBD | Not started | - |
 | 6. Front-end (React + Tailwind) | 0/TBD | Not started | - |
 | 7. Polimento e Qualidade | 0/TBD | Not started | - |
