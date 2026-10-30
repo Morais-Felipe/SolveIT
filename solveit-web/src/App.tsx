@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/layout/AppLayout'
 import { CadastroPage } from '@/pages/CadastroPage'
+import { ChamadosPage } from '@/pages/ChamadosPage'
 import { EmBreve, NaoEncontrado } from '@/pages/EmBreve'
 import { LoginPage } from '@/pages/LoginPage'
 import { RedirecionarParaInicial, RotaPorPerfil, RotaProtegida, SomenteAnonimo } from '@/routes/guards'
@@ -17,7 +18,7 @@ export default function App() {
 
       <Route element={<RotaProtegida><AppLayout /></RotaProtegida>}>
         <Route index element={<RedirecionarParaInicial />} />
-        <Route path="chamados" element={<EmBreve titulo="Chamados" plano="06-02" />} />
+        <Route path="chamados" element={<ChamadosPage />} />
         <Route
           path="chamados/novo"
           element={
