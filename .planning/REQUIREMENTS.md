@@ -75,7 +75,7 @@
 
 - [x] **WEB-01**: A aplicação React oferece cadastro, login, restauração da sessão válida e saída, usando um cliente Axios configurado centralmente.
 - [x] **WEB-02**: O solicitante pode visualizar seus chamados, filtrar a lista e abrir um novo chamado.
-- [ ] **WEB-03**: Usuários autorizados podem visualizar detalhe, comentários e histórico do chamado e executar somente ações permitidas pelo estado e perfil.
+- [x] **WEB-03**: Usuários autorizados podem visualizar detalhe, comentários e histórico do chamado e executar somente ações permitidas pelo estado e perfil.
 - [ ] **WEB-04**: O atendente dispõe de uma fila de chamados adequada ao seu trabalho e pode assumir, comentar e resolver chamados permitidos.
 - [ ] **WEB-05**: O administrador dispõe de dashboard e telas para administrar usuários e categorias.
 - [ ] **WEB-06**: Todas as telas principais possuem estados de carregamento, vazio, sucesso e erro com mensagens compreensíveis.
@@ -164,7 +164,7 @@
 | DASH-05 | Phase 5 | Complete |
 | WEB-01 | Phase 6 | Complete |
 | WEB-02 | Phase 6 | Complete |
-| WEB-03 | Phase 6 | Pending |
+| WEB-03 | Phase 6 | Complete |
 | WEB-04 | Phase 6 | Pending |
 | WEB-05 | Phase 6 | Pending |
 | WEB-06 | Phase 7 | Pending |
