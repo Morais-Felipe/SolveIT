@@ -1,19 +1,19 @@
 ---
 gsd_state_version: 1.0
-current_phase: 05
-current_phase_name: Dashboard
+current_phase: 06
+current_phase_name: Front-end (React + Tailwind)
 status: planning
-stopped_at: Phase 4 complete on ticket/23-notificacoes-email (PR #25, CI green); next is planning phase 5
+stopped_at: Phase 5 complete on ticket/24-dashboard; next is planning phase 6
 last_updated: "2026-10-30T12:00:00.000Z"
 last_activity: 2026-10-30
-last_activity_desc: Plan 04-01 implemented; CI on GitHub Actions brought forward and green (229/229)
+last_activity_desc: Plan 05-01 implemented (dashboard summary aggregated in the database); back-end complete
 state_head: 92d1879
 progress:
   total_phases: 7
-  completed_phases: 4
-  total_plans: 24
-  completed_plans: 24
-  percent: 57
+  completed_phases: 5
+  total_plans: 25
+  completed_plans: 25
+  percent: 71
 ---
 
 # Project State
@@ -27,13 +27,13 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 05 (Dashboard) — NOT PLANNED YET
-Plan: phase 4 complete (1 of 1); phase 5 plans not written yet
-Status: ticket/23-notificacoes-email pushed (PR #25 draft, CI green); awaiting final approval to merge
-Last activity: 2026-10-30 — Plan 04-01 implemented; CI added and green
+Phase: 06 (Front-end React + Tailwind) — NOT PLANNED YET
+Plan: phase 5 complete (1 of 1); phase 6 plans not written yet
+Status: ticket/24-dashboard committed locally; awaiting publish approval
+Last activity: 2026-10-30 — Plan 05-01 implemented; back-end complete
 
-Progress by phase: [███████████░░░░░░░░░] 4/7 phases (57%)
-Plan progress: 24/24 known plans complete; Phase 04 has 1/1 implementation tickets complete
+Progress by phase: [██████████████░░░░░░] 5/7 phases (71%)
+Plan progress: 25/25 known plans complete; Phase 05 has 1/1 implementation tickets complete
 
 ## Performance Metrics
 
@@ -144,6 +144,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 03 / 03-10]: Perfil e atividade mudam juntos em PATCH /api/usuarios/{id}/operacao; devolução EM_ANDAMENTO→ABERTO com motivo automático e histórico; último ADMIN protegido após o guard.
 - [Phase 04 / 04-01]: Notificações publicadas na transação e entregues por @TransactionalEventListener(AFTER_COMMIT) + @Async; autor e inativos excluídos; UTF-8 obrigatório.
 - [Process]: CI no GitHub Actions desde 2026-10-30 (antecipado da Fase 7). As falhas locais de loopback/SMTP são do ambiente Windows: o CI executa 229/229.
+- [Phase 05 / 05-01]: Dashboard no escopo de visivelPara (ATENDENTE = fila + seus); carga ativa = EM_ANDAMENTO; crítica aberta = ABERTO + CRITICA; por categoria = todos os status.
 - [Process]: A partir de 2026-10-22 o projeto segue os planos em .planning com Claude Code, sem GSD; fluxo Git por ticket e modo pedagógico permanecem.
 - [Process]: Revisão de escopo de 2026-10-30 (ver ROADMAP): sem prévia no 03-10; e-mail após commit sem outbox; dashboard em uma rota; Fase 7 com handler 500, CI, docker-compose e um E2E por perfil; testes proporcionais; uma autorização final por ticket para push + PR + merge.
 - [Phase 4]: Decidido em 2026-10-30 — envio após commit, fora da requisição, falha registrada em log; outbox fica para v2.
@@ -161,14 +162,14 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#22](https://github.com/Morais-Felipe/SolveIT/pull/22) (ticket 20, README) integrado em 2026-10-29 (ca9a739).
 - PR [#23](https://github.com/Morais-Felipe/SolveIT/pull/23) (ticket 21, revisão de escopo) integrado em 2026-10-30 (13753a4).
 - PR [#24](https://github.com/Morais-Felipe/SolveIT/pull/24) (plano 03-10) integrado em 2026-10-30 (5352bf2); Fase 3 concluída.
-- Ticket 23 (`ticket/23-notificacoes-email`, plano 04-01): PR [#25](https://github.com/Morais-Felipe/SolveIT/pull/25) em rascunho com CI verde; merge aguarda aprovação final.
+- PR [#25](https://github.com/Morais-Felipe/SolveIT/pull/25) (plano 04-01 + CI) integrado em 2026-10-30 (91b8e4d); Fase 4 concluída.
+- Ticket 24 (`ticket/24-dashboard`, plano 05-01): commits locais; publicação com uma autorização única.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
 
 - [Pre-production]: Definir e verificar rate limiting para login/cadastro antes de expor o SolveIT à internet.
-- [Phase 5]: Definir escopo dos agregados para atendentes e significado de carga ativa.
 
 ### Quick Tasks Completed
 
@@ -190,5 +191,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Phase 4 complete; next is planning phase 5
+Stopped at: Phase 5 complete; next is planning phase 6
 Resume file: none

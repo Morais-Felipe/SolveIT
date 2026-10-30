@@ -4,7 +4,7 @@
 
 ### Chamados de suporte com autorização correta, histórico auditável e comunicação clara
 
-![Status: Fase 4 concluída](https://img.shields.io/badge/status-fase%204%20conclu%C3%ADda-22c55e)
+![Status: Fase 5 concluída](https://img.shields.io/badge/status-fase%205%20conclu%C3%ADda-22c55e)
 [![Back-end CI](https://github.com/Morais-Felipe/SolveIT/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Morais-Felipe/SolveIT/actions/workflows/backend-ci.yml)
 ![Abordagem: Build to Learn](https://img.shields.io/badge/abordagem-Build%20to%20Learn-f97316)
 ![Java 17](https://img.shields.io/badge/Java-17-007396)
@@ -15,7 +15,7 @@
 </div>
 
 > [!IMPORTANT]
-> **Fases 3 e 4 concluídas.** Além da autenticação JWT, a API administra usuários (inclusive ativação e troca de perfil com devolução auditada dos chamados) e categorias e conduz o chamado por todo o fluxo: abertura, consulta e filtros, edição, atribuição, resolução, fechamento, cancelamento, comentários e histórico auditável. Os eventos do chamado notificam os envolvidos por e-mail depois do commit. A suíte tem 229 testes contra MySQL 8.4 real (Testcontainers) e roda no GitHub Actions a cada PR. Próximas fases: dashboard, front-end React e polimento.
+> **Back-end do v1 concluído (Fases 1 a 5).** Além da autenticação JWT, a API administra usuários (inclusive ativação e troca de perfil com devolução auditada dos chamados) e categorias e conduz o chamado por todo o fluxo: abertura, consulta e filtros, edição, atribuição, resolução, fechamento, cancelamento, comentários e histórico auditável. Os eventos do chamado notificam os envolvidos por e-mail depois do commit, e administradores e atendentes têm um dashboard calculado no banco. A suíte tem 235 testes contra MySQL 8.4 real (Testcontainers) e roda no GitHub Actions a cada PR. Próximas fases: front-end React e polimento.
 
 ## O que é o SolveIT
 
@@ -35,16 +35,16 @@ O objetivo não é apenas chegar a uma aplicação funcional. A abordagem **Buil
 
 | Item | Situação |
 | --- | --- |
-| Estado do repositório | Fases 1 a 4 concluídas e integradas na `main`; CI no GitHub Actions |
-| Fases | 4 de 7 concluídas |
-| Requisitos do v1 | 38 de 55 concluídos (back-end de chamados e notificações) |
-| Foco atual | Fase 5 — dashboard com indicadores (uma rota, escopo revisado em 2026-10-30) |
+| Estado do repositório | Fases 1 a 5 concluídas e integradas na `main`; CI no GitHub Actions |
+| Fases | 5 de 7 concluídas (back-end completo) |
+| Requisitos do v1 | 43 de 55 concluídos (todo o back-end) |
+| Foco atual | Fase 6 — front-end React + Tailwind (planejamento) |
 | Aplicação executável | API Spring Boot executável localmente com MySQL configurado |
 | API disponível | Auth, usuários, categorias, chamados, comentários e histórico (ver [Contrato de API](#contrato-de-api)) |
 | Telas | Ainda não existem; a SPA React é a Fase 6 |
 | Processo | Planos em `.planning/` executados com Claude Code, um ticket/branch/PR por plano e modo pedagógico |
 
-Tudo o que aparece como implementado neste README está coberto por testes de integração com MySQL real. Dashboard, front-end e polimento final continuam como **contratos planejados**.
+Tudo o que aparece como implementado neste README está coberto por testes de integração com MySQL real. Front-end e polimento final continuam como **contratos planejados**.
 
 ## Como acompanhar o projeto
 
@@ -65,12 +65,12 @@ Set-Location solveit-api
 .\mvnw.cmd clean verify
 ```
 
-Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **229 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
+Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **235 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
 
 A mesma suíte roda automaticamente no **GitHub Actions** ([`backend-ci.yml`](.github/workflows/backend-ci.yml)) a cada pull request e a cada push na `main`, em uma máquina Linux limpa.
 
 > [!NOTE]
-> Em algumas máquinas Windows, softwares do próprio host (antivírus, firewall ou VPN) anulam conexões para `localhost`. Nesse caso, os testes de `AuthHttpErrorIntegrationTest` e alguns testes de e-mail podem falhar localmente com `Unable to establish loopback connection` ou "conexão anulada pelo software no computador host". No CI todos os 229 testes passam; a falha é do ambiente, não do código.
+> Em algumas máquinas Windows, softwares do próprio host (antivírus, firewall ou VPN) anulam conexões para `localhost`. Nesse caso, os testes de `AuthHttpErrorIntegrationTest` e alguns testes de e-mail podem falhar localmente com `Unable to establish loopback connection` ou "conexão anulada pelo software no computador host". No CI todos os testes passam; a falha é do ambiente, não do código.
 
 Para iniciar a aplicação localmente, crie antes o database `solveit` em uma instância MySQL e forneça as credenciais pelo ambiente. O Flyway cria e versiona as tabelas (V1 a V9), mas deliberadamente não cria o database nem armazena credenciais no repositório.
 
@@ -166,6 +166,19 @@ Qualquer transição que não apareça no diagrama é rejeitada com `409 INVALID
 
 Quem executa a ação não recebe e-mail dela, e usuários inativos nunca recebem. Os serviços publicam um evento dentro da transação; um listener com `@TransactionalEventListener(AFTER_COMMIT)` e `@Async` só envia depois que ela é confirmada, fora da thread da requisição. Uma transação desfeita não envia nada, e uma falha de SMTP é apenas registrada em log, sem desfazer nem atrasar a operação. Cada destinatário recebe uma mensagem própria, sem ver os demais endereços.
 
+### Dashboard
+
+`GET /api/dashboard/resumo` (ADMIN e ATENDENTE) responde com quatro indicadores, todos calculados no MySQL com `COUNT` e `GROUP BY`, sem carregar os chamados na aplicação:
+
+| Indicador | Significado |
+| --- | --- |
+| Totais | Chamados `ABERTO`, `EM_ANDAMENTO` e `RESOLVIDO`, e críticos ainda `ABERTO` (aguardando alguém assumir) |
+| Por categoria | Todos os chamados visíveis, de qualquer status, por categoria (inclui categorias desativadas) |
+| Carga por atendente | Chamados `EM_ANDAMENTO` de cada atendente responsável |
+| Abertos por prioridade | Chamados `ABERTO` por prioridade, sempre com as quatro prioridades |
+
+Os números usam a mesma regra de visibilidade da lista de chamados: o ADMIN vê toda a operação e o ATENDENTE vê a fila e os chamados atribuídos a ele. Por isso cada indicador é igual ao total de `GET /api/chamados` com o filtro equivalente, o que os testes verificam.
+
 ## Stack do projeto
 
 | Camada | Tecnologias | Situação |
@@ -174,7 +187,7 @@ Quem executa a ação não recebe e-mail dela, e usuários inativos nunca recebe
 | Persistência | MySQL 8.4, Spring Data JPA, Hibernate, Specifications | Implementado |
 | Migrações | Flyway (V1 a V9) | Implementado; único responsável pelo esquema |
 | Segurança | Spring Security, JWT (JJWT), BCrypt | Implementado |
-| Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL, GreenMail | Implementado (229 testes) |
+| Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL, GreenMail | Implementado (235 testes) |
 | CI | GitHub Actions | Implementado — suíte completa a cada PR |
 | Notificações | JavaMailSender via SMTP, eventos após commit, `@Async` | Implementado |
 | Front-end | React, Tailwind CSS, React Router, Axios, Vite | Planejado — Fase 6 |
@@ -236,10 +249,7 @@ As rotas marcadas como ✅ estão implementadas e testadas; as demais documentam
 | Comentários | `GET /api/chamados/{id}/comentarios` | Usuário com acesso; ordem cronológica | ✅ |
 | Comentários | `POST /api/chamados/{id}/comentarios` | Usuário com acesso; comentário imutável | ✅ |
 | Histórico | `GET /api/chamados/{id}/historico` | Usuário com acesso; trilha cronológica completa | ✅ |
-| Dashboard | `GET /api/dashboard/resumo` | `ADMIN` e `ATENDENTE`; contadores operacionais | Fase 5 |
-| Dashboard | `GET /api/dashboard/por-categoria` | `ADMIN` e `ATENDENTE`; chamados por categoria | Fase 5 |
-| Dashboard | `GET /api/dashboard/por-atendente` | `ADMIN` e `ATENDENTE`; carga ativa por atendente | Fase 5 |
-| Dashboard | `GET /api/dashboard/por-prioridade` | `ADMIN` e `ATENDENTE`; abertos por prioridade | Fase 5 |
+| Dashboard | `GET /api/dashboard/resumo` | `ADMIN` e `ATENDENTE`; totais por status e críticos abertos, chamados por categoria, carga ativa por atendente e abertos por prioridade, no escopo do perfil | ✅ |
 
 Comandos que alteram recursos versionados exigem `versaoEsperada` e respondem `409 STALE_RESOURCE` quando o recurso mudou. Erros seguem Problem Details com um `code` estável (`VALIDATION_ERROR`, `ACCESS_DENIED`, `INVALID_STATE`, `COMMENTS_CLOSED`, `CORE_BUSY`, entre outros). Respostas nunca expõem senhas, entidades JPA, segredos ou stack traces, e listagens são calculadas no banco.
 
@@ -253,7 +263,7 @@ As sete fases são incrementos sequenciais.
 | 2 — Autenticação | Cadastro de solicitante, login JWT e autorização por perfil e relação | Concluída — 8/8 planos |
 | 3 — Core de Chamados | Administração, ciclo completo do chamado, comentários e histórico auditável | Concluída — 10/10 planos |
 | 4 — Notificações por E-mail | Comunicação dos eventos confirmados aos envolvidos corretos | Concluída — 1/1 plano |
-| 5 — Dashboard | Indicadores autorizados para administradores e atendentes | Pendente |
+| 5 — Dashboard | Indicadores autorizados para administradores e atendentes | Concluída — 1/1 plano |
 | 6 — Front-end (React + Tailwind) | Jornadas principais dos três perfis na SPA responsiva | Pendente |
 | 7 — Polimento e Qualidade | Estados de interface, responsividade, testes e revisão de segurança | Pendente |
 
