@@ -113,6 +113,43 @@ export function ChamadoDetalhePage() {
     }
   }
 
+  // Cada handler devolve true quando a operação deu certo, para o formulário se fechar/limpar.
+  async function salvarEdicao(titulo: string, descricao: string): Promise<boolean> {
+    try {
+      const atualizado = await editarChamado(chamado, titulo, descricao)
+      atualizarDados((d) => ({ ...d, chamado: atualizado }))
+      setAviso({ tipo: 'sucesso', texto: 'Chamado atualizado.' })
+      return true
+    } catch (falha) {
+      tratarFalha(falha)
+      return false
+    }
+  }
+
+  async function enviarComentario(texto: string): Promise<boolean> {
+    try {
+      const novo = await comentar(chamado.id, texto)
+      atualizarDados((d) => ({ ...d, comentarios: [...d.comentarios, novo] }))
+      return true
+    } catch (falha) {
+      tratarFalha(falha)
+      return false
+    }
+  }
+
+  async function confirmarAcao(acao: AcaoStatus, observacao: string): Promise<boolean> {
+    try {
+      const atualizado = await alterarStatus(chamado, DESTINO[acao], observacao)
+      setAviso({ tipo: 'sucesso', texto: `Status alterado para ${ROTULO_STATUS[atualizado.status]}.` })
+      // O histórico ganhou uma linha que só o servidor conhece: recarrega tudo.
+      setRecarga((n) => n + 1)
+      return true
+    } catch (falha) {
+      tratarFalha(falha)
+      return false
+    }
+  }
+
   return (
     <article className="grid gap-6">
       <Link to="/chamados" className="text-sm text-primary underline-offset-4 hover:underline">
@@ -125,59 +162,36 @@ export function ChamadoDetalhePage() {
         </Alert>
       )}
 
+      {/*
+        D-5: no desktop, duas colunas. No celular, as colunas viram "contents" (os filhos
+        entram direto na grade única) e order coloca as ações logo abaixo do título.
+      */}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <div className="grid content-start gap-6">
-          <CabecalhoEDescricao
-            chamado={chamado}
-            podeEditar={acoes.has('EDITAR')}
-            aoSalvar={async (titulo, descricao) => {
-              try {
-                const atualizado = await editarChamado(chamado, titulo, descricao)
-                atualizarDados((d) => ({ ...d, chamado: atualizado }))
-                setAviso({ tipo: 'sucesso', texto: 'Chamado atualizado.' })
-                return true
-              } catch (falha) {
-                tratarFalha(falha)
-                return false
-              }
-            }}
-          />
-          <Conversa
-            chamado={chamado}
-            comentarios={comentarios}
-            podeComentar={acoes.has('COMENTAR')}
-            aoComentar={async (texto) => {
-              try {
-                const novo = await comentar(chamado.id, texto)
-                atualizarDados((d) => ({ ...d, comentarios: [...d.comentarios, novo] }))
-                return true
-              } catch (falha) {
-                tratarFalha(falha)
-                return false
-              }
-            }}
-          />
+        <div className="contents lg:grid lg:content-start lg:gap-6">
+          <div className="order-1 lg:order-none">
+            <CabecalhoEDescricao chamado={chamado} podeEditar={acoes.has('EDITAR')} aoSalvar={salvarEdicao} />
+          </div>
+          <div className="order-3 lg:order-none">
+            <Conversa
+              chamado={chamado}
+              comentarios={comentarios}
+              podeComentar={acoes.has('COMENTAR')}
+              aoComentar={enviarComentario}
+            />
+          </div>
         </div>
 
-        <aside className="grid content-start gap-6">
-          <FichaChamado chamado={chamado} />
-          <Acoes
-            acoes={acoes}
-            aoConfirmar={async (acao, observacao) => {
-              try {
-                const atualizado = await alterarStatus(chamado, DESTINO[acao], observacao)
-                setAviso({ tipo: 'sucesso', texto: `Status alterado para ${ROTULO_STATUS[atualizado.status]}.` })
-                // O histórico ganhou uma linha que só o servidor conhece: recarrega tudo.
-                setRecarga((n) => n + 1)
-                return true
-              } catch (falha) {
-                tratarFalha(falha)
-                return false
-              }
-            }}
-          />
-          <Historico historico={historico} />
-        </aside>
+        <div className="contents lg:grid lg:content-start lg:gap-6">
+          <div className="order-4 lg:order-none">
+            <FichaChamado chamado={chamado} />
+          </div>
+          <div className="order-2 empty:hidden lg:order-none">
+            <Acoes acoes={acoes} aoConfirmar={confirmarAcao} />
+          </div>
+          <div className="order-5 lg:order-none">
+            <Historico historico={historico} />
+          </div>
+        </div>
       </div>
     </article>
   )
