@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 current_phase: 06
 current_phase_name: Front-end (React + Tailwind)
 status: executing
-stopped_at: Plan 06-01 complete on ticket/25-frontend-base; awaiting publish approval
+stopped_at: Plan 06-02 complete on ticket/26-frontend-solicitante; awaiting publish approval
 last_updated: "2026-10-30T12:00:00.000Z"
 last_activity: 2026-10-30
-last_activity_desc: Plan 06-01 implemented (front-end base: TypeScript, shadcn/ui, auth, layout, CI)
+last_activity_desc: Plan 06-02 implemented (requester ticket list with filters and new ticket form)
 state_head: 92d1879
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 30
-  completed_plans: 26
-  percent: 71
+  completed_plans: 27
+  percent: 74
 ---
 
 # Project State
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 06 (Front-end React + Tailwind) — EXECUTING
-Plan: 1 of 5 complete
-Status: ticket/25-frontend-base committed locally; awaiting publish approval
-Last activity: 2026-10-30 — Plan 06-01 implemented (front-end base)
+Plan: 2 of 5 complete
+Status: ticket/26-frontend-solicitante committed locally; awaiting publish approval
+Last activity: 2026-10-30 — Plan 06-02 implemented (requester list and new ticket)
 
 Progress by phase: [██████████████░░░░░░] 5/7 phases (71%)
-Plan progress: 26/30 known plans complete; Phase 06 has 1/5 implementation tickets complete
+Plan progress: 27/30 known plans complete; Phase 06 has 2/5 implementation tickets complete
 
 ## Performance Metrics
 
@@ -165,7 +165,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#24](https://github.com/Morais-Felipe/SolveIT/pull/24) (plano 03-10) integrado em 2026-10-30 (5352bf2); Fase 3 concluída.
 - PR [#25](https://github.com/Morais-Felipe/SolveIT/pull/25) (plano 04-01 + CI) integrado em 2026-10-30 (91b8e4d); Fase 4 concluída.
 - PR [#26](https://github.com/Morais-Felipe/SolveIT/pull/26) (plano 05-01) integrado em 2026-10-30 (1b2cd95); back-end do v1 concluído.
-- Ticket 25 (`ticket/25-frontend-base`, plano 06-01): commits locais; publicação com uma autorização única.
+- PR [#27](https://github.com/Morais-Felipe/SolveIT/pull/27) (ticket 25, plano 06-01) integrado em 2026-10-30 (803f479).
+- Ticket 26 (`ticket/26-frontend-solicitante`, plano 06-02): commits locais; teste de ponta a ponta contra a API real aprovado (MySQL e API em Docker); publicação com uma autorização única.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
@@ -193,5 +194,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 06-01 complete; next is plan 06-02
+Stopped at: Plan 06-02 complete; next is plan 06-03
 Resume file: none
