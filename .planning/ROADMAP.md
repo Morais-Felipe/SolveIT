@@ -200,7 +200,11 @@ Plans:
 
 **Abordagem (revisão 2026-10-30)**: uma única rota `GET /api/dashboard/resumo`. Estimativa: 1 plano.
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+
+- [ ] `05-01-PLAN.md` — Resumo do dashboard no escopo do perfil, calculado no banco e reconciliado com a lista (DASH-01..05)
 **UI hint**: yes
 
 ### Phase 6: Front-end (React + Tailwind)
