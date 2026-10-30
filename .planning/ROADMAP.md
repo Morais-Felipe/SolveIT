@@ -14,6 +14,21 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 - [ ] **Phase 6: Front-end (React + Tailwind)** - Cada perfil conclui suas jornadas principais na web.
 - [ ] **Phase 7: Polimento e Qualidade** - O v1 comprova usabilidade, segurança e fluxos críticos.
 
+## Revisão de escopo — 2026-10-30
+
+Decisão do responsável, com o projeto público e usado como portfólio: concluir o v1 mais rápido sem perder o que diferencia o projeto. O back-end já demonstrou autorização por relação, auditoria atômica e concorrência provada com MySQL real; daqui em diante o rigor passa a ser **proporcional**.
+
+| Área | Antes | Depois |
+|---|---|---|
+| 03-10 | Prévia do impacto com confirmação explícita antes de desativar/trocar perfil | Sem prévia: a operação é atômica, devolve os chamados `EM_ANDAMENTO` do atendente à fila com histórico e informa a quantidade na resposta; versão esperada do usuário e proteção do último ADMIN continuam |
+| Fase 4 | Decisão entre outbox durável e envio após commit | Envio após o commit, fora da requisição, com falha registrada em log; testado contra SMTP falso. Outbox fica para v2 (OPER-01) |
+| Fase 5 | Quatro rotas de indicadores | Uma rota `GET /api/dashboard/resumo` com todos os agregados, calculados no banco e no escopo do perfil |
+| Fase 6 | Jornadas completas dos três perfis | Mantida: telas objetivas por perfil; gráficos somente se sobrar tempo (cards e tabelas bastam) |
+| Fase 7 | Matriz completa de todos os endpoints e E2E de todas as jornadas | Handler genérico de 500, CI no GitHub Actions, `docker-compose` (app + MySQL + SMTP falso) e uma jornada E2E por perfil; a matriz de autorização é a dos testes já existentes |
+| Processo | Prova de concorrência e de rollback em toda funcionalidade; três autorizações por ticket | Testes proporcionais (caminho feliz, permissões, erros); concorrência só para disputa nova; tickets maiores; push + PR + merge com uma única autorização final por ticket |
+
+Nenhum requisito foi apagado; os que mudaram de forma estão anotados em `REQUIREMENTS.md`.
+
 ## Phase Details
 
 ### Phase 1: Base do Projeto
@@ -147,7 +162,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 
 **Wave 10** *(bloqueada pela conclusão e integração da Wave 9)*
 
-- [ ] `03-10-PLAN.md` — Alterar atividade/perfil com prévia, devolução auditada e proteção do último ADMIN
+- [ ] `03-10-PLAN.md` — Alterar atividade/perfil com devolução auditada e proteção do último ADMIN (prévia removida na revisão de 2026-10-30)
 
 ### Phase 4: Notificações por E-mail
 
@@ -161,6 +176,8 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   2. Atendente e solicitante recebem a atribuição, e o solicitante recebe cada atualização de status.
   3. Novo comentário notifica todos os envolvidos uma única vez por destinatário.
   4. Transações revertidas não enviam e-mail, e falha SMTP não desfaz mudança válida do chamado.
+
+**Abordagem (revisão 2026-10-30)**: eventos publicados na transação e enviados depois do commit, fora da requisição; sem outbox. Estimativa: 1–2 planos.
 
 **Plans**: TBD
 
@@ -176,6 +193,8 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   2. Consultam quantidades por categoria, carga ativa por atendente e abertos por prioridade.
   3. Indicadores respeitam o escopo de acesso e reconciliam com listagens equivalentes.
   4. Agregados são calculados no banco sem carregar todos os chamados na aplicação.
+
+**Abordagem (revisão 2026-10-30)**: uma única rota `GET /api/dashboard/resumo`. Estimativa: 1 plano.
 
 **Plans**: TBD
 **UI hint**: yes
@@ -194,6 +213,8 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   4. O administrador visualiza o dashboard e administra usuários e categorias.
   5. A interface oferece ações compatíveis com estado e perfil, mantendo a API como autoridade final.
 
+**Abordagem (revisão 2026-10-30)**: telas objetivas; dashboard em cards e tabelas, gráficos opcionais. Estimativa: 4–5 planos.
+
 **Plans**: TBD
 **UI hint**: yes
 
@@ -210,6 +231,9 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
   3. A matriz de perfis, propriedade e atribuição comprova permissões e recusas de todos os endpoints.
   4. Testes unitários e de integração comprovam regras críticas, MySQL/Flyway, JWT, escopo, filtros, atomicidade, concorrência e e-mail.
   5. Jornadas essenciais dos três perfis completam de ponta a ponta antes da entrega.
+  6. *(Revisão 2026-10-30)* Quem clona o repositório sobe app, MySQL e SMTP falso com um comando (`docker-compose`), e o GitHub Actions executa a suíte a cada PR.
+
+**Abordagem (revisão 2026-10-30)**: os critérios 3 e 4 são atendidos pelos testes já existentes mais os testes das fases 4–6; o critério 5 por uma jornada E2E por perfil. Estimativa: 2 planos.
 
 **Plans**: TBD
 **UI hint**: yes

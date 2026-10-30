@@ -205,34 +205,27 @@ Architecture not yet mapped. Follow existing patterns found in the codebase.
 No project skills found. Add skills to any of: `.claude/skills/`, `.agents/skills/`, `.cursor/skills/`, `.github/skills/`, or `.codex/skills/` with a `SKILL.md` index file.
 <!-- GSD:skills-end -->
 
-<!-- GSD:workflow-start source:GSD defaults -->
+## Fluxo de trabalho
 
-## GSD Workflow Enforcement
+O GSD foi descontinuado em 2026-10-22. O trabalho segue os planos já documentados em `.planning/` (ROADMAP, REQUIREMENTS, STATE e `phases/`), executados diretamente pelo agente, sem comandos `$gsd-*`. As seções acima marcadas com `GSD:` são geradas a partir desses documentos e continuam válidas como contexto.
 
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
-
-Use these entry points:
-
-- `$gsd-quick` for small fixes, doc updates, and ad-hoc tasks
-- `$gsd-debug` for investigation and bug fixing
-- `$gsd-execute-phase` for planned phase work
-
-Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
-<!-- GSD:workflow-end -->
+- Antes de cada plano: ler o `NN-PP-PLAN.md`, apresentá-lo explicado e aguardar aprovação.
+- Ao concluir: escrever `NN-PP-SUMMARY.md` e atualizar STATE, ROADMAP e REQUIREMENTS.
+- Testes proporcionais ao risco (revisão de escopo de 2026-10-30, registrada no ROADMAP).
 
 ## Git e GitHub por ticket
 
 - A política obrigatória está em `docs/GIT-WORKFLOW.md` e deve ser lida antes de iniciar qualquer ticket.
 - Use uma branch `ticket/NN-descricao-curta`; não implemente tickets diretamente na `main`.
-- A partir da Fase 3, cada plano de implementação GSD aprovado usa um ticket/branch/PR próprio. Integre o anterior antes de implementar o seguinte; não concentre uma fase inteira na mesma branch. A numeração de tickets é sequencial e independente da numeração de fases/planos. Registre a correspondência plano → branch → PR e retome a mesma branch ao trocar de máquina.
+- A partir da Fase 3, cada plano de implementação aprovado usa um ticket/branch/PR próprio. Integre o anterior antes de implementar o seguinte; não concentre uma fase inteira na mesma branch. A numeração de tickets é sequencial e independente da numeração de fases/planos. Registre a correspondência plano → branch → PR e retome a mesma branch ao trocar de máquina.
 - Planeje e obtenha aprovação antes de escrever código.
-- Faça commits atômicos durante o ticket e push da branch após testes, resumo e aprovação.
-- Integre na `main` somente após confirmação explícita do usuário.
+- Faça commits atômicos durante o ticket.
+- Publicação (push, PR e merge) somente após testes, resumo e **uma** aprovação explícita do usuário para aquele ticket (decisão de 2026-10-30).
 - Para continuar em outra máquina no meio de um ticket, registre um checkpoint e faça push da branch sem integrá-la.
 
 ## Modo pedagógico obrigatório
 
-O responsável é um desenvolvedor Java júnior e usa a construção do SolveIT também como processo de aprendizagem. O GSD e qualquer agente que trabalhe neste repositório devem ensinar no contexto da tarefa, sem presumir domínio prévio de Spring, segurança, infraestrutura, containers, identidade, armazenamento ou operações Git.
+O responsável é um desenvolvedor Java júnior e usa a construção do SolveIT também como processo de aprendizagem. Qualquer agente que trabalhe neste repositório devem ensinar no contexto da tarefa, sem presumir domínio prévio de Spring, segurança, infraestrutura, containers, identidade, armazenamento ou operações Git.
 
 - Antes de cada ação, explicar em linguagem clara o que será feito, por que isso é necessário e qual conceito técnico está envolvido.
 - Antes de executar um comando relevante, explicar seu efeito e o resultado esperado; depois, interpretar a saída, incluindo falhas, avisos e consequências.

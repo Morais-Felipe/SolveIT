@@ -26,6 +26,7 @@
 - [x] **ADMN-01**: Um administrador pode listar usuários de forma paginada e consultar um usuário por id.
 - [x] **ADMN-02**: Um administrador pode criar e editar usuários com qualquer perfil sem permitir e-mails duplicados.
 - [ ] **ADMN-03**: Um administrador pode ativar ou desativar usuários sem excluí-los. Desativação ou retirada do perfil ATENDENTE devolve seus chamados EM_ANDAMENTO a ABERTO sem responsável, após confirmação explícita da quantidade, com histórico e operação atômica. Conflito exige nova revisão sem mudanças parciais. O último ADMIN ativo não pode ser desativado nem perder seu perfil.
+  - *Revisão 2026-10-30:* sem prévia nem confirmação da quantidade. A operação é atômica, usa a versão esperada do usuário (conflito = 409, sem mudança parcial), devolve os chamados com histórico e informa na resposta quantos foram devolvidos.
 - [x] **ADMN-04**: Qualquer usuário autenticado pode listar categorias ativas e consultar uma categoria permitida por id.
 - [x] **ADMN-05**: Um administrador pode criar e editar categorias com nome único.
 - [x] **ADMN-06**: Um administrador pode ativar ou desativar categorias sem excluí-las.
@@ -60,6 +61,7 @@
 - [ ] **MAIL-04**: O solicitante recebe e-mail após cada atualização de status.
 - [ ] **MAIL-05**: Todos os envolvidos no chamado recebem e-mail após novo comentário, sem duplicar destinatários.
 - [ ] **MAIL-06**: E-mails são disparados somente após confirmação da transação do evento e falhas SMTP não desfazem mudanças válidas do chamado.
+  - *Revisão 2026-10-30:* envio após o commit e fora da requisição, com falha registrada em log; sem outbox (reenvio durável segue em OPER-01, v2).
 
 ### Dashboard
 
@@ -84,8 +86,10 @@
 - [ ] **QUAL-01**: Serviços críticos possuem testes unitários para autorização, transições, edição, comentários e destinatários de notificação.
 - [ ] **QUAL-02**: Testes de integração verificam migrações em MySQL, autenticação JWT, escopo por usuário, atomicidade de histórico e filtros paginados.
 - [ ] **QUAL-03**: Todos os endpoints são revisados contra uma matriz de perfis, propriedade e atribuição, incluindo cenários negativos.
+  - *Revisão 2026-10-30:* atendido pelos testes de integração existentes (matrizes de detalhe, lista, transições e comentários) e pelos das fases 4–6; sem nova matriz dedicada.
 - [ ] **QUAL-04**: Exceções são convertidas em respostas consistentes, sem expor stack traces, segredos ou entidades JPA.
 - [ ] **QUAL-05**: Jornadas essenciais de solicitante, atendente e administrador são verificadas de ponta a ponta antes da entrega do v1.
+  - *Revisão 2026-10-30:* uma jornada E2E automatizada por perfil.
 
 ## v2 Requirements
 

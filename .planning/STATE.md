@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 current_phase: 03
 current_phase_name: Core de Chamados
 status: executing
-stopped_at: Plan 03-09 complete on ticket/19-leitura-comentarios-historico; awaiting push approval
-last_updated: "2026-10-29T12:00:00.000Z"
-last_activity: 2026-10-29
-last_activity_desc: Plan 03-09 implemented and verified locally (203/207; 4 loopback failures are environmental)
+stopped_at: Scope review recorded on ticket/21-revisao-escopo; next is plan 03-10 (ticket 22)
+last_updated: "2026-10-30T12:00:00.000Z"
+last_activity: 2026-10-30
+last_activity_desc: Scope review for portfolio delivery; README updated (PR #22)
 state_head: 92d1879
 progress:
   total_phases: 7
@@ -29,8 +29,8 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 Phase: 03 (Core de Chamados) — EXECUTING
 Plan: 9 of 10 complete
-Status: ticket/19-leitura-comentarios-historico committed locally; awaiting push approval
-Last activity: 2026-10-29 — Plan 03-09 implemented with Claude Code
+Status: scope review on ticket/21-revisao-escopo; plan 03-10 not started
+Last activity: 2026-10-30 — Scope review recorded (ROADMAP, REQUIREMENTS, GIT-WORKFLOW, AGENTS)
 
 Progress by phase: [██████░░░░░░░░░░░░░░] 2/7 phases (29%)
 Plan progress: 22/23 plans complete (96%); Phase 03 has 9/10 implementation tickets complete
@@ -142,6 +142,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 03 / 03-08]: Comentário usa a política de leitura de chamados, verifica acesso antes do status encerrado e trava o chamado só para ler; não altera chamado nem versão.
 - [Phase 03 / 03-09]: Comentários e histórico são lidos sem paginação, ordenados no SQL (data, id) e com a mesma política do detalhe; comentários não têm rota de edição ou exclusão.
 - [Process]: A partir de 2026-10-22 o projeto segue os planos em .planning com Claude Code, sem GSD; fluxo Git por ticket e modo pedagógico permanecem.
+- [Process]: Revisão de escopo de 2026-10-30 (ver ROADMAP): sem prévia no 03-10; e-mail após commit sem outbox; dashboard em uma rota; Fase 7 com handler 500, CI, docker-compose e um E2E por perfil; testes proporcionais; uma autorização final por ticket para push + PR + merge.
+- [Phase 4]: Decidido em 2026-10-30 — envio após commit, fora da requisição, falha registrada em log; outbox fica para v2.
 
 ### Pending Todos
 
@@ -152,18 +154,18 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#18](https://github.com/Morais-Felipe/SolveIT/pull/18) (plano 03-06) integrado na `main` em 2026-10-22 (d1ca0c9).
 - PR [#19](https://github.com/Morais-Felipe/SolveIT/pull/19) (plano 03-07) integrado na `main` em 2026-10-22 (d4545e5) com autorização conjunta explícita, condicionada à suíte sem falhas além do loopback.
 - PR [#20](https://github.com/Morais-Felipe/SolveIT/pull/20) (plano 03-08) integrado na `main` em 2026-10-23 (1d88cd1).
-- Ticket 19 (`ticket/19-leitura-comentarios-historico`, plano 03-09): commits locais; push, PR e merge exigem aprovações separadas.
+- PR [#21](https://github.com/Morais-Felipe/SolveIT/pull/21) (plano 03-09) integrado na `main` em 2026-10-29 (77391a0).
+- PR [#22](https://github.com/Morais-Felipe/SolveIT/pull/22) (ticket 20, README) integrado em 2026-10-29 (ca9a739).
+- Ticket 21 (`ticket/21-revisao-escopo`): registro da revisão de escopo; o plano 03-10 passa a ser o ticket 22.
 - A suíte completa passou de 10 minutos localmente; considerar CI no GitHub Actions.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
 - TICK-10, TICK-11 e TICK-12 seguem parciais até a devolução administrativa do plano 03-10.
 - Investigar `Unable to establish loopback connection` no AuthHttpErrorIntegrationTest nesta máquina (reproduz na `main`).
-- Remover do AGENTS.md e do docs/GIT-WORKFLOW.md as instruções que exigem GSD (decisão de 2026-10-22: GSD descontinuado).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
 
 - [Pre-production]: Definir e verificar rate limiting para login/cadastro antes de expor o SolveIT à internet.
-- [Phase 4]: Decidir entre entrega best-effort após commit e outbox durável.
 - [Phase 5]: Definir escopo dos agregados para atendentes e significado de carga ativa.
 
 ### Quick Tasks Completed
@@ -186,5 +188,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 03-09 complete on ticket/19-leitura-comentarios-historico; awaiting push approval
+Stopped at: Scope review recorded; next is plan 03-10 (ticket 22)
 Resume file: none
