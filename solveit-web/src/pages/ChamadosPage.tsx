@@ -18,10 +18,13 @@ import {
 } from '@/lib/chamados'
 import type { Categoria, Chamado, Pagina, Prioridade, StatusChamado } from '@/lib/types'
 
-type Estado =
+type Resultado =
   | { tipo: 'carregando' }
   | { tipo: 'erro'; mensagem: string }
   | { tipo: 'pronto'; pagina: Pagina<Chamado> }
+
+/** Resultado de uma busca, marcado com a chave dos filtros que o produziram. */
+type Busca = { chave: string; resultado: Resultado }
 
 /** Lê os filtros da URL (decisão D-1), descartando valores que a API não reconheceria. */
 function lerFiltros(params: URLSearchParams): FiltrosChamados {
@@ -46,12 +49,16 @@ export function ChamadosPage() {
   const location = useLocation()
   const [params, setParams] = useSearchParams()
   const { status, prioridade, categoriaId, page } = lerFiltros(params)
-  const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
+  const [busca, setBusca] = useState<Busca | null>(null)
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [tentativa, setTentativa] = useState(0)
   const aviso = (location.state as { aviso?: string } | null)?.aviso
   const ehSolicitante = sessao.status === 'autenticado' && sessao.usuario.perfil === 'SOLICITANTE'
   const filtrando = Boolean(status || prioridade || categoriaId)
+  // "Carregando" é derivado: se o último resultado é de outros filtros (ou de outra
+  // tentativa), ainda estamos esperando a resposta atual.
+  const chaveBusca = JSON.stringify([status, prioridade, categoriaId, page, tentativa])
+  const estado: Resultado = busca?.chave === chaveBusca ? busca.resultado : { tipo: 'carregando' }
 
   useEffect(() => {
     const controle = new AbortController()
@@ -67,16 +74,15 @@ export function ChamadosPage() {
     // Cada mudança de filtro cancela a busca anterior: uma resposta atrasada
     // nunca sobrescreve a lista mais recente.
     const controle = new AbortController()
-    setEstado({ tipo: 'carregando' })
     listarChamados({ status, prioridade, categoriaId, page }, controle.signal)
-      .then((pagina) => setEstado({ tipo: 'pronto', pagina }))
+      .then((pagina) => setBusca({ chave: chaveBusca, resultado: { tipo: 'pronto', pagina } }))
       .catch((falha: unknown) => {
         if (!controle.signal.aborted) {
-          setEstado({ tipo: 'erro', mensagem: toApiError(falha).message })
+          setBusca({ chave: chaveBusca, resultado: { tipo: 'erro', mensagem: toApiError(falha).message } })
         }
       })
     return () => controle.abort()
-  }, [status, prioridade, categoriaId, page, tentativa])
+  }, [chaveBusca, status, prioridade, categoriaId, page])
 
   /** Muda um filtro e volta à primeira página; valor vazio remove o parâmetro. */
   function filtrar(nome: 'status' | 'prioridade' | 'categoriaId', valor: string) {

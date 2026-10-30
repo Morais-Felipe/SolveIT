@@ -28,8 +28,11 @@ function renderApp(rota: string): void {
   render(<App />, { wrapper })
 }
 
+/** /auth/me devolve o usuário; as listas das telas iniciais vêm vazias. */
 function respostaMe(usuario: Usuario) {
-  return vi.spyOn(api, 'get').mockResolvedValue({ data: usuario })
+  return vi.spyOn(api, 'get').mockImplementation(async (url: string) =>
+    url === '/auth/me' ? { data: usuario } : { data: { items: [], page: 0, size: 10, totalElements: 0, totalPages: 0 } },
+  )
 }
 
 beforeEach(() => {
@@ -120,7 +123,7 @@ describe('autenticação', () => {
     const get = respostaMe(SOLICITANTE)
     renderApp('/')
 
-    expect(await screen.findByRole('heading', { name: 'Chamados' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Meus chamados' })).toBeInTheDocument()
     expect(screen.getByText('Sol')).toBeInTheDocument()
     expect(get).toHaveBeenCalledWith('/auth/me')
   })
@@ -154,7 +157,7 @@ describe('autenticação', () => {
     respostaMe(SOLICITANTE)
     renderApp('/usuarios')
 
-    expect(await screen.findByRole('heading', { name: 'Chamados' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Meus chamados' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Usuários' })).not.toBeInTheDocument()
   })
 })

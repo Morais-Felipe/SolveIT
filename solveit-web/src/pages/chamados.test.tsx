@@ -67,8 +67,9 @@ function renderApp(rota: string): void {
 
 /** Parâmetros enviados na última chamada GET /chamados. */
 function ultimosParametros(get: ReturnType<typeof simularApi>) {
-  const chamadas = get.mock.calls.filter(([url]) => url === '/chamados')
-  return (chamadas.at(-1)?.[1] as { params: Record<string, unknown> }).params
+  const ultima = get.mock.calls.filter(([url]) => url === '/chamados').at(-1)
+  if (!ultima) throw new Error('GET /chamados não foi chamado')
+  return (ultima[1] as { params: Record<string, unknown> }).params
 }
 
 beforeEach(() => {
@@ -159,5 +160,62 @@ describe('lista de chamados', () => {
     await usuarioEvento.click(screen.getByRole('button', { name: 'Tentar novamente' }))
 
     expect(await screen.findAllByText('Impressora')).not.toHaveLength(0)
+  })
+})
+
+describe('abertura de chamado', () => {
+  it('envia somente os quatro campos aceitos e volta para a lista com aviso', async () => {
+    const usuarioEvento = userEvent.setup()
+    simularApi()
+    const post = vi.spyOn(api, 'post').mockResolvedValue({ data: chamado(42, 'Monitor piscando') })
+    renderApp('/chamados/novo')
+
+    await usuarioEvento.type(await screen.findByLabelText('Título'), '  Monitor piscando  ')
+    await usuarioEvento.type(screen.getByLabelText('Descrição'), 'Pisca desde ontem.')
+    await usuarioEvento.selectOptions(screen.getByLabelText('Prioridade'), 'ALTA')
+    await screen.findByRole('option', { name: 'Hardware' })
+    await usuarioEvento.selectOptions(screen.getByLabelText('Categoria'), '2')
+    await usuarioEvento.click(screen.getByRole('button', { name: 'Abrir chamado' }))
+
+    expect(post).toHaveBeenCalledWith('/chamados', {
+      titulo: 'Monitor piscando',
+      descricao: 'Pisca desde ontem.',
+      prioridade: 'ALTA',
+      categoriaId: 2,
+    })
+    expect(await screen.findByText('Chamado #42 aberto com sucesso.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Meus chamados' })).toBeInTheDocument()
+  })
+
+  it('mostra no campo o erro de validação devolvido pela API', async () => {
+    const usuarioEvento = userEvent.setup()
+    simularApi()
+    vi.spyOn(api, 'post').mockRejectedValue(
+      new ApiError(400, 'VALIDATION_ERROR', 'Dados inválidos.', { categoriaId: 'A categoria está inativa' }),
+    )
+    renderApp('/chamados/novo')
+
+    await usuarioEvento.type(await screen.findByLabelText('Título'), 'Teclado')
+    await usuarioEvento.type(screen.getByLabelText('Descrição'), 'Tecla A falha.')
+    await screen.findByRole('option', { name: 'Rede' })
+    await usuarioEvento.selectOptions(screen.getByLabelText('Categoria'), '1')
+    await usuarioEvento.click(screen.getByRole('button', { name: 'Abrir chamado' }))
+
+    expect(await screen.findByText('A categoria está inativa')).toBeInTheDocument()
+    expect(screen.getByLabelText('Categoria')).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('não envia enquanto faltam campos obrigatórios', async () => {
+    const usuarioEvento = userEvent.setup()
+    simularApi()
+    const post = vi.spyOn(api, 'post')
+    renderApp('/chamados/novo')
+
+    await usuarioEvento.click(await screen.findByRole('button', { name: 'Abrir chamado' }))
+
+    expect(screen.getByText('Informe o título.')).toBeInTheDocument()
+    expect(screen.getByText('Descreva o problema.')).toBeInTheDocument()
+    expect(screen.getByText('Escolha a categoria.')).toBeInTheDocument()
+    expect(post).not.toHaveBeenCalled()
   })
 })

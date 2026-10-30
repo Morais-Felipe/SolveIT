@@ -3,6 +3,7 @@ import { AppLayout } from '@/layout/AppLayout'
 import { CadastroPage } from '@/pages/CadastroPage'
 import { ChamadosPage } from '@/pages/ChamadosPage'
 import { EmBreve, NaoEncontrado } from '@/pages/EmBreve'
+import { NovoChamadoPage } from '@/pages/NovoChamadoPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RedirecionarParaInicial, RotaPorPerfil, RotaProtegida, SomenteAnonimo } from '@/routes/guards'
 
@@ -23,7 +24,7 @@ export default function App() {
           path="chamados/novo"
           element={
             <RotaPorPerfil perfis={['SOLICITANTE']}>
-              <EmBreve titulo="Abrir chamado" plano="06-02" />
+              <NovoChamadoPage />
             </RotaPorPerfil>
           }
         />
