@@ -87,7 +87,7 @@
 - [ ] **QUAL-02**: Testes de integração verificam migrações em MySQL, autenticação JWT, escopo por usuário, atomicidade de histórico e filtros paginados.
 - [ ] **QUAL-03**: Todos os endpoints são revisados contra uma matriz de perfis, propriedade e atribuição, incluindo cenários negativos.
   - *Revisão 2026-10-30:* atendido pelos testes de integração existentes (matrizes de detalhe, lista, transições e comentários) e pelos das fases 4–6; sem nova matriz dedicada.
-- [ ] **QUAL-04**: Exceções são convertidas em respostas consistentes, sem expor stack traces, segredos ou entidades JPA.
+- [x] **QUAL-04**: Exceções são convertidas em respostas consistentes, sem expor stack traces, segredos ou entidades JPA.
 - [ ] **QUAL-05**: Jornadas essenciais de solicitante, atendente e administrador são verificadas de ponta a ponta antes da entrega do v1.
   - *Revisão 2026-10-30:* uma jornada E2E automatizada por perfil.
 
@@ -172,7 +172,7 @@
 | QUAL-01 | Phase 7 | Pending |
 | QUAL-02 | Phase 7 | Pending |
 | QUAL-03 | Phase 7 | Pending |
-| QUAL-04 | Phase 7 | Pending |
+| QUAL-04 | Phase 7 | Complete |
 | QUAL-05 | Phase 7 | Pending |
 
 **Coverage:**

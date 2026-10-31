@@ -103,7 +103,7 @@ Set-Location solveit-api
 .\mvnw.cmd clean verify
 ```
 
-Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **235 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
+Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **241 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
 
 A mesma suíte roda automaticamente no **GitHub Actions** ([`backend-ci.yml`](.github/workflows/backend-ci.yml)) a cada pull request e a cada push na `main`, em uma máquina Linux limpa.
 

@@ -259,7 +259,7 @@ Plans:
 
 Plans:
 
-- [ ] `07-01-PLAN.md` — Entrega reproduzível e erros consistentes: handler genérico de 500, Dockerfiles e `docker-compose` (API + web + MySQL + Mailpit) (QUAL-04; critério 6)
+- [x] `07-01-PLAN.md` — Entrega reproduzível e erros consistentes: handler genérico de 500, Dockerfiles e `docker-compose` (API + web + MySQL + Mailpit) (QUAL-04; critério 6)
 - [ ] `07-02-PLAN.md` — Jornadas E2E por perfil (Playwright contra o compose), revisão de estados/telas móveis e mapa de evidências de QUAL-01..03 (QUAL-01, QUAL-02, QUAL-03, QUAL-05, WEB-06, WEB-07)
 **UI hint**: yes
 
@@ -273,4 +273,4 @@ Plans:
 | 4. Notificações por E-mail | 1/1 | Complete | 2026-10-30 |
 | 5. Dashboard | 1/1 | Complete | 2026-10-30 |
 | 6. Front-end (React + Tailwind) | 5/5 | Complete | 2026-10-31 |
-| 7. Polimento e Qualidade | 0/TBD | Not started | - |
+| 7. Polimento e Qualidade | 1/2 | In Progress |  |
