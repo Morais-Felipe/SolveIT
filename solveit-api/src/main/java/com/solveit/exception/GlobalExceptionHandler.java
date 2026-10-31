@@ -8,17 +8,22 @@ import jakarta.validation.Path;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.dao.QueryTimeoutException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -215,6 +220,75 @@ public final class GlobalExceptionHandler {
         return problemResponse(HttpStatus.INTERNAL_SERVER_ERROR, problem);
     }
 
+    /**
+     * Última rede de segurança (plano 07-01 D-1). Três caminhos:
+     * <ol>
+     *   <li>401/403 do Spring Security são relançados sem alteração: a cadeia de filtros
+     *       (ExceptionTranslationFilter) responde como sempre respondeu. Relançar a mesma
+     *       exceção faz o Spring desistir deste handler em silêncio.</li>
+     *   <li>Exceções que já trazem um status HTTP (ResponseStatusException, rota ou método
+     *       inexistente) mantêm o status, no formato do SolveIT e com texto fixo.</li>
+     *   <li>O resto é defeito: 500 com texto fixo e um errorId (D-2). O detalhe completo
+     *       vai só para o log, junto com o mesmo errorId.</li>
+     * </ol>
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ProblemDetail> handleUnexpected(
+            Exception exception,
+            HttpServletRequest request) throws Exception {
+        if (exception instanceof AccessDeniedException || exception instanceof AuthenticationException) {
+            throw exception;
+        }
+
+        if (exception instanceof ErrorResponse errorResponse
+                && !errorResponse.getStatusCode().is5xxServerError()) {
+            HttpStatus status = HttpStatus.valueOf(errorResponse.getStatusCode().value());
+            ProblemDetail problem = switch (status) {
+                case NOT_FOUND -> problemDetailFactory.create(
+                        status,
+                        ApiErrorCode.RESOURCE_NOT_FOUND,
+                        "Recurso não encontrado",
+                        "O recurso solicitado não existe.",
+                        requestUri(request),
+                        null);
+                case METHOD_NOT_ALLOWED -> problemDetailFactory.create(
+                        status,
+                        ApiErrorCode.METHOD_NOT_ALLOWED,
+                        "Método não permitido",
+                        "Este recurso não aceita o método " + request.getMethod() + ".",
+                        requestUri(request),
+                        null);
+                default -> problemDetailFactory.create(
+                        status,
+                        ApiErrorCode.REQUEST_INVALID,
+                        "Requisição inválida",
+                        "A requisição não pôde ser processada.",
+                        requestUri(request),
+                        null);
+            };
+            return problemResponse(status, errorResponse.getHeaders(), problem);
+        }
+
+        String errorId = UUID.randomUUID().toString().substring(0, 8);
+        SAFE_ERROR_LOG.error(
+                "Unexpected error {} on {} {}",
+                errorId,
+                request.getMethod(),
+                request.getRequestURI(),
+                exception);
+
+        ProblemDetail problem = problemDetailFactory.create(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ApiErrorCode.INTERNAL_ERROR,
+                "Erro interno",
+                "Ocorreu um erro inesperado. Tente novamente.",
+                requestUri(request),
+                null);
+        problem.setProperty("errorId", errorId);
+
+        return problemResponse(HttpStatus.INTERNAL_SERVER_ERROR, problem);
+    }
+
     private static String lastPathNode(Path propertyPath) {
         String name = null;
         for (Path.Node node : propertyPath) {
@@ -230,7 +304,16 @@ public final class GlobalExceptionHandler {
     private static ResponseEntity<ProblemDetail> problemResponse(
             HttpStatus status,
             ProblemDetail problem) {
+        return problemResponse(status, HttpHeaders.EMPTY, problem);
+    }
+
+    /** Mantém cabeçalhos que o status exige, como o Allow de um 405. */
+    private static ResponseEntity<ProblemDetail> problemResponse(
+            HttpStatus status,
+            HttpHeaders headers,
+            ProblemDetail problem) {
         return ResponseEntity.status(status)
+                .headers(headers)
                 .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .body(problem);
     }
