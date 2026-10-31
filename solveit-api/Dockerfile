@@ -8,8 +8,12 @@ WORKDIR /build
 # e não baixa tudo de novo a cada alteração no código.
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
-# Num clone no Windows o mvnw pode vir com fim de linha CRLF, que o Linux não executa.
-RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && ./mvnw -B -ntp dependency:go-offline
+# Num clone no Windows o mvnw e o .properties do wrapper podem vir com fim de linha CRLF:
+# o Linux não executa o script, e o hash SHA-256 lido do .properties ganha um "\r" que
+# nunca confere com o download (o wrapper recusa a distribuição). Normalizamos os dois.
+RUN sed -i 's/\r$//' mvnw .mvn/wrapper/maven-wrapper.properties \
+    && chmod +x mvnw \
+    && ./mvnw -B -ntp dependency:go-offline
 
 COPY src/ src/
 # Os testes rodam no CI e localmente com Testcontainers; aqui só empacotamos.
