@@ -42,8 +42,9 @@ public class CategoriaController {
             @RequestParam(defaultValue = "20")
             @Min(value = 1, message = "O tamanho da página deve ser entre 1 e 100")
             @Max(value = 100, message = "O tamanho da página deve ser entre 1 e 100")
-            int size) {
-        return categoriaService.listarAtivas(principal.getId(), page, size);
+            int size,
+            @RequestParam(defaultValue = "false") boolean incluirInativas) {
+        return categoriaService.listar(principal.getId(), incluirInativas, page, size);
     }
 
     @GetMapping("/{id}")

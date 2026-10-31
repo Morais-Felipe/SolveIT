@@ -11,7 +11,7 @@ O SolveIT será entregue em sete incrementos MVP na ordem definida pelo document
 - [x] **Phase 3: Core de Chamados** - Os três perfis operam o ciclo auditável completo do chamado. (completed 2026-10-30)
 - [x] **Phase 4: Notificações por E-mail** - Eventos confirmados comunicam os envolvidos corretos. (completed 2026-10-30)
 - [x] **Phase 5: Dashboard** - Admins e atendentes consultam indicadores autorizados. (completed 2026-10-30)
-- [ ] **Phase 6: Front-end (React + Tailwind)** - Cada perfil conclui suas jornadas principais na web.
+- [x] **Phase 6: Front-end (React + Tailwind)** - Cada perfil conclui suas jornadas principais na web. (completed 2026-10-31)
 - [ ] **Phase 7: Polimento e Qualidade** - O v1 comprova usabilidade, segurança e fluxos críticos.
 
 ## Revisão de escopo — 2026-10-30
@@ -233,7 +233,7 @@ Plans:
 - [x] `06-02-PLAN.md` — Solicitante: lista com filtros e abertura (WEB-02)
 - [x] `06-03-PLAN.md` — Detalhe: comentários, histórico e ações permitidas (WEB-03)
 - [x] `06-04-PLAN.md` — Atendente: fila, assumir, comentar e resolver (WEB-04)
-- [ ] `06-05-PLAN.md` — Administrador: dashboard, usuários e categorias (WEB-05)
+- [x] `06-05-PLAN.md` — Administrador: dashboard, usuários e categorias (WEB-05)
 **UI hint**: yes
 
 ### Phase 7: Polimento e Qualidade
@@ -265,5 +265,5 @@ Plans:
 | 3. Core de Chamados | 10/10 | Complete | 2026-10-30 |
 | 4. Notificações por E-mail | 1/1 | Complete | 2026-10-30 |
 | 5. Dashboard | 1/1 | Complete | 2026-10-30 |
-| 6. Front-end (React + Tailwind) | 4/5 | In Progress |  |
+| 6. Front-end (React + Tailwind) | 5/5 | Complete | 2026-10-31 |
 | 7. Polimento e Qualidade | 0/TBD | Not started | - |

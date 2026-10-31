@@ -28,11 +28,20 @@ function renderApp(rota: string): void {
   render(<App />, { wrapper })
 }
 
-/** /auth/me devolve o usuário; as listas das telas iniciais vêm vazias. */
+const RESUMO_VAZIO = {
+  totais: { aberto: 0, emAndamento: 0, resolvido: 0, criticaAberta: 0 },
+  porCategoria: [],
+  cargaPorAtendente: [],
+  abertosPorPrioridade: {},
+}
+
+/** /auth/me devolve o usuário; o dashboard e as listas das telas iniciais vêm vazios. */
 function respostaMe(usuario: Usuario) {
-  return vi.spyOn(api, 'get').mockImplementation(async (url: string) =>
-    url === '/auth/me' ? { data: usuario } : { data: { items: [], page: 0, size: 10, totalElements: 0, totalPages: 0 } },
-  )
+  return vi.spyOn(api, 'get').mockImplementation(async (url: string) => {
+    if (url === '/auth/me') return { data: usuario }
+    if (url === '/dashboard/resumo') return { data: RESUMO_VAZIO }
+    return { data: { items: [], page: 0, size: 10, totalElements: 0, totalPages: 0 } }
+  })
 }
 
 beforeEach(() => {

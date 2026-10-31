@@ -74,6 +74,23 @@ export type Categoria = {
   versao: number
 }
 
+/** Espelha UsuarioDtos.Resposta (rotas de administração): traz a versão para o bloqueio otimista. */
+export type UsuarioAdmin = Usuario & { versao: number }
+
+/** Espelha UsuarioDtos.ResultadoOperacao: quantos chamados em andamento voltaram para a fila. */
+export type ResultadoOperacao = {
+  usuario: UsuarioAdmin
+  chamadosDevolvidos: number
+}
+
+/** Espelha DashboardDtos.Resumo. O escopo (tudo para o ADMIN, o próprio para o atendente) é da API. */
+export type ResumoDashboard = {
+  totais: { aberto: number; emAndamento: number; resolvido: number; criticaAberta: number }
+  porCategoria: { categoriaId: number; nome: string; quantidade: number }[]
+  cargaPorAtendente: { atendenteId: number; nome: string; emAndamento: number }[]
+  abertosPorPrioridade: Partial<Record<Prioridade, number>>
+}
+
 /** Espelha ComentarioDtos.Resposta. Comentários são imutáveis: não há edição nem exclusão. */
 export type Comentario = {
   id: number

@@ -1,11 +1,14 @@
 import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/layout/AppLayout'
 import { CadastroPage } from '@/pages/CadastroPage'
+import { CategoriasPage } from '@/pages/CategoriasPage'
 import { ChamadoDetalhePage } from '@/pages/ChamadoDetalhePage'
 import { ChamadosPage } from '@/pages/ChamadosPage'
-import { EmBreve, NaoEncontrado } from '@/pages/EmBreve'
+import { DashboardPage } from '@/pages/DashboardPage'
+import { NaoEncontrado } from '@/pages/NaoEncontrado'
 import { FilaPage } from '@/pages/FilaPage'
 import { NovoChamadoPage } from '@/pages/NovoChamadoPage'
+import { UsuariosPage } from '@/pages/UsuariosPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RedirecionarParaInicial, RotaPorPerfil, RotaProtegida, SomenteAnonimo } from '@/routes/guards'
 
@@ -43,7 +46,7 @@ export default function App() {
           path="dashboard"
           element={
             <RotaPorPerfil perfis={['ADMIN', 'ATENDENTE']}>
-              <EmBreve titulo="Dashboard" plano="06-05" />
+              <DashboardPage />
             </RotaPorPerfil>
           }
         />
@@ -51,7 +54,7 @@ export default function App() {
           path="usuarios"
           element={
             <RotaPorPerfil perfis={['ADMIN']}>
-              <EmBreve titulo="Usuários" plano="06-05" />
+              <UsuariosPage />
             </RotaPorPerfil>
           }
         />
@@ -59,7 +62,7 @@ export default function App() {
           path="categorias"
           element={
             <RotaPorPerfil perfis={['ADMIN']}>
-              <EmBreve titulo="Categorias" plano="06-05" />
+              <CategoriasPage />
             </RotaPorPerfil>
           }
         />
