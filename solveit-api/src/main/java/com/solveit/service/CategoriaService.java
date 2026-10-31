@@ -52,10 +52,16 @@ public class CategoriaService {
     }
 
     @Transactional(readOnly = true)
-    public CategoriaDtos.Pagina listarAtivas(Long usuarioId, int page, int size) {
-        carregarUsuarioAtivo(usuarioId);
-        Page<Categoria> categorias = categoriaRepository.findByAtivoTrue(
-                PageRequest.of(page, size, ORDEM_CATALOGO));
+    public CategoriaDtos.Pagina listar(Long usuarioId, boolean incluirInativas, int page, int size) {
+        Usuario usuario = carregarUsuarioAtivo(usuarioId);
+        // Plano 06-05 D-1: o catálogo completo (com inativas) existe só para administrar.
+        if (incluirInativas && usuario.getPerfil() != PerfilUsuario.ADMIN) {
+            throw new AccessDeniedException("Listing inactive categories requires administrator profile");
+        }
+        PageRequest pagina = PageRequest.of(page, size, ORDEM_CATALOGO);
+        Page<Categoria> categorias = incluirInativas
+                ? categoriaRepository.findAll(pagina)
+                : categoriaRepository.findByAtivoTrue(pagina);
 
         return new CategoriaDtos.Pagina(
                 categorias.getContent().stream().map(CategoriaService::toResponse).toList(),

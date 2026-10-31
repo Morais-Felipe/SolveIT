@@ -135,6 +135,47 @@ class CategoriaIntegrationTest {
     }
 
     @Test
+    void listsInactiveCategoriesOnlyForAdminWhenRequested() throws Exception {
+        LoginResult solicitante = registerAndLogin(
+                "catalogo-solicitante@example.com",
+                "Catalogo Solicitante");
+        LoginResult atendente = registerAndLogin(
+                "catalogo-atendente@example.com",
+                "Catalogo Atendente");
+        changeProfile(atendente.usuarioId(), PerfilUsuario.ATENDENTE);
+        LoginResult admin = registerAndLogin("catalogo-admin@example.com", "Catalogo Admin");
+        promoteToAdmin(admin.usuarioId());
+        Categoria ativa = categoriaRepository.saveAndFlush(new Categoria("Rede", "Ativa"));
+        Categoria inativa = new Categoria("Impressoras", "Desativada");
+        inativa.setAtivo(false);
+        categoriaRepository.saveAndFlush(inativa);
+
+        mockMvc.perform(get("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin))
+                        .queryParam("incluirInativas", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(2))
+                .andExpect(jsonPath("$.items[0].id").value(inativa.getId()))
+                .andExpect(jsonPath("$.items[0].ativo").value(false))
+                .andExpect(jsonPath("$.items[1].id").value(ativa.getId()))
+                .andExpect(jsonPath("$.totalElements").value(2));
+
+        mockMvc.perform(get("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(admin)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].id").value(ativa.getId()));
+
+        for (LoginResult naoAdmin : List.of(solicitante, atendente)) {
+            mockMvc.perform(get("/api/categorias")
+                            .header(HttpHeaders.AUTHORIZATION, bearer(naoAdmin))
+                            .queryParam("incluirInativas", "true"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+        }
+    }
+
+    @Test
     void returnsActiveCategoryByIdForAnyAuthenticatedUser() throws Exception {
         LoginResult solicitante = registerAndLogin(
                 "detalhe@example.com",
@@ -358,8 +399,12 @@ class CategoriaIntegrationTest {
     }
 
     private void promoteToAdmin(Long usuarioId) {
+        changeProfile(usuarioId, PerfilUsuario.ADMIN);
+    }
+
+    private void changeProfile(Long usuarioId, PerfilUsuario perfil) {
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
-        usuario.setPerfil(PerfilUsuario.ADMIN);
+        usuario.setPerfil(perfil);
         usuarioRepository.saveAndFlush(usuario);
     }
 
