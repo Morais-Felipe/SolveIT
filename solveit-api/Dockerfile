@@ -4,13 +4,18 @@
 FROM eclipse-temurin:17.0.20_8-jdk-noble AS build
 WORKDIR /build
 
+# Sem unzip, o mvnw baixa o Maven em .tar.gz, mas o distributionSha256Sum do projeto é
+# do .zip: a verificação de integridade falharia. Instalar o unzip mantém a verificação.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends unzip \
+    && rm -rf /var/lib/apt/lists/*
+
 # Dependências primeiro: enquanto o pom.xml não mudar, o Docker reaproveita esta camada
 # e não baixa tudo de novo a cada alteração no código.
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
-# Num clone no Windows o mvnw e o .properties do wrapper podem vir com fim de linha CRLF:
-# o Linux não executa o script, e o hash SHA-256 lido do .properties ganha um "\r" que
-# nunca confere com o download (o wrapper recusa a distribuição). Normalizamos os dois.
+# Num clone no Windows o mvnw e o .properties do wrapper podem vir com fim de linha CRLF,
+# que o shell do Linux não interpreta corretamente. Normalizamos os dois para LF.
 RUN sed -i 's/\r$//' mvnw .mvn/wrapper/maven-wrapper.properties \
     && chmod +x mvnw \
     && ./mvnw -B -ntp dependency:go-offline
