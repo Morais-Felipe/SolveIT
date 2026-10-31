@@ -7,6 +7,7 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { EmBreve, NaoEncontrado } from '@/pages/EmBreve'
 import { FilaPage } from '@/pages/FilaPage'
 import { NovoChamadoPage } from '@/pages/NovoChamadoPage'
+import { UsuariosPage } from '@/pages/UsuariosPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RedirecionarParaInicial, RotaPorPerfil, RotaProtegida, SomenteAnonimo } from '@/routes/guards'
 
@@ -52,7 +53,7 @@ export default function App() {
           path="usuarios"
           element={
             <RotaPorPerfil perfis={['ADMIN']}>
-              <EmBreve titulo="Usuários" plano="06-05" />
+              <UsuariosPage />
             </RotaPorPerfil>
           }
         />
