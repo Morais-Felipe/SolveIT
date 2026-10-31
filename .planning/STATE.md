@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 current_phase: 06
 current_phase_name: Front-end (React + Tailwind)
 status: executing
-stopped_at: Plan 06-05 complete on ticket/29-frontend-admin; awaiting publish approval
+stopped_at: Phase 7 split into 2 plans; plan 07-01 drafted, awaiting approval
 last_updated: "2026-10-31T12:00:00.000Z"
 last_activity: 2026-10-31
 last_activity_desc: Plan 06-05 implemented (admin dashboard, users, categories); Phase 6 complete
@@ -27,9 +27,9 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 06 (Front-end React + Tailwind) — COMPLETE (pending publish)
+Phase: 06 (Front-end React + Tailwind) — COMPLETE
 Plan: 5 of 5 complete
-Status: ticket/29-frontend-admin committed locally; awaiting publish approval
+Status: PR #31 merged; Phase 6 complete; Phase 7 not yet planned
 Last activity: 2026-10-31 — Plan 06-05 implemented (admin screens); Phase 6 complete
 
 Progress by phase: [█████████████████░░░] 6/7 phases (86%)
@@ -169,7 +169,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#28](https://github.com/Morais-Felipe/SolveIT/pull/28) (ticket 26, plano 06-02) integrado em 2026-10-30 (1581708).
 - PR [#29](https://github.com/Morais-Felipe/SolveIT/pull/29) (ticket 27, plano 06-03) integrado em 2026-10-30 (f5ad0ab).
 - PR [#30](https://github.com/Morais-Felipe/SolveIT/pull/30) (ticket 28, plano 06-04) integrado em 2026-10-30 (37752fe).
-- Ticket 29 (`ticket/29-frontend-admin`, plano 06-05): commits locais; suítes completas e ponta a ponta contra a API real aprovados; publicação com uma autorização única.
+- PR [#31](https://github.com/Morais-Felipe/SolveIT/pull/31) (ticket 29, plano 06-05) integrado em 2026-10-31 (80aca9e); Fase 6 concluída.
+- Ticket 30 (`ticket/30-docker-erros`, plano 07-01): plano redigido; aguardando aprovação.
 - Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
@@ -197,5 +198,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 06-05 complete; awaiting publish approval, then Phase 7 planning
+Stopped at: Phase 6 complete (PR #31 merged); next is Phase 7 planning
 Resume file: none

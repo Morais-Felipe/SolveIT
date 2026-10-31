@@ -253,7 +253,14 @@ Plans:
 
 **Abordagem (revisão 2026-10-30)**: os critérios 3 e 4 são atendidos pelos testes já existentes mais os testes das fases 4–6; o critério 5 por uma jornada E2E por perfil. Estimativa: 2 planos.
 
-**Plans**: TBD
+**Estado na abertura (2026-10-31)**: o CI do critério 6 já existe desde o PR #25 (back-end e front-end). Faltam o handler genérico de erro, o `docker-compose` e as jornadas E2E.
+
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] `07-01-PLAN.md` — Entrega reproduzível e erros consistentes: handler genérico de 500, Dockerfiles e `docker-compose` (API + web + MySQL + Mailpit) (QUAL-04; critério 6)
+- [ ] `07-02-PLAN.md` — Jornadas E2E por perfil (Playwright contra o compose), revisão de estados/telas móveis e mapa de evidências de QUAL-01..03 (QUAL-01, QUAL-02, QUAL-03, QUAL-05, WEB-06, WEB-07)
 **UI hint**: yes
 
 ## Progress
