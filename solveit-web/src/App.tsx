@@ -3,6 +3,7 @@ import { AppLayout } from '@/layout/AppLayout'
 import { CadastroPage } from '@/pages/CadastroPage'
 import { ChamadoDetalhePage } from '@/pages/ChamadoDetalhePage'
 import { ChamadosPage } from '@/pages/ChamadosPage'
+import { DashboardPage } from '@/pages/DashboardPage'
 import { EmBreve, NaoEncontrado } from '@/pages/EmBreve'
 import { FilaPage } from '@/pages/FilaPage'
 import { NovoChamadoPage } from '@/pages/NovoChamadoPage'
@@ -43,7 +44,7 @@ export default function App() {
           path="dashboard"
           element={
             <RotaPorPerfil perfis={['ADMIN', 'ATENDENTE']}>
-              <EmBreve titulo="Dashboard" plano="06-05" />
+              <DashboardPage />
             </RotaPorPerfil>
           }
         />
