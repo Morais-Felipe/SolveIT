@@ -44,6 +44,15 @@ async function irPeloMenu(page: Page, item: string) {
   await menu.getByRole('link', { name: item }).click()
 }
 
+/** A tela atual cabe na largura do aparelho: nada empurra a página para o lado (WEB-07). */
+async function semRolagemHorizontal(page: Page) {
+  const larguras = await page.evaluate(() => ({
+    conteudo: document.documentElement.scrollWidth,
+    tela: window.innerWidth,
+  }))
+  expect(larguras.conteudo, 'largura do conteúdo').toBeLessThanOrEqual(larguras.tela)
+}
+
 test('ADMIN torna um usuário atendente e cria uma categoria', async ({ page, request }) => {
   const cadastro = await request.post('/api/auth/register', {
     data: { nome: atendente.nome, email: atendente.email, senha: SENHA_E2E },
@@ -52,6 +61,7 @@ test('ADMIN torna um usuário atendente e cria uma categoria', async ({ page, re
 
   await entrar(page, ADMIN_E2E.email)
   await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+  await semRolagemHorizontal(page)
 
   await irPeloMenu(page, 'Usuários')
   const linhaAtendente = page.getByRole('listitem').filter({ hasText: atendente.email })
@@ -59,12 +69,14 @@ test('ADMIN torna um usuário atendente e cria uma categoria', async ({ page, re
   await linhaAtendente.getByLabel('Perfil').selectOption({ label: 'Atendente' })
   await linhaAtendente.getByRole('button', { name: 'Salvar perfil e situação' }).click()
   await expect(page.getByText(`Perfil e situação de ${atendente.nome} atualizados.`)).toBeVisible()
+  await semRolagemHorizontal(page)
 
   await irPeloMenu(page, 'Categorias')
   await page.getByRole('button', { name: 'Nova categoria' }).click()
   await page.getByLabel('Nome').fill(categoria)
   await page.getByRole('button', { name: 'Criar categoria' }).click()
   await expect(page.getByRole('listitem').filter({ hasText: categoria })).toBeVisible()
+  await semRolagemHorizontal(page)
 })
 
 test('solicitante se cadastra, abre um chamado e comenta', async ({ page, request }) => {
@@ -75,12 +87,14 @@ test('solicitante se cadastra, abre um chamado e comenta', async ({ page, reques
   await page.getByLabel('Senha').fill(SENHA_E2E)
   await page.getByRole('button', { name: 'Criar conta' }).click()
   await expect(page.getByRole('heading', { name: 'Meus chamados' })).toBeVisible()
+  await semRolagemHorizontal(page)
 
   await irPeloMenu(page, 'Abrir chamado')
   await page.getByLabel('Título').fill(titulo)
   await page.getByLabel('Descrição').fill('A impressora do segundo andar não aparece na rede desde ontem.')
   await page.getByLabel('Prioridade').selectOption({ label: 'Alta' })
   await page.getByLabel('Categoria').selectOption({ label: categoria })
+  await semRolagemHorizontal(page)
   await page.getByRole('button', { name: 'Abrir chamado' }).click()
 
   const aviso = page.getByText(/Chamado #\d+ aberto com sucesso\./)
@@ -93,6 +107,7 @@ test('solicitante se cadastra, abre um chamado e comenta', async ({ page, reques
   await page.getByLabel('Novo comentário').fill('Já reiniciei a impressora, sem efeito.')
   await page.getByRole('button', { name: 'Comentar' }).click()
   await expect(page.getByRole('list', { name: 'Comentários' })).toContainText('Já reiniciei a impressora')
+  await semRolagemHorizontal(page)
 
   // WEB-07: a interface esconde as telas de ADMIN, mas quem garante é a API.
   const login = await request.post('/api/auth/login', { data: { email: solicitante.email, senha: SENHA_E2E } })
@@ -105,6 +120,7 @@ test('solicitante se cadastra, abre um chamado e comenta', async ({ page, reques
 test('atendente assume e resolve; o solicitante é avisado e fecha', async ({ page, request }) => {
   await entrar(page, atendente.email)
   await expect(page.getByRole('heading', { name: 'Fila' })).toBeVisible()
+  await semRolagemHorizontal(page)
   await page.getByRole('button', { name: `Assumir ${titulo}` }).click()
   await expect(page.getByText(`Você assumiu o chamado #${chamadoId}.`)).toBeVisible()
   await expect(page.getByRole('definition').filter({ hasText: atendente.nome })).toBeVisible()
@@ -112,6 +128,7 @@ test('atendente assume e resolve; o solicitante é avisado e fecha', async ({ pa
   await page.getByRole('region', { name: 'Ações' }).getByRole('button', { name: 'Resolver' }).click()
   await page.getByRole('button', { name: 'Confirmar' }).click()
   await expect(page.getByText('Status alterado para Resolvido.')).toBeVisible()
+  await semRolagemHorizontal(page)
 
   // MAIL-03: o solicitante recebe o aviso de que o chamado foi atribuído.
   await expect
@@ -132,9 +149,11 @@ test('atendente assume e resolve; o solicitante é avisado e fecha', async ({ pa
   await sair(page)
   await entrar(page, solicitante.email)
   await expect(page.getByRole('heading', { name: 'Meus chamados' })).toBeVisible()
+  await semRolagemHorizontal(page)
   await page.goto(`/chamados/${chamadoId}`)
   await page.getByRole('region', { name: 'Ações' }).getByRole('button', { name: 'Fechar chamado' }).click()
   await page.getByRole('button', { name: 'Confirmar' }).click()
   await expect(page.getByText('Status alterado para Fechado.')).toBeVisible()
   await expect(page.getByRole('list', { name: 'Histórico de status' })).toContainText('Resolvido → Fechado')
+  await semRolagemHorizontal(page)
 })
