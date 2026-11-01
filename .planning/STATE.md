@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 current_phase: 07
 current_phase_name: Polimento e Qualidade
 status: executing
-stopped_at: Plan 07-01 complete on ticket/30-docker-erros; awaiting publish approval
+stopped_at: Plan 07-02 approved; implementing on ticket/31-e2e-qualidade
 last_updated: "2026-10-31T12:00:00.000Z"
 last_activity: 2026-10-31
-last_activity_desc: Plan 07-01 implemented (safe 500 handler, docker compose)
+last_activity_desc: Plan 07-02 approved (E2E, mobile nav, quality evidence)
 state_head: 92d1879
 progress:
   total_phases: 7
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 Phase: 07 (Polimento e Qualidade) — EXECUTING
 Plan: 1 of 2 complete
-Status: ticket/30-docker-erros committed locally; awaiting publish approval
+Status: Plan 07-02 approved; implementing on ticket/31-e2e-qualidade
 Last activity: 2026-10-31 — Plan 07-01 implemented (safe 500 handler, docker compose)
 
 Progress by phase: [█████████████████░░░] 6/7 phases (86%)
@@ -170,7 +170,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#29](https://github.com/Morais-Felipe/SolveIT/pull/29) (ticket 27, plano 06-03) integrado em 2026-10-30 (f5ad0ab).
 - PR [#30](https://github.com/Morais-Felipe/SolveIT/pull/30) (ticket 28, plano 06-04) integrado em 2026-10-30 (37752fe).
 - PR [#31](https://github.com/Morais-Felipe/SolveIT/pull/31) (ticket 29, plano 06-05) integrado em 2026-10-31 (80aca9e); Fase 6 concluída.
-- Ticket 30 (`ticket/30-docker-erros`, plano 07-01): commits locais; suíte completa (241) e compose a partir de clone limpo aprovados; publicação com uma autorização única.
+- Ticket 30 (`ticket/30-docker-erros`, plano 07-01): PR #32 integrado na `main` (merge `16b41dd`) após CI verde.
+- Ticket 31 (`ticket/31-e2e-qualidade`, plano 07-02): plano aprovado; em implementação.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
@@ -197,5 +198,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 07-01 complete; awaiting publish approval, then plan 07-02
+Stopped at: Plan 07-02 approved; implementing on ticket/31-e2e-qualidade
 Resume file: none
