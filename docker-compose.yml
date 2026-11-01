@@ -1,0 +1,61 @@
+# SolveIT completo com um comando (plano 07-01): docker compose up --build
+# Antes, copie .env.example para .env e preencha os segredos (veja o README).
+name: solveit
+
+services:
+  mysql:
+    image: mysql:8.4.11
+    environment:
+      MYSQL_DATABASE: solveit
+      MYSQL_USER: ${DB_USERNAME:?Defina DB_USERNAME no arquivo .env}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no arquivo .env}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    # Sem porta publicada: só a API, pela rede interna, fala com o banco (D-4).
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  mailpit:
+    image: axllent/mailpit:v1.33.0
+    # SMTP falso: recebe os e-mails da API e mostra numa página em http://localhost:8025.
+    ports:
+      - "127.0.0.1:8025:8025"
+
+  api:
+    build: ./solveit-api
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:mysql://mysql:3306/solveit?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SOLVEIT_JWT_SECRET: ${SOLVEIT_JWT_SECRET:?Defina SOLVEIT_JWT_SECRET no arquivo .env (Base64, 32+ bytes)}
+      SOLVEIT_MAIL_HOST: mailpit
+      SOLVEIT_MAIL_PORT: "1025"
+      SOLVEIT_MAIL_FROM: ${SOLVEIT_MAIL_FROM:-solveit@localhost}
+    # A API só sobe quando o MySQL já aceita conexões; senão o Flyway falharia na partida.
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    restart: unless-stopped
+
+  web:
+    build: ./solveit-web
+    # Única porta da aplicação; 127.0.0.1 impede acesso de outras máquinas da rede.
+    ports:
+      - "127.0.0.1:${SOLVEIT_WEB_PORT:-8080}:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  mysql-data:

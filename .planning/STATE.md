@@ -1,18 +1,18 @@
 ---
 gsd_state_version: 1.0
-current_phase: 06
-current_phase_name: Front-end (React + Tailwind)
+current_phase: 07
+current_phase_name: Polimento e Qualidade
 status: executing
-stopped_at: Plan 06-05 complete on ticket/29-frontend-admin; awaiting publish approval
+stopped_at: Plan 07-01 complete on ticket/30-docker-erros; awaiting publish approval
 last_updated: "2026-10-31T12:00:00.000Z"
 last_activity: 2026-10-31
-last_activity_desc: Plan 06-05 implemented (admin dashboard, users, categories); Phase 6 complete
+last_activity_desc: Plan 07-01 implemented (safe 500 handler, docker compose)
 state_head: 92d1879
 progress:
   total_phases: 7
   completed_phases: 6
-  total_plans: 30
-  completed_plans: 30
+  total_plans: 32
+  completed_plans: 31
   percent: 86
 ---
 
@@ -27,13 +27,13 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 06 (Front-end React + Tailwind) — COMPLETE (pending publish)
-Plan: 5 of 5 complete
-Status: ticket/29-frontend-admin committed locally; awaiting publish approval
-Last activity: 2026-10-31 — Plan 06-05 implemented (admin screens); Phase 6 complete
+Phase: 07 (Polimento e Qualidade) — EXECUTING
+Plan: 1 of 2 complete
+Status: ticket/30-docker-erros committed locally; awaiting publish approval
+Last activity: 2026-10-31 — Plan 07-01 implemented (safe 500 handler, docker compose)
 
 Progress by phase: [█████████████████░░░] 6/7 phases (86%)
-Plan progress: 30/30 known plans complete; Phase 07 not yet planned
+Plan progress: 31/32 known plans complete; Phase 07 has 1/2 plans complete
 
 ## Performance Metrics
 
@@ -169,8 +169,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#28](https://github.com/Morais-Felipe/SolveIT/pull/28) (ticket 26, plano 06-02) integrado em 2026-10-30 (1581708).
 - PR [#29](https://github.com/Morais-Felipe/SolveIT/pull/29) (ticket 27, plano 06-03) integrado em 2026-10-30 (f5ad0ab).
 - PR [#30](https://github.com/Morais-Felipe/SolveIT/pull/30) (ticket 28, plano 06-04) integrado em 2026-10-30 (37752fe).
-- Ticket 29 (`ticket/29-frontend-admin`, plano 06-05): commits locais; suítes completas e ponta a ponta contra a API real aprovados; publicação com uma autorização única.
-- Adicionar handler genérico de `Exception` → 500 `INTERNAL_ERROR` sem vazar detalhes (achado no 03-04).
+- PR [#31](https://github.com/Morais-Felipe/SolveIT/pull/31) (ticket 29, plano 06-05) integrado em 2026-10-31 (80aca9e); Fase 6 concluída.
+- Ticket 30 (`ticket/30-docker-erros`, plano 07-01): commits locais; suíte completa (241) e compose a partir de clone limpo aprovados; publicação com uma autorização única.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
@@ -197,5 +197,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 06-05 complete; awaiting publish approval, then Phase 7 planning
+Stopped at: Plan 07-01 complete; awaiting publish approval, then plan 07-02
 Resume file: none

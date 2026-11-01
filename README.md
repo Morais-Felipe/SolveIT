@@ -57,6 +57,43 @@ Tudo o que aparece como implementado neste README está coberto por testes de in
 
 O andamento só deve ser considerado entregue quando os artefatos de planejamento, os testes proporcionais e o histórico Git confirmarem a conclusão. O texto deste README deve evoluir junto com o estado real do repositório.
 
+## Rodar tudo com Docker
+
+O caminho mais curto para ver o SolveIT funcionando: um comando sobe a API, o front-end, o MySQL 8.4 e o [Mailpit](https://mailpit.axllent.org/) (um SMTP falso com caixa de entrada web). Requer apenas Docker Desktop com o engine Linux; Java e Node não são necessários.
+
+1. Crie o `.env` a partir do modelo e preencha a senha do banco e a chave dos tokens:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+   Para `SOLVEIT_JWT_SECRET`, gere uma chave Base64 com `openssl rand -base64 48` (disponível no Git Bash). O `.env` é ignorado pelo Git; se algum segredo faltar, o compose se recusa a subir e diz qual.
+
+2. Suba os serviços (a primeira vez compila as imagens e leva alguns minutos):
+
+   ```powershell
+   docker compose up --build -d
+   ```
+
+| Endereço | O que é |
+| --- | --- |
+| `http://localhost:8080` | Aplicação (o nginx serve o front-end e repassa `/api` para a API) |
+| `http://localhost:8025` | Caixa de entrada do Mailpit, com os e-mails enviados pelo SolveIT |
+
+O MySQL e a API não ficam expostos fora da rede interna do compose, e as portas acima só aceitam conexões da própria máquina.
+
+3. Cadastre-se pela aplicação. Para ter o primeiro administrador, siga o procedimento de [primeiro ADMIN](docs/PRIMEIRO-ADMIN.md) dentro do MySQL do compose (a senha pedida é a `DB_PASSWORD` do `.env`):
+
+   ```powershell
+   docker compose exec mysql mysql -u solveit -p solveit
+   ```
+
+| Comando | O que faz |
+| --- | --- |
+| `docker compose logs -f api` | Acompanha o log da API (erros 500 aparecem aqui com o mesmo `errorId` da resposta) |
+| `docker compose down` | Para tudo e mantém os dados |
+| `docker compose down -v` | Para tudo e **apaga** o banco |
+
 ## Como verificar o back-end atual
 
 Para compilar e executar os testes no Windows, tenha Java 17 e Docker Desktop com o engine Linux ativo. O Maven Wrapper fixa a versão do Maven do projeto, e o Testcontainers cria bancos MySQL 8.4 temporários para validar persistência, migrações, segurança, regras de negócio e concorrência — `DB_USERNAME` e `DB_PASSWORD` não são necessários nesse caminho.
@@ -66,7 +103,7 @@ Set-Location solveit-api
 .\mvnw.cmd clean verify
 ```
 
-Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **235 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
+Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **241 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
 
 A mesma suíte roda automaticamente no **GitHub Actions** ([`backend-ci.yml`](.github/workflows/backend-ci.yml)) a cada pull request e a cada push na `main`, em uma máquina Linux limpa.
 
@@ -82,7 +119,7 @@ Set-Location solveit-api
 .\mvnw.cmd spring-boot:run
 ```
 
-`DB_URL` é opcional e, quando omitida, usa `jdbc:mysql://localhost:3306/solveit` com Unicode e UTC. Ainda não há `docker-compose.yml`; Docker é usado automaticamente pelos testes de integração.
+`DB_URL` é opcional e, quando omitida, usa `jdbc:mysql://localhost:3306/solveit` com Unicode e UTC. Para subir tudo junto sem instalar MySQL, use o [`docker-compose`](#rodar-tudo-com-docker).
 
 O cadastro público cria apenas `SOLICITANTE`. Para ter o primeiro administrador em um banco novo, siga o procedimento manual e auditável de [primeiro ADMIN](docs/PRIMEIRO-ADMIN.md); não existe endpoint, *seed* nem senha padrão para isso.
 
@@ -101,7 +138,7 @@ docker run -d --name solveit-mailpit -p 1025:1025 -p 8025:8025 axllent/mailpit
 | `SOLVEIT_MAIL_FROM` | `solveit@localhost` | Remetente |
 | `SOLVEIT_MAIL_ENABLED` | `true` | `false` desliga os envios sem afetar a API |
 
-Sem nenhum SMTP disponível a API continua funcionando normalmente: a falha de envio fica apenas no log. O `docker-compose` com aplicação, MySQL e Mailpit juntos está previsto para a Fase 7.
+Sem nenhum SMTP disponível a API continua funcionando normalmente: a falha de envio fica apenas no log. No [`docker-compose`](#rodar-tudo-com-docker) o Mailpit já vem incluído.
 
 ## Como rodar o front-end
 
