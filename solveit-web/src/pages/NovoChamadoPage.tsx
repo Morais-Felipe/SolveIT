@@ -86,6 +86,9 @@ export function NovoChamadoPage() {
     }
   }
 
+  // Lista carregada sem erro, mas vazia: ninguém consegue abrir chamado até o ADMIN criar uma categoria.
+  const semCategorias = categorias !== null && categorias.length === 0 && erroGeral === null
+
   return (
     <section className="grid max-w-2xl gap-6">
       <header className="grid gap-1">
@@ -99,6 +102,13 @@ export function NovoChamadoPage() {
             {erroGeral && (
               <Alert variant="destructive">
                 <AlertDescription>{erroGeral}</AlertDescription>
+              </Alert>
+            )}
+            {semCategorias && (
+              <Alert>
+                <AlertDescription>
+                  Ainda não há categorias disponíveis. Peça a um administrador para cadastrar uma.
+                </AlertDescription>
               </Alert>
             )}
 
@@ -157,7 +167,7 @@ export function NovoChamadoPage() {
             <Link to="/chamados" className={cn(buttonVariants({ variant: 'outline' }), 'w-full sm:w-auto')}>
               Cancelar
             </Link>
-            <Button type="submit" className="w-full sm:w-auto" disabled={enviando}>
+            <Button type="submit" className="w-full sm:w-auto" disabled={enviando || semCategorias}>
               {enviando ? 'Enviando…' : 'Abrir chamado'}
             </Button>
           </CardFooter>

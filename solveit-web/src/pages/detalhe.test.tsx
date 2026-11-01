@@ -123,6 +123,24 @@ describe('detalhe do chamado', () => {
     renderApp('/chamados/7')
 
     expect(await screen.findByText('Chamado não encontrado ou você não tem acesso a ele.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Tentar novamente' })).not.toBeInTheDocument()
+  })
+
+  it('oferece nova tentativa quando a falha é passageira', async () => {
+    const usuarioEvento = userEvent.setup()
+    let tentativas = 0
+    simularApi({
+      detalhe: async () => {
+        tentativas += 1
+        if (tentativas === 1) throw new ApiError(500, 'INTERNAL_ERROR', 'Ocorreu um erro inesperado. Tente novamente.', {})
+        return { data: chamado() }
+      },
+    })
+    renderApp('/chamados/7')
+
+    await usuarioEvento.click(await screen.findByRole('button', { name: 'Tentar novamente' }))
+
+    expect(await screen.findByRole('heading', { name: 'Impressora travada' })).toBeInTheDocument()
   })
 
   it('abre o detalhe a partir da lista', async () => {

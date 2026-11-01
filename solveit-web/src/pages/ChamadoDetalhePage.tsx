@@ -34,7 +34,8 @@ const SEM_ACESSO = 'Chamado não encontrado ou você não tem acesso a ele.'
 const CONFLITO = 'O chamado foi alterado por outra pessoa. Confira os dados atualizados e tente de novo.'
 
 type Dados = { chamado: Chamado; comentarios: Comentario[]; historico: HistoricoStatus[] }
-type Resultado = { tipo: 'pronto'; dados: Dados } | { tipo: 'erro'; mensagem: string }
+// recuperavel: falha passageira (rede, 500), em que tentar de novo pode funcionar; 403/404 não.
+type Resultado = { tipo: 'pronto'; dados: Dados } | { tipo: 'erro'; mensagem: string; recuperavel: boolean }
 type Aviso = { tipo: 'sucesso' | 'erro'; texto: string }
 type AcaoStatus = 'RESOLVER' | 'FECHAR' | 'CANCELAR'
 
@@ -74,7 +75,9 @@ export function ChamadoDetalhePage() {
       )
       .catch((falha: unknown) => {
         if (!controle.signal.aborted) {
-          setBusca({ id, resultado: { tipo: 'erro', mensagem: mensagemDeCarga(toApiError(falha)) } })
+          const erro = toApiError(falha)
+          const recuperavel = erro.status !== 403 && erro.status !== 404
+          setBusca({ id, resultado: { tipo: 'erro', mensagem: mensagemDeCarga(erro), recuperavel } })
         }
       })
     return () => controle.abort()
@@ -95,7 +98,12 @@ export function ChamadoDetalhePage() {
     )
   }
   if (busca.resultado.tipo === 'erro') {
-    return <Mensagem texto={busca.resultado.mensagem} />
+    return (
+      <Mensagem
+        texto={busca.resultado.mensagem}
+        aoTentarDeNovo={busca.resultado.recuperavel ? () => setRecarga((n) => n + 1) : undefined}
+      />
+    )
   }
 
   const { chamado, comentarios, historico } = busca.resultado.dados
@@ -232,10 +240,15 @@ export function ChamadoDetalhePage() {
   )
 }
 
-function Mensagem({ texto }: { texto: string }) {
+function Mensagem({ texto, aoTentarDeNovo }: { texto: string; aoTentarDeNovo?: () => void }) {
   return (
     <section className="grid gap-3">
       <p className="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">{texto}</p>
+      {aoTentarDeNovo && (
+        <Button variant="outline" size="sm" className="justify-self-center" onClick={aoTentarDeNovo}>
+          Tentar novamente
+        </Button>
+      )}
       <Link to="/chamados" className="text-sm text-primary underline-offset-4 hover:underline">
         ← Voltar para chamados
       </Link>
