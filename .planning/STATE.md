@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 current_phase: 07
 current_phase_name: Polimento e Qualidade
-status: executing
-stopped_at: Plan 07-02 complete on ticket/31-e2e-qualidade; awaiting publish approval
+status: complete
+stopped_at: v1 complete; PR #33 (ticket 31) merged
 last_updated: "2026-10-31T12:00:00.000Z"
 last_activity: 2026-10-31
 last_activity_desc: Plan 07-02 implemented (E2E journeys, mobile states, quality evidence); v1 complete
@@ -23,13 +23,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-04)
 
 **Core value:** Permitir que um chamado percorra seu fluxo completo com autorização correta, histórico auditável e comunicação clara entre todos os envolvidos.
-**Current focus:** v1 concluído (Fases 1 a 7); publicar o ticket 31
+**Current focus:** v1 concluído (Fases 1 a 7) e integrado na main
 
 ## Current Position
 
 Phase: 07 (Polimento e Qualidade) — COMPLETE
 Plan: 2 of 2 complete
-Status: ticket/31-e2e-qualidade committed locally; awaiting publish approval
+Status: PR #33 (ticket 31) merged into main (1e0972a); v1 complete
 Last activity: 2026-10-31 — Plan 07-02 implemented (E2E journeys, mobile states, quality evidence)
 
 Progress by phase: [████████████████████] 7/7 phases (100%)
@@ -171,7 +171,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#30](https://github.com/Morais-Felipe/SolveIT/pull/30) (ticket 28, plano 06-04) integrado em 2026-10-30 (37752fe).
 - PR [#31](https://github.com/Morais-Felipe/SolveIT/pull/31) (ticket 29, plano 06-05) integrado em 2026-10-31 (80aca9e); Fase 6 concluída.
 - Ticket 30 (`ticket/30-docker-erros`, plano 07-01): PR #32 integrado na `main` (merge `16b41dd`) após CI verde.
-- Ticket 31 (`ticket/31-e2e-qualidade`, plano 07-02): commits locais; E2E verde 3x (desktop e celular), suíte completa e testes de componente aprovados; publicação com uma autorização única.
+- Ticket 31 (`ticket/31-e2e-qualidade`, plano 07-02): PR #33 integrado na `main` (merge `1e0972a`) após CI verde (back-end, front-end e E2E).
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
@@ -198,5 +198,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: Plan 07-02 complete; awaiting publish approval (v1 complete)
+Stopped at: v1 complete; PR #33 merged
 Resume file: none
