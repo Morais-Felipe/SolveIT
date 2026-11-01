@@ -4,23 +4,24 @@
 
 ### Chamados de suporte com autorização correta, histórico auditável e comunicação clara
 
-![Status: Fase 5 concluída](https://img.shields.io/badge/status-fase%205%20conclu%C3%ADda-22c55e)
+![Status: v1 concluído](https://img.shields.io/badge/status-v1%20conclu%C3%ADdo-22c55e)
 [![Back-end CI](https://github.com/Morais-Felipe/SolveIT/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Morais-Felipe/SolveIT/actions/workflows/backend-ci.yml)
 [![Front-end CI](https://github.com/Morais-Felipe/SolveIT/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Morais-Felipe/SolveIT/actions/workflows/frontend-ci.yml)
+[![E2E](https://github.com/Morais-Felipe/SolveIT/actions/workflows/e2e.yml/badge.svg)](https://github.com/Morais-Felipe/SolveIT/actions/workflows/e2e.yml)
 ![Abordagem: Build to Learn](https://img.shields.io/badge/abordagem-Build%20to%20Learn-f97316)
 ![Java 17](https://img.shields.io/badge/Java-17-007396)
 ![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3-6DB33F)
-![React](https://img.shields.io/badge/React-planejado-61DAFB)
+![React 19](https://img.shields.io/badge/React-19-61DAFB)
 ![MySQL 8](https://img.shields.io/badge/MySQL-8-4479A1)
 
 </div>
 
 > [!IMPORTANT]
-> **Back-end do v1 concluído (Fases 1 a 5).** Além da autenticação JWT, a API administra usuários (inclusive ativação e troca de perfil com devolução auditada dos chamados) e categorias e conduz o chamado por todo o fluxo: abertura, consulta e filtros, edição, atribuição, resolução, fechamento, cancelamento, comentários e histórico auditável. Os eventos do chamado notificam os envolvidos por e-mail depois do commit, e administradores e atendentes têm um dashboard calculado no banco. A suíte tem 235 testes contra MySQL 8.4 real (Testcontainers) e roda no GitHub Actions a cada PR. Próximas fases: front-end React e polimento.
+> **v1 concluído (Fases 1 a 7).** A API administra usuários e categorias e conduz o chamado por todo o fluxo — abertura, consulta e filtros, edição, atribuição, resolução, fechamento, cancelamento, comentários e histórico auditável —, notifica os envolvidos por e-mail e oferece um dashboard calculado no banco. A SPA React atende os três perfis em desktop e celular. Tudo sobe com um `docker compose`, e cada PR roda 242 testes de back-end contra MySQL 8.4 real, 77 testes de componente e as jornadas de ponta a ponta dos três perfis com Playwright. As evidências estão no [mapa de qualidade](docs/EVIDENCIAS-QUALIDADE.md).
 
 ## O que é o SolveIT
 
-O SolveIT é um sistema web em construção para abertura e gerenciamento de chamados de suporte técnico. Solicitantes registram e acompanham problemas, atendentes conduzem o atendimento e administradores gerenciam a operação, os usuários, as categorias e, futuramente, os indicadores.
+O SolveIT é um sistema web para abertura e gerenciamento de chamados de suporte técnico. Solicitantes registram e acompanham problemas, atendentes conduzem o atendimento e administradores gerenciam a operação, os usuários, as categorias e os indicadores.
 
 O projeto nasce como uma aplicação educacional construída do zero. Seu valor central é permitir que um chamado percorra todo o ciclo com autorização validada no servidor, comunicação entre os envolvidos e uma trilha de auditoria que explique cada mudança de status.
 
@@ -36,16 +37,15 @@ O objetivo não é apenas chegar a uma aplicação funcional. A abordagem **Buil
 
 | Item | Situação |
 | --- | --- |
-| Estado do repositório | Fases 1 a 5 concluídas e integradas na `main`; CI no GitHub Actions |
-| Fases | 5 de 7 concluídas (back-end completo) |
-| Requisitos do v1 | 43 de 55 concluídos (todo o back-end) |
-| Foco atual | Fase 6 — front-end React + Tailwind (planejamento) |
-| Aplicação executável | API Spring Boot executável localmente com MySQL configurado |
-| API disponível | Auth, usuários, categorias, chamados, comentários e histórico (ver [Contrato de API](#contrato-de-api)) |
-| Telas | Fase 6 em andamento: login, cadastro, sessão e menu por perfil prontos |
+| Estado do repositório | Fases 1 a 7 concluídas; CI no GitHub Actions (back-end, front-end e E2E) |
+| Fases | 7 de 7 concluídas |
+| Requisitos do v1 | 55 de 55 concluídos |
+| Aplicação executável | `docker compose up --build` sobe API, web, MySQL e SMTP falso (ver [Rodar tudo com Docker](#rodar-tudo-com-docker)) |
+| API disponível | Auth, usuários, categorias, chamados, comentários, histórico e dashboard (ver [Contrato de API](#contrato-de-api)) |
+| Telas | Jornadas completas de solicitante, atendente e administrador, em desktop e celular |
 | Processo | Planos em `.planning/` executados com Claude Code, um ticket/branch/PR por plano e modo pedagógico |
 
-Tudo o que aparece como implementado neste README está coberto por testes de integração com MySQL real. Front-end e polimento final continuam como **contratos planejados**.
+Tudo o que aparece como implementado neste README está coberto por testes; o [mapa de evidências](docs/EVIDENCIAS-QUALIDADE.md) aponta qual teste prova cada regra.
 
 ## Como acompanhar o projeto
 
@@ -103,7 +103,7 @@ Set-Location solveit-api
 .\mvnw.cmd clean verify
 ```
 
-Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **241 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
+Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **242 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
 
 A mesma suíte roda automaticamente no **GitHub Actions** ([`backend-ci.yml`](.github/workflows/backend-ci.yml)) a cada pull request e a cada push na `main`, em uma máquina Linux limpa.
 
@@ -161,6 +161,18 @@ Abra `http://localhost:5173`. Em desenvolvimento, o Vite repassa as chamadas `/a
 | `npm run build` | Build de produção em `solveit-web/dist` |
 
 O token de acesso fica no `localStorage` para manter a sessão ao recarregar a página; ao abrir o app ele é validado com `GET /api/auth/me` e descartado se a API recusar. O GitHub Actions ([`frontend-ci.yml`](.github/workflows/frontend-ci.yml)) executa lint, tipos, testes e build a cada PR.
+
+### Testes de ponta a ponta (Playwright)
+
+As jornadas dos três perfis rodam num navegador real contra o sistema completo do `docker compose`, em desktop (1280 px) e celular (360 px). Requer Docker Desktop em execução; na primeira vez, baixe o navegador:
+
+```powershell
+Set-Location solveit-web
+npx playwright install chromium
+npm run e2e
+```
+
+O comando sobe um compose **separado** do de desenvolvimento (projeto `solveit-e2e`, portas 8180 e 8125), cria o primeiro ADMIN com o SQL de [`docs/PRIMEIRO-ADMIN.md`](docs/PRIMEIRO-ADMIN.md), percorre as jornadas e apaga containers e volume no fim. Seus dados do compose `solveit` não são tocados. Se algo falhar, `npx playwright show-report` abre o relatório com o rastro (trace) de cada passo. O workflow [`e2e.yml`](.github/workflows/e2e.yml) faz o mesmo a cada PR.
 
 ## Como funciona
 
@@ -247,11 +259,12 @@ Os números usam a mesma regra de visibilidade da lista de chamados: o ADMIN vê
 | Persistência | MySQL 8.4, Spring Data JPA, Hibernate, Specifications | Implementado |
 | Migrações | Flyway (V1 a V9) | Implementado; único responsável pelo esquema |
 | Segurança | Spring Security, JWT (JJWT), BCrypt | Implementado |
-| Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL, GreenMail | Implementado (235 testes) |
-| CI | GitHub Actions | Implementado — back-end e front-end a cada PR |
+| Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL, GreenMail | Implementado (242 testes) |
+| CI | GitHub Actions | Implementado — back-end, front-end e E2E a cada PR |
 | Notificações | JavaMailSender via SMTP, eventos após commit, `@Async` | Implementado |
-| Front-end | React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, React Router, Axios | Em construção — Fase 6 |
-| Testes de interface | Vitest, React Testing Library (Playwright na Fase 7) | Implementado para autenticação |
+| Front-end | React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, React Router, Axios | Implementado |
+| Testes de interface | Vitest e React Testing Library (77 testes); Playwright para as jornadas E2E | Implementado |
+| Entrega | Docker Compose (API, nginx, MySQL, Mailpit) | Implementado |
 
 Segredos de banco, JWT e SMTP vêm do ambiente ou de um cofre de segredos; não são versionados em arquivos de configuração.
 
@@ -282,11 +295,11 @@ solveit-api/
 - `security`: filtro JWT, identidade autenticada e handlers de 401/403.
 - `service`: transações, coordenação de escritas (`CoreWriteCoordinator`), política de leitura (`ChamadoAuthorizationService`), tabela de transições (`ChamadoTransitionPolicy`) e demais invariantes.
 
-O front-end será uma SPA React separada, consumindo a API por uma instância Axios centralizada. As telas planejadas incluem login e cadastro, lista e abertura de chamados do solicitante, detalhe com comentários e histórico, fila do atendente, dashboard administrativo e administração de usuários e categorias. Login, cadastro, restauração de sessão e o menu por perfil já existem; as demais telas chegam nos planos 06-02 a 06-05.
+O front-end é uma SPA React separada, que consome a API por uma instância Axios centralizada. As telas incluem login e cadastro, lista e abertura de chamados do solicitante, detalhe com comentários e histórico, fila do atendente, dashboard administrativo e administração de usuários e categorias.
 
 ## Contrato de API
 
-As rotas marcadas como ✅ estão implementadas e testadas; as demais documentam contratos de fases futuras.
+Todas as rotas abaixo estão implementadas e testadas (✅); a matriz de quem pode chamar cada uma está no [mapa de evidências](docs/EVIDENCIAS-QUALIDADE.md#qual-03--matriz-de-autorização).
 
 | Grupo | Método e rota | Acesso e finalidade | Estado |
 | --- | --- | --- | --- |
@@ -324,8 +337,8 @@ As sete fases são incrementos sequenciais.
 | 3 — Core de Chamados | Administração, ciclo completo do chamado, comentários e histórico auditável | Concluída — 10/10 planos |
 | 4 — Notificações por E-mail | Comunicação dos eventos confirmados aos envolvidos corretos | Concluída — 1/1 plano |
 | 5 — Dashboard | Indicadores autorizados para administradores e atendentes | Concluída — 1/1 plano |
-| 6 — Front-end (React + Tailwind) | Jornadas principais dos três perfis na SPA responsiva | Pendente |
-| 7 — Polimento e Qualidade | Estados de interface, responsividade, testes e revisão de segurança | Pendente |
+| 6 — Front-end (React + Tailwind) | Jornadas principais dos três perfis na SPA responsiva | Concluída — 5/5 planos |
+| 7 — Polimento e Qualidade | Erros seguros, docker compose, E2E, responsividade e mapa de evidências | Concluída — 2/2 planos |
 
 ### Entregas da Fase 3
 
@@ -342,18 +355,18 @@ As sete fases são incrementos sequenciais.
 | 03-09 | Leitura de comentários e histórico; imutabilidade | [#21](https://github.com/Morais-Felipe/SolveIT/pull/21) |
 | 03-10 | Ativação/perfil de usuários, devolução auditada e último ADMIN (sem prévia, após revisão de escopo) | Ticket 22 |
 
-Metas, dependências, critérios de sucesso e rastreabilidade estão no [roadmap completo](.planning/ROADMAP.md). As Fases 4 a 7 ainda não foram detalhadas em planos.
+Metas, dependências, critérios de sucesso e rastreabilidade estão no [roadmap completo](.planning/ROADMAP.md); cada plano tem seu `PLAN` e `SUMMARY` em `.planning/phases/`.
 
 ### Pendências técnicas conhecidas
 
-- Handler genérico de `Exception` que devolva `500 INTERNAL_ERROR` padronizado para falhas inesperadas.
 - Rate limiting de login e cadastro antes de qualquer exposição à internet.
+- `npm audit` aponta vulnerabilidades moderadas na cadeia da CLI do shadcn (`ts-morph` → `minimatch`), ferramenta de geração de componentes que não entra no build; a correção sugerida exige rebaixar o shadcn e ficou para avaliação.
 
 ## Referência visual
 
-![Referência visual planejada do SolveIT](docs/design/solveit-ui-reference.png)
+![Referência visual do SolveIT](docs/design/solveit-ui-reference.png)
 
-A direção visual aprovada para a futura Fase 6 usa tema escuro, destaque laranja, navegação lateral, cards, tabelas densas, indicadores, gráficos e chips semânticos. A imagem é uma referência de composição desktop: seus textos e dados são ilustrativos e não criam novos requisitos, estados, telas ou relatórios.
+A direção visual aprovada, seguida pela Fase 6, usa tema escuro, destaque laranja, navegação lateral, cards, tabelas densas, indicadores, gráficos e chips semânticos. A imagem é uma referência de composição desktop: seus textos e dados são ilustrativos e não criam novos requisitos, estados, telas ou relatórios.
 
 Consulte o [contrato da referência visual](docs/design/SOLVEIT-UI-REFERENCE.md) para a tradução dos elementos ao domínio e seus limites.
 
@@ -361,7 +374,7 @@ Consulte o [contrato da referência visual](docs/design/SOLVEIT-UI-REFERENCE.md)
 
 Cada plano de implementação usa um ticket com branch própria (`ticket/NN-descricao-curta`), depois de planejamento e aprovação antes da escrita de código. Durante o trabalho, mudanças verificáveis recebem commits atômicos no padrão Conventional Commits.
 
-Após testes e resumo, há três gates independentes: autorização para fazer push da branch, autorização posterior para abrir o pull request e autorização posterior para fazer merge. Uma aprovação não implica as seguintes, salvo quando o responsável autoriza explicitamente as três ações na mesma mensagem. O procedimento completo está em [Fluxo Git por ticket](docs/GIT-WORKFLOW.md).
+Após testes e resumo, push, pull request e merge acontecem com **uma** autorização explícita do responsável para aquele ticket (decisão de 2026-10-30), e o merge só depois do CI verde. O procedimento completo está em [Fluxo Git por ticket](docs/GIT-WORKFLOW.md).
 
 ## Segurança e auditoria
 
@@ -414,7 +427,9 @@ Qualquer ampliação depende de uma decisão futura explícita e de atualizaçã
 | [Requisitos e rastreabilidade](.planning/REQUIREMENTS.md) | Escopo v1, itens futuros e exclusões |
 | [Roadmap](.planning/ROADMAP.md) | Sete fases, metas, dependências e critérios de sucesso |
 | [Estado atual](.planning/STATE.md) | Posição, progresso, decisões e pontos de atenção |
-| [Planos e resumos da Fase 3](.planning/phases/03-core-de-chamados/) | Planos, decisões aprovadas e evidências de cada entrega |
+| [Planos e resumos](.planning/phases/) | Planos, decisões aprovadas e evidências de cada entrega, por fase |
+| [Evidências de qualidade](docs/EVIDENCIAS-QUALIDADE.md) | Qual teste prova cada regra; matriz de autorização das 23 rotas |
+| [Notas de estudo](docs/estudos/) | Conceitos e decisões de cada plano, para revisar depois |
 | [Contrato original do SolveIT](SolveIT_GSD_SystemPrompt.md) | Domínio, entidades, regras, rotas e ordem inicial |
 | [Primeiro ADMIN](docs/PRIMEIRO-ADMIN.md) | Procedimento manual e auditável para o primeiro administrador |
 | [Referência visual](docs/design/SOLVEIT-UI-REFERENCE.md) | Direção visual e limites da composição |

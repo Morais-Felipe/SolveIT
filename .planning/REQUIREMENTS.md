@@ -78,17 +78,17 @@
 - [x] **WEB-03**: Usuários autorizados podem visualizar detalhe, comentários e histórico do chamado e executar somente ações permitidas pelo estado e perfil.
 - [x] **WEB-04**: O atendente dispõe de uma fila de chamados adequada ao seu trabalho e pode assumir, comentar e resolver chamados permitidos.
 - [x] **WEB-05**: O administrador dispõe de dashboard e telas para administrar usuários e categorias.
-- [ ] **WEB-06**: Todas as telas principais possuem estados de carregamento, vazio, sucesso e erro com mensagens compreensíveis.
-- [ ] **WEB-07**: As jornadas principais são utilizáveis em telas móveis e desktop, sem depender da interface para garantir autorização.
+- [x] **WEB-06**: Todas as telas principais possuem estados de carregamento, vazio, sucesso e erro com mensagens compreensíveis.
+- [x] **WEB-07**: As jornadas principais são utilizáveis em telas móveis e desktop, sem depender da interface para garantir autorização.
 
 ### Qualidade e Segurança
 
-- [ ] **QUAL-01**: Serviços críticos possuem testes unitários para autorização, transições, edição, comentários e destinatários de notificação.
-- [ ] **QUAL-02**: Testes de integração verificam migrações em MySQL, autenticação JWT, escopo por usuário, atomicidade de histórico e filtros paginados.
-- [ ] **QUAL-03**: Todos os endpoints são revisados contra uma matriz de perfis, propriedade e atribuição, incluindo cenários negativos.
+- [x] **QUAL-01**: Serviços críticos possuem testes unitários para autorização, transições, edição, comentários e destinatários de notificação.
+- [x] **QUAL-02**: Testes de integração verificam migrações em MySQL, autenticação JWT, escopo por usuário, atomicidade de histórico e filtros paginados.
+- [x] **QUAL-03**: Todos os endpoints são revisados contra uma matriz de perfis, propriedade e atribuição, incluindo cenários negativos.
   - *Revisão 2026-10-30:* atendido pelos testes de integração existentes (matrizes de detalhe, lista, transições e comentários) e pelos das fases 4–6; sem nova matriz dedicada.
 - [x] **QUAL-04**: Exceções são convertidas em respostas consistentes, sem expor stack traces, segredos ou entidades JPA.
-- [ ] **QUAL-05**: Jornadas essenciais de solicitante, atendente e administrador são verificadas de ponta a ponta antes da entrega do v1.
+- [x] **QUAL-05**: Jornadas essenciais de solicitante, atendente e administrador são verificadas de ponta a ponta antes da entrega do v1.
   - *Revisão 2026-10-30:* uma jornada E2E automatizada por perfil.
 
 ## v2 Requirements
@@ -167,13 +167,13 @@
 | WEB-03 | Phase 6 | Complete |
 | WEB-04 | Phase 6 | Complete |
 | WEB-05 | Phase 6 | Complete |
-| WEB-06 | Phase 7 | Pending |
-| WEB-07 | Phase 7 | Pending |
-| QUAL-01 | Phase 7 | Pending |
-| QUAL-02 | Phase 7 | Pending |
-| QUAL-03 | Phase 7 | Pending |
+| WEB-06 | Phase 7 | Complete |
+| WEB-07 | Phase 7 | Complete |
+| QUAL-01 | Phase 7 | Complete |
+| QUAL-02 | Phase 7 | Complete |
+| QUAL-03 | Phase 7 | Complete |
 | QUAL-04 | Phase 7 | Complete |
-| QUAL-05 | Phase 7 | Pending |
+| QUAL-05 | Phase 7 | Complete |
 
 **Coverage:**
 
