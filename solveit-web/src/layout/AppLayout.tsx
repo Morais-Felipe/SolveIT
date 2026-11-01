@@ -31,8 +31,8 @@ const NOME_PERFIL: Record<Perfil, string> = {
 }
 
 /**
- * Estrutura das telas logadas: menu lateral no desktop e barra superior com rolagem
- * horizontal no celular. Os itens dependem do perfil atual.
+ * Estrutura das telas logadas: menu lateral no desktop e barra superior no celular, que
+ * quebra linha quando os itens não cabem (nenhum fica escondido). Os itens dependem do perfil atual.
  */
 export function AppLayout() {
   const { sessao, sair } = useAuth()
@@ -53,7 +53,7 @@ export function AppLayout() {
             <p className="text-muted-foreground">{NOME_PERFIL[usuario.perfil]}</p>
           </div>
         </div>
-        <nav aria-label="Menu principal" className="flex gap-1 overflow-x-auto px-2 pb-2 md:flex-col md:pb-0">
+        <nav aria-label="Menu principal" className="flex flex-wrap gap-1 px-2 pb-2 md:flex-col md:flex-nowrap md:pb-0">
           {MENU[usuario.perfil].map((item) => (
             <NavLink
               key={item.para}

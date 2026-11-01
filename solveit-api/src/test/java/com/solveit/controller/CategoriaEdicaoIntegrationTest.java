@@ -380,6 +380,43 @@ class CategoriaEdicaoIntegrationTest {
         assertThat(persisted.getVersion()).isZero();
     }
 
+    /** QUAL-03: o catálogo é só do ADMIN; ATENDENTE não herda escrita por ser equipe. */
+    @Test
+    void forbidsAtendenteFromEveryCategoryWrite() throws Exception {
+        LoginResult atendente = registerAndLogin("atendente-catalogo@example.com", "Atendente Catalogo");
+        Usuario usuario = usuarioRepository.findById(atendente.usuarioId()).orElseThrow();
+        usuario.setPerfil(PerfilUsuario.ATENDENTE);
+        usuarioRepository.saveAndFlush(usuario);
+        Categoria categoria = categoriaRepository.saveAndFlush(
+                new Categoria("Impressoras", "Descricao original"));
+        long categoriasAntes = categoriaRepository.count();
+
+        mockMvc.perform(post("/api/categorias")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(atendente))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("nome", "Nova pelo atendente"))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+        mockMvc.perform(put("/api/categorias/{id}", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(atendente))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new EditCategoryPayload(
+                                "Impressoras alteradas",
+                                "Sem permissao",
+                                0L))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+        mockMvc.perform(patch("/api/categorias/{id}/ativo", categoria.getId())
+                        .header(HttpHeaders.AUTHORIZATION, bearer(atendente))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ChangeActivePayload(false, 0L))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+
+        assertThat(categoriaRepository.count()).isEqualTo(categoriasAntes);
+        assertCategoryUnchanged(categoria.getId());
+    }
+
     @Test
     void rejectsMissingExpectedVersionForActivationChange() throws Exception {
         LoginResult admin = registerAndLogin(

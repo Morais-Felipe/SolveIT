@@ -44,13 +44,16 @@ function pagina(items: Chamado[], extra: Partial<Pagina<Chamado>> = {}): Pagina<
   return { items, page: 0, size: 10, totalElements: items.length, totalPages: items.length ? 1 : 0, ...extra }
 }
 
-type Rotas = { chamados?: () => Promise<unknown> }
+type Rotas = { chamados?: () => Promise<unknown>; categorias?: typeof CATEGORIAS }
 
 /** Simula a API por URL: /auth/me, /categorias e /chamados. */
 function simularApi(rotas: Rotas = {}) {
   return vi.spyOn(api, 'get').mockImplementation(async (url: string) => {
     if (url === '/auth/me') return { data: SOLICITANTE }
-    if (url === '/categorias') return { data: { items: CATEGORIAS, page: 0, size: 100, totalElements: 2, totalPages: 1 } }
+    if (url === '/categorias') {
+      const items = rotas.categorias ?? CATEGORIAS
+      return { data: { items, page: 0, size: 100, totalElements: items.length, totalPages: 1 } }
+    }
     if (url === '/chamados') return rotas.chamados ? rotas.chamados() : { data: pagina([]) }
     throw new Error(`GET inesperado: ${url}`)
   })
@@ -229,5 +232,15 @@ describe('abertura de chamado', () => {
 
     expect(screen.queryByText('Informe o título.')).not.toBeInTheDocument()
     expect(screen.getByText('Descreva o problema.')).toBeInTheDocument()
+  })
+
+  it('explica que não há categoria ativa e não deixa enviar', async () => {
+    simularApi({ categorias: [] })
+    renderApp('/chamados/novo')
+
+    expect(
+      await screen.findByText('Ainda não há categorias disponíveis. Peça a um administrador para cadastrar uma.'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Abrir chamado' })).toBeDisabled()
   })
 })
