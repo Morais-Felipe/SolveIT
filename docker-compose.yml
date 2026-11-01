@@ -26,8 +26,9 @@ services:
   mailpit:
     image: axllent/mailpit:v1.33.0
     # SMTP falso: recebe os e-mails da API e mostra numa página em http://localhost:8025.
+    # A porta é configurável para o E2E subir um compose isolado ao lado deste (plano 07-02).
     ports:
-      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:${SOLVEIT_MAILPIT_PORT:-8025}:8025"
 
   api:
     build: ./solveit-api
