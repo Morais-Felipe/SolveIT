@@ -44,9 +44,27 @@ A correção atacou a causa:
 - Tela nova começa no topo.
 - O E2E agora exige `toBeInViewport` para o aviso.
 
-No CI, esse teste novo falhou: a página ficou parada no fim da lista. Em 14 rodadas locais, com e sem limite de CPU, a falha não se repetiu, então a causa exata não foi provada. A correção trocou a rolagem suave pela instantânea, que elimina a única parte assíncrona do caminho. Uma rolagem animada dura vários quadros e a lista recarrega ao mesmo tempo.
+No CI, esse teste novo falhou: a página ficou parada no fim da lista. Em 14 rodadas locais, com e sem limite de CPU, a falha não se repetiu. Por isso, a rolagem suave foi trocada pela instantânea, por suspeita de que fosse interrompida no caminho. O CI falhou de novo, e a suspeita estava errada.
 
-**Para levar:** um comportamento bom que existe por acidente some quando você muda algo sem relação aparente. Ao ver um teste falhar, pergunte o que ele revela antes de ajustá-lo.
+A causa real apareceu ao registrar cada rolagem, com a mesma lista do CI e sem depender do instante da verificação (celular, 740 px de altura):
+
+| Momento | Rolagem (`y`) | Altura da página |
+|---|---|---|
+| Aviso aparece e a lista vira skeleton | 13 | 753 px |
+| Lista volta | 351 | 1091 px |
+
+A página cresceu 338 px e a rolagem andou os mesmos 338 px. Esse é o **scroll anchoring**: quando o conteúdo muda, o navegador move a rolagem para manter no lugar o que está na tela. Normalmente isso ajuda, mas aqui empurrou o aviso para fora.
+
+O teste passava localmente porque o aviso fica visível por cerca de 17 ms antes do salto, e às vezes a verificação via esse instante. O defeito, porém, era real para quem usava a tela.
+
+A correção tem duas partes:
+
+- `html { overflow-anchor: none }` no `index.css`. Com a ancoragem desligada, o aviso continuou visível em todas as 20 tentativas; com ela ligada, ficou fora da tela em todas as 20.
+- O E2E agora espera a lista recarregar antes de verificar o aviso. Assim, ele falha sempre que o defeito existe, em vez de depender do momento.
+
+**O custo:** se um conteúdo acima da área visível crescer, a tela vai se mover. Hoje as telas trocam a lista inteira ao recarregar, então a ancoragem atrapalhava mais do que ajudava.
+
+**Para levar:** um comportamento bom que existe por acidente some quando você muda algo sem relação aparente. Ao ver um teste falhar, pergunte o que ele revela antes de ajustá-lo. E se uma falha não se repete, procure a diferença entre os dois ambientes: um teste que verifica um estado passageiro pode passar sem que o estado final esteja certo.
 
 ## 6. Acessibilidade do movimento
 
