@@ -1,5 +1,5 @@
 import { CircleCheck, Headset, Hourglass, TriangleAlert, type LucideIcon } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { SeloPrioridade, SeloStatus } from '@/components/Selos'
@@ -8,8 +8,14 @@ import { Button } from '@/components/ui/button'
 import { buscarResumo } from '@/lib/admin'
 import { toApiError } from '@/lib/api'
 import { formatarData, listarChamados, PRIORIDADES } from '@/lib/chamados'
+import { formatarPeriodo } from '@/lib/semanas'
 import type { Chamado, Prioridade, ResumoDashboard } from '@/lib/types'
 import { cn } from '@/lib/utils'
+
+// Se o download falhar (ex.: logo após um deploy), só o gráfico avisa; o resto da tela continua.
+const GraficoSemanal = lazy(() =>
+  import('@/components/GraficoSemanal').catch(() => ({ default: GraficoIndisponivel })),
+)
 
 const TOTAL_RECENTES = 5
 
@@ -28,7 +34,7 @@ type Resultado =
   | { tipo: 'pronto'; resumo: ResumoDashboard }
 
 /**
- * Painel do ADMIN e do atendente (D-2): cards, tabelas com barras e chamados recentes. Os números
+ * Painel do ADMIN e do atendente: cards, gráfico por semana, tabelas com barras e chamados recentes. Os números
  * vêm prontos da API, já no escopo do perfil; cada card leva à lista com o mesmo filtro,
  * para que a pessoa confira de onde o número saiu.
  */
@@ -158,6 +164,8 @@ function Indicadores({ resumo }: { resumo: ResumoDashboard }) {
         ))}
       </ul>
 
+      <PainelSemanas semanas={resumo.semanas} />
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Tabela titulo="Abertos por prioridade" colunas={['Prioridade', 'Abertos']}>
           {PRIORIDADES.map((p) => {
@@ -208,6 +216,72 @@ function Indicadores({ resumo }: { resumo: ResumoDashboard }) {
         <ChamadosRecentes className={cn(!temCarga && 'lg:col-span-2')} />
       </div>
     </>
+  )
+}
+
+function GraficoIndisponivel() {
+  return <p className="text-sm text-muted-foreground">Não foi possível carregar o gráfico. Recarregue a página.</p>
+}
+
+function PainelSemanas({ semanas }: { semanas: ResumoDashboard['semanas'] }) {
+  const semDados = semanas.every((s) => s.novos === 0 && s.resolvidos === 0)
+
+  return (
+    <div className={cn(PAINEL, 'grid min-w-0 gap-3')}>
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
+        <div className="grid gap-1">
+          <h2 className="text-sm font-medium">Chamados por semana</h2>
+          <p className="text-xs text-muted-foreground">Novos e resolvidos em janelas de 7 dias, terminando agora.</p>
+        </div>
+        {!semDados && (
+          <ul aria-hidden="true" className="flex gap-4 text-xs text-muted-foreground">
+            <li className="flex items-center gap-1.5">
+              <span className="w-4 border-t-2 border-dashed border-foreground" />
+              Novos
+            </li>
+            <li className="flex items-center gap-1.5">
+              <span className="w-4 border-t-2 border-primary" />
+              Resolvidos
+            </li>
+          </ul>
+        )}
+      </div>
+
+      {semDados ? (
+        <p className="text-sm text-muted-foreground">Nenhum chamado nas últimas 8 semanas.</p>
+      ) : (
+        <>
+          <Suspense
+            fallback={
+              <p role="status" className="text-sm text-muted-foreground">
+                Carregando gráfico…
+              </p>
+            }
+          >
+            <GraficoSemanal semanas={semanas} />
+          </Suspense>
+          <table className="sr-only">
+            <caption>Chamados novos e resolvidos por semana</caption>
+            <thead>
+              <tr>
+                <th scope="col">Período</th>
+                <th scope="col">Novos</th>
+                <th scope="col">Resolvidos</th>
+              </tr>
+            </thead>
+            <tbody>
+              {semanas.map((s) => (
+                <tr key={s.inicio}>
+                  <td>{formatarPeriodo(s)}</td>
+                  <td>{s.novos}</td>
+                  <td>{s.resolvidos}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+    </div>
   )
 }
 

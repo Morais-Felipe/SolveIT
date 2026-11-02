@@ -191,7 +191,7 @@ class DashboardIntegrationTest {
         resumo(admin);
 
         assertThat(estatisticas.getEntityStatistics(Chamado.class.getName()).getLoadCount()).isZero();
-        assertThat(estatisticas.getPrepareStatementCount()).isLessThanOrEqualTo(6);
+        assertThat(estatisticas.getPrepareStatementCount()).isLessThanOrEqualTo(8);
     }
 
     @Test

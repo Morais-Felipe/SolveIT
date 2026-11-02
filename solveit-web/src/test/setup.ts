@@ -10,3 +10,10 @@ afterEach(() => {
 
 // O jsdom não desenha em canvas e avisa a cada tentativa; null é o que o FundoAnimado já trata.
 HTMLCanvasElement.prototype.getContext = () => null
+
+// O Recharts mede o espaço disponível; sem layout no jsdom, o gráfico só não é desenhado.
+globalThis.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}

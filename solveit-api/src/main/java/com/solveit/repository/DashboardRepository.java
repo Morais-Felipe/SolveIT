@@ -14,6 +14,8 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +123,41 @@ public class DashboardRepository {
                 .map(linha -> new DashboardDtos.CargaAtendente(
                         linha.get(id), linha.get(nome), linha.get(total)))
                 .toList();
+    }
+
+    /**
+     * Conta os chamados visíveis em cada janela [limites[i], limites[i + 1]) pela data de
+     * {@code campoData}. Um único SELECT com um SUM(CASE WHEN ...) por janela: o MySQL faz a
+     * conta e chamados sem a data (ainda não resolvidos) ficam de fora sozinhos.
+     */
+    public List<Long> contarPorJanela(Usuario usuario, String campoData, List<LocalDateTime> limites) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tuple> query = cb.createTupleQuery();
+        Root<Chamado> chamado = query.from(Chamado.class);
+        Expression<LocalDateTime> data = chamado.get(campoData);
+
+        List<Expression<Long>> somas = new ArrayList<>();
+        for (int i = 0; i < limites.size() - 1; i++) {
+            Predicate naJanela = cb.and(
+                    cb.greaterThanOrEqualTo(data, limites.get(i)),
+                    cb.lessThan(data, limites.get(i + 1)));
+            somas.add(cb.sum(cb.<Long>selectCase().when(naJanela, 1L).otherwise(0L)));
+        }
+
+        query.multiselect(somas.toArray(Expression[]::new))
+                .where(
+                        visivel(usuario, chamado, query, cb),
+                        cb.greaterThanOrEqualTo(data, limites.get(0)),
+                        cb.lessThan(data, limites.get(limites.size() - 1)));
+
+        Tuple linha = entityManager.createQuery(query).getSingleResult();
+        List<Long> contagem = new ArrayList<>();
+        for (Expression<Long> soma : somas) {
+            // Sem nenhuma linha no período, SUM devolve NULL.
+            Long valor = linha.get(soma);
+            contagem.add(valor == null ? 0L : valor);
+        }
+        return contagem;
     }
 
     private static Predicate visivel(

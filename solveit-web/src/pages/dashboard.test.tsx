@@ -17,6 +17,11 @@ const ADMIN: Usuario = {
   criadoEm: '2026-10-30T10:00:00',
 }
 
+/** Data no formato da API, a partir de 1º de agosto de 2026. */
+function dataDaApi(dias: number): string {
+  return new Date(Date.UTC(2026, 7, 1 + dias, 12)).toISOString().slice(0, 19)
+}
+
 const RESUMO: ResumoDashboard = {
   totais: { aberto: 4, emAndamento: 3, resolvido: 9, criticaAberta: 1 },
   porCategoria: [
@@ -25,6 +30,12 @@ const RESUMO: ResumoDashboard = {
   ],
   cargaPorAtendente: [{ atendenteId: 5, nome: 'Ari Atendente', emAndamento: 3 }],
   abertosPorPrioridade: { BAIXA: 1, MEDIA: 2, ALTA: 0, CRITICA: 1 },
+  semanas: Array.from({ length: 8 }, (_, i) => ({
+    inicio: dataDaApi(i * 7),
+    fim: dataDaApi((i + 1) * 7),
+    novos: i === 7 ? 6 : 0,
+    resolvidos: i === 7 ? 2 : 0,
+  })),
 }
 
 function chamado(id: number, titulo: string): Chamado {
@@ -109,6 +120,24 @@ describe('dashboard', () => {
 
     await screen.findByRole('table', { name: 'Abertos por prioridade' })
     expect(screen.queryByRole('table', { name: 'Carga por atendente' })).not.toBeInTheDocument()
+  })
+
+  it('expõe em tabela os números do gráfico, no fuso de quem vê', async () => {
+    simularApi(ADMIN, async () => ({ data: RESUMO }))
+    renderApp('/dashboard')
+
+    const tabela = await screen.findByRole('table', { name: 'Chamados novos e resolvidos por semana' })
+    expect(within(tabela).getAllByRole('row')).toHaveLength(9)
+    expect(within(tabela).getByRole('row', { name: /^\d{2}\/\d{2} a \d{2}\/\d{2} 6 2$/ })).toBeInTheDocument()
+  })
+
+  it('troca o gráfico por um aviso quando não há chamados no período', async () => {
+    const semanas = RESUMO.semanas.map((s) => ({ ...s, novos: 0, resolvidos: 0 }))
+    simularApi(ADMIN, async () => ({ data: { ...RESUMO, semanas } }))
+    renderApp('/dashboard')
+
+    expect(await screen.findByText('Nenhum chamado nas últimas 8 semanas.')).toBeInTheDocument()
+    expect(screen.queryByRole('table', { name: 'Chamados novos e resolvidos por semana' })).not.toBeInTheDocument()
   })
 
   it('lista só os cinco chamados mais recentes, com link para o detalhe', async () => {

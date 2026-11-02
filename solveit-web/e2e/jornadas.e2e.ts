@@ -130,6 +130,12 @@ test('atendente assume e resolve; o solicitante é avisado e fecha', async ({ pa
   await expect(page.getByText('Status alterado para Resolvido.')).toBeVisible()
   await semRolagemHorizontal(page)
 
+  // Só um navegador real prova que o gráfico é baixado e desenhado.
+  await irPeloMenu(page, 'Dashboard')
+  await expect(page.locator('.recharts-area-curve').first()).toBeVisible()
+  await expect(page.getByRole('table', { name: 'Chamados novos e resolvidos por semana' })).toBeAttached()
+  await semRolagemHorizontal(page)
+
   // MAIL-03: o solicitante recebe o aviso de que o chamado foi atribuído.
   await expect
     .poll(async () => {

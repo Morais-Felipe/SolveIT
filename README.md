@@ -103,7 +103,7 @@ Set-Location solveit-api
 .\mvnw.cmd clean verify
 ```
 
-Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **242 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
+Em Linux ou macOS, use `./mvnw clean verify`. A suíte atual possui **248 testes** e leva cerca de 15 minutos, porque cada classe de integração sobe seu próprio MySQL. Ela cobre migrações, constraints, JWT, autorização por perfil e relação, filtros e paginação, transições de status, histórico, comentários, notificações por e-mail (com um servidor SMTP em memória, GreenMail) e disputas concorrentes reais entre transações.
 
 A mesma suíte roda automaticamente no **GitHub Actions** ([`backend-ci.yml`](.github/workflows/backend-ci.yml)) a cada pull request e a cada push na `main`, em uma máquina Linux limpa.
 
@@ -240,7 +240,7 @@ Quem executa a ação não recebe e-mail dela, e usuários inativos nunca recebe
 
 ### Dashboard
 
-`GET /api/dashboard/resumo` (ADMIN e ATENDENTE) responde com quatro indicadores, todos calculados no MySQL com `COUNT` e `GROUP BY`, sem carregar os chamados na aplicação:
+`GET /api/dashboard/resumo` (ADMIN e ATENDENTE) responde com cinco indicadores, todos calculados no MySQL com `COUNT`, `GROUP BY` ou somas condicionais, sem carregar os chamados na aplicação:
 
 | Indicador | Significado |
 | --- | --- |
@@ -248,6 +248,7 @@ Quem executa a ação não recebe e-mail dela, e usuários inativos nunca recebe
 | Por categoria | Todos os chamados visíveis, de qualquer status, por categoria (inclui categorias desativadas) |
 | Carga por atendente | Chamados `EM_ANDAMENTO` de cada atendente responsável |
 | Abertos por prioridade | Chamados `ABERTO` por prioridade, sempre com as quatro prioridades |
+| Semanas | Oito janelas móveis de 7 dias terminando agora, com chamados criados (`novos`) e resolvidos (`resolvidos`) em cada uma |
 
 Os números usam a mesma regra de visibilidade da lista de chamados: o ADMIN vê toda a operação e o ATENDENTE vê a fila e os chamados atribuídos a ele. Por isso cada indicador é igual ao total de `GET /api/chamados` com o filtro equivalente, o que os testes verificam.
 
@@ -259,11 +260,11 @@ Os números usam a mesma regra de visibilidade da lista de chamados: o ADMIN vê
 | Persistência | MySQL 8.4, Spring Data JPA, Hibernate, Specifications | Implementado |
 | Migrações | Flyway (V1 a V9) | Implementado; único responsável pelo esquema |
 | Segurança | Spring Security, JWT (JJWT), BCrypt | Implementado |
-| Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL, GreenMail | Implementado (242 testes) |
+| Testes | JUnit, AssertJ, MockMvc, Testcontainers MySQL, GreenMail | Implementado (248 testes) |
 | CI | GitHub Actions | Implementado — back-end, front-end e E2E a cada PR |
 | Notificações | JavaMailSender via SMTP, eventos após commit, `@Async` | Implementado |
-| Front-end | React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, React Router, Axios | Implementado |
-| Testes de interface | Vitest e React Testing Library (82 testes); Playwright para as jornadas E2E | Implementado |
+| Front-end | React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, React Router, Axios, Recharts | Implementado |
+| Testes de interface | Vitest e React Testing Library (84 testes); Playwright para as jornadas E2E | Implementado |
 | Entrega | Docker Compose (API, nginx, MySQL, Mailpit) | Implementado |
 
 Segredos de banco, JWT e SMTP vêm do ambiente ou de um cofre de segredos; não são versionados em arquivos de configuração.
@@ -322,7 +323,7 @@ Todas as rotas abaixo estão implementadas e testadas (✅); a matriz de quem po
 | Comentários | `GET /api/chamados/{id}/comentarios` | Usuário com acesso; ordem cronológica | ✅ |
 | Comentários | `POST /api/chamados/{id}/comentarios` | Usuário com acesso; comentário imutável | ✅ |
 | Histórico | `GET /api/chamados/{id}/historico` | Usuário com acesso; trilha cronológica completa | ✅ |
-| Dashboard | `GET /api/dashboard/resumo` | `ADMIN` e `ATENDENTE`; totais por status e críticos abertos, chamados por categoria, carga ativa por atendente e abertos por prioridade, no escopo do perfil | ✅ |
+| Dashboard | `GET /api/dashboard/resumo` | `ADMIN` e `ATENDENTE`; totais por status e críticos abertos, chamados por categoria, carga ativa por atendente, abertos por prioridade e novos e resolvidos por semana, no escopo do perfil | ✅ |
 
 Comandos que alteram recursos versionados exigem `versaoEsperada` e respondem `409 STALE_RESOURCE` quando o recurso mudou. Erros seguem Problem Details com um `code` estável (`VALIDATION_ERROR`, `ACCESS_DENIED`, `INVALID_STATE`, `COMMENTS_CLOSED`, `CORE_BUSY`, entre outros). Respostas nunca expõem senhas, entidades JPA, segredos ou stack traces, e listagens são calculadas no banco.
 
