@@ -25,7 +25,7 @@ const PAINEL = 'rounded-xl bg-card p-4 ring-1 ring-foreground/10'
 const COR_BARRA_PRIORIDADE: Record<Prioridade, string> = {
   BAIXA: 'bg-muted-foreground',
   MEDIA: 'bg-foreground',
-  ALTA: 'bg-primary',
+  ALTA: 'bg-amber-700 dark:bg-amber-300',
   CRITICA: 'bg-destructive',
 }
 

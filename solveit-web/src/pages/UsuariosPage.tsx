@@ -153,7 +153,7 @@ export function UsuariosPage() {
                           className={cn(
                             'inline-flex rounded-full border px-2 py-0.5 text-xs',
                             u.ativo
-                              ? 'border-primary/40 bg-primary/10 text-primary'
+                              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
                               : 'border-border bg-muted text-muted-foreground',
                           )}
                         >
