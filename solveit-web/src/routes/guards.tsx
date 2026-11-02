@@ -10,7 +10,7 @@ import type { Perfil } from '@/lib/types'
 
 export function TelaCarregando() {
   return (
-    <div role="status" className="flex min-h-svh items-center justify-center text-muted-foreground">
+    <div role="status" className="esqueleto-atrasado flex min-h-svh items-center justify-center text-muted-foreground">
       Carregando…
     </div>
   )

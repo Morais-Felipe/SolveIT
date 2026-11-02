@@ -44,7 +44,7 @@ export function CampoTexto({ id, rotulo, erro, ajuda, icone: Icone, acao, classN
         </p>
       )}
       {erro && (
-        <p id={idErro} className="text-xs text-destructive">
+        <p id={idErro} className="entrada-suave text-xs text-destructive">
           {erro}
         </p>
       )}

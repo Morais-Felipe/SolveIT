@@ -16,7 +16,7 @@ export function AutenticacaoLayout({ children }: { children: ReactNode }) {
         </span>
       </header>
       <main className="flex flex-1 items-center justify-center p-4">
-        <Card className="w-full max-w-sm bg-card/70 backdrop-blur animate-in fade-in slide-in-from-bottom-4 duration-700 motion-reduce:animate-none">
+        <Card className="w-full max-w-sm bg-card/70 backdrop-blur animate-in fade-in slide-in-from-bottom-4 duration-300 motion-reduce:animate-none">
           {children}
         </Card>
       </main>

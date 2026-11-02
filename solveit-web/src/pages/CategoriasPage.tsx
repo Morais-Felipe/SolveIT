@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { CampoAreaTexto } from '@/components/CampoAreaTexto'
 import { CampoTexto } from '@/components/CampoTexto'
 import { Paginacao } from '@/components/Paginacao'
+import { EsqueletoLista } from '@/components/Esqueleto'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -157,9 +158,7 @@ export function CategoriasPage() {
       )}
 
       {estado.tipo === 'carregando' && (
-        <p role="status" className="text-muted-foreground">
-          Carregando categorias…
-        </p>
+        <EsqueletoLista rotulo="Carregando categorias…" />
       )}
 
       {estado.tipo === 'erro' && (
@@ -183,7 +182,7 @@ export function CategoriasPage() {
 
       {estado.tipo === 'pronto' && estado.pagina.items.length > 0 && (
         <>
-          <ul className="grid gap-3">
+          <ul className="entrada-suave grid gap-3">
             {estado.pagina.items.map((c) => (
               <li key={c.id} className="grid gap-3 rounded-lg border border-border p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -202,7 +201,7 @@ export function CategoriasPage() {
                     <Button variant="outline" size="sm" onClick={() => abrir({ modo: 'editar', categoria: c })}>
                       Editar
                     </Button>
-                    <Button
+                    <Button carregando={alternando === c.id}
                       variant="outline"
                       size="sm"
                       disabled={alternando !== null}
@@ -308,7 +307,7 @@ function FormCategoria({
             <Button type="button" variant="outline" onClick={aoCancelar} disabled={enviando}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={enviando}>
+            <Button carregando={enviando} type="submit" disabled={enviando}>
               {enviando ? 'Salvando…' : rotuloEnviar}
             </Button>
           </div>

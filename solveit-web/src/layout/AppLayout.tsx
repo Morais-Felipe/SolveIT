@@ -1,5 +1,5 @@
 import { CirclePlus, Inbox, LayoutDashboard, Tags, Ticket, Users, type LucideIcon } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import type { Perfil } from '@/lib/types'
@@ -45,6 +45,7 @@ function iniciais(nome: string): string {
  */
 export function AppLayout() {
   const { sessao, sair } = useAuth()
+  const { pathname } = useLocation()
   if (sessao.status !== 'autenticado') {
     return null
   }
@@ -67,7 +68,7 @@ export function AppLayout() {
               end
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-2 rounded-md px-3 py-2 text-sm whitespace-nowrap transition-colors hover:bg-sidebar-accent',
+                  'flex items-center gap-2 rounded-md px-3 py-2 text-sm whitespace-nowrap transition-[color,background-color,transform] duration-(--duracao-rapida) ease-(--curva-saida) hover:bg-sidebar-accent active:scale-[0.98]',
                   isActive && 'bg-primary/15 font-medium text-primary md:shadow-[inset_2px_0_0_var(--primary)]',
                 )
               }
@@ -102,7 +103,10 @@ export function AppLayout() {
             Sair
           </Button>
         </div>
-        <Outlet />
+        {/* A chave reinicia a entrada a cada tela; mudar só filtros (?status=) não troca a chave. */}
+        <div key={pathname} className="entrada-suave">
+          <Outlet />
+        </div>
       </main>
     </div>
   )
