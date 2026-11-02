@@ -7,6 +7,10 @@ import com.solveit.enums.Prioridade;
 import com.solveit.enums.StatusChamado;
 import com.solveit.repository.DashboardRepository;
 import com.solveit.repository.UsuarioRepository;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -15,14 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DashboardService {
 
+    private static final int TOTAL_SEMANAS = 8;
+
     private final DashboardRepository dashboardRepository;
     private final UsuarioRepository usuarioRepository;
+    private final Clock clock;
 
     public DashboardService(
             DashboardRepository dashboardRepository,
-            UsuarioRepository usuarioRepository) {
+            UsuarioRepository usuarioRepository,
+            Clock clock) {
         this.dashboardRepository = dashboardRepository;
         this.usuarioRepository = usuarioRepository;
+        this.clock = clock;
     }
 
     /**
@@ -50,6 +59,29 @@ public class DashboardService {
                         abertosPorPrioridade.get(Prioridade.CRITICA)),
                 dashboardRepository.porCategoria(usuario),
                 dashboardRepository.cargaPorAtendente(usuario),
-                abertosPorPrioridade);
+                abertosPorPrioridade,
+                semanas(usuario));
+    }
+
+    /**
+     * Janelas móveis de 7 dias terminando agora, da mais antiga para a mais nova. Toda janela
+     * tem a mesma duração e os limites são instantes, então o fuso de quem vê não muda a conta.
+     */
+    private List<DashboardDtos.Semana> semanas(Usuario usuario) {
+        LocalDateTime agora = LocalDateTime.now(clock);
+        List<LocalDateTime> limites = new ArrayList<>();
+        for (int i = TOTAL_SEMANAS; i >= 0; i--) {
+            limites.add(agora.minusWeeks(i));
+        }
+
+        List<Long> novos = dashboardRepository.contarPorJanela(usuario, "criadoEm", limites);
+        List<Long> resolvidos = dashboardRepository.contarPorJanela(usuario, "resolvidoEm", limites);
+
+        List<DashboardDtos.Semana> semanas = new ArrayList<>();
+        for (int i = 0; i < TOTAL_SEMANAS; i++) {
+            semanas.add(new DashboardDtos.Semana(
+                    limites.get(i), limites.get(i + 1), novos.get(i), resolvidos.get(i)));
+        }
+        return semanas;
     }
 }
