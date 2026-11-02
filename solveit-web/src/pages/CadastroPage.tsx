@@ -1,12 +1,12 @@
-import { Mail, User } from 'lucide-react'
+import { Mail, User, UserPlus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { rotaInicial, useAuth } from '@/auth/useAuth'
 import { CampoSenha } from '@/components/CampoSenha'
 import { CampoTexto } from '@/components/CampoTexto'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { ShinyButton } from '@/components/ui/shiny-button'
 import { AutenticacaoLayout } from '@/layout/AutenticacaoLayout'
 import { toApiError } from '@/lib/api'
 
@@ -59,9 +59,9 @@ export function CadastroPage() {
 
   return (
     <AutenticacaoLayout>
-        <CardHeader>
+        <CardHeader className="text-center">
           <CardTitle>
-            <h1 className="text-2xl font-semibold tracking-tight">Criar conta</h1>
+            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Criar conta</h1>
           </CardTitle>
           <CardDescription>Contas novas entram como solicitante.</CardDescription>
         </CardHeader>
@@ -76,7 +76,7 @@ export function CadastroPage() {
               id="nome"
               rotulo="Nome"
               icone={User}
-              className="h-10"
+              className="h-12 rounded-xl px-4"
               autoComplete="name"
               value={nome}
               erro={erros.nome}
@@ -87,7 +87,7 @@ export function CadastroPage() {
               rotulo="E-mail"
               type="email"
               icone={Mail}
-              className="h-10"
+              className="h-12 rounded-xl px-4"
               autoComplete="email"
               value={email}
               erro={erros.email}
@@ -96,7 +96,7 @@ export function CadastroPage() {
             <CampoSenha
               id="senha"
               rotulo="Senha"
-              className="h-10"
+              className="h-12 rounded-xl px-4"
               autoComplete="new-password"
               value={senha}
               erro={erros.senha}
@@ -104,16 +104,20 @@ export function CadastroPage() {
               onChange={(e) => setSenha(e.target.value)}
             />
           </CardContent>
-          <CardFooter className="mt-4 flex flex-col gap-3">
-            <Button carregando={enviando} type="submit" size="lg" className="h-10 w-full" disabled={enviando}>
+          <CardFooter className="mt-5 flex flex-col gap-4 border-0 bg-transparent pt-0">
+            <ShinyButton icone={UserPlus} carregando={enviando} type="submit" className="w-full" disabled={enviando}>
               {enviando ? 'Criando conta…' : 'Criar conta'}
-            </Button>
-            <p className="text-sm text-muted-foreground">
-              Já tem conta?{' '}
-              <Link to="/login" className="text-primary underline-offset-4 hover:underline">
-                Entrar
-              </Link>
-            </p>
+            </ShinyButton>
+            <div className="flex w-full items-center gap-3 text-sm text-muted-foreground">
+              <span aria-hidden="true" className="h-px flex-1 bg-border" />
+              <p>
+                Já tem conta?{' '}
+                <Link to="/login" className="text-primary underline-offset-4 hover:underline">
+                  Entrar
+                </Link>
+              </p>
+              <span aria-hidden="true" className="h-px flex-1 bg-border" />
+            </div>
           </CardFooter>
         </form>
     </AutenticacaoLayout>
