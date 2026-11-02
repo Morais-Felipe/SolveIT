@@ -2,6 +2,7 @@ import { CirclePlus, Inbox, LayoutDashboard, Tags, Ticket, Users, type LucideIco
 import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation, useNavigationType } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
+import { Marca } from '@/components/Logo'
 import { Button } from '@/components/ui/button'
 import type { Perfil } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -64,9 +65,7 @@ export function AppLayout() {
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground md:flex-row">
       <aside className="grid grid-cols-[1fr_auto] items-center border-b border-border bg-sidebar md:sticky md:top-0 md:flex md:h-svh md:w-60 md:shrink-0 md:flex-col md:items-stretch md:overflow-y-auto md:border-r md:border-b-0">
-        <span className="px-4 py-3 text-lg font-semibold tracking-tight md:py-5">
-          Solve<span className="text-primary">IT</span>
-        </span>
+        <Marca className="px-4 py-3 text-lg font-semibold tracking-tight md:py-5" />
         <nav
           aria-label="Menu principal"
           className="col-span-2 row-start-2 flex flex-wrap gap-1 px-2 pb-2 md:flex-col md:flex-nowrap md:pb-0"
