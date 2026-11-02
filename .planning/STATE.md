@@ -6,7 +6,7 @@ status: complete
 stopped_at: v1 complete; ticket 36 (smoother interactions) ready to publish
 last_updated: "2026-11-02T12:00:00.000Z"
 last_activity: 2026-11-02
-last_activity_desc: Ticket 38 implemented (tokens, status colors, list panels)
+last_activity_desc: Ticket 39 implemented (new login and signup screens)
 state_head: 92d1879
 progress:
   total_phases: 7
@@ -177,7 +177,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Ticket 35 (`ticket/35-grafico-semanal`, pós-v1): `GET /api/dashboard/resumo` ganha `semanas` (8 janelas móveis de 7 dias) e o dashboard ganha gráfico com Recharts, carregado sob demanda; substitui a decisão D-2 da Fase 5 ("sem gráficos"); nota em `docs/estudos/35-grafico-semanal.md`. PR #37 integrado na `main` (merge `580473f`) após CI verde.
 - Ticket 36 (`ticket/36-interacoes-fluidas`, pós-v1): ícone próprio; microinterações, entradas de tela e painéis, skeletons com atraso, progresso nos botões e tempos centralizados; avisos rolam até ficar visíveis; nota em `docs/estudos/36-interacoes-fluidas.md`. PR #38 integrado na `main` (merge `dce17ce`) após CI verde.
 - Ticket 37 (`ticket/37-teste-login-confiavel`, pós-v1): teste de login instável no CI; o cache de contextos dos testes passa a guardar 1 contexto, e pools sem banco deixam de escrever no log; nenhuma asserção mudou; mutação detectada; nota em `docs/estudos/37-teste-login-confiavel.md`. PR #39 integrado na `main` (merge `cd163fd`) após CI verde.
-- Ticket 38 (`ticket/38-refinamento-visual`, pós-v1): bordas e títulos ajustados por tokens; laranja reservado a ações e tela atual, com cores próprias para status e prioridade; linhas das listas como painéis; nota em `docs/estudos/38-refinamento-visual.md`. Publicação aguardando autorização.
+- Ticket 38 (`ticket/38-refinamento-visual`, pós-v1): bordas e títulos ajustados por tokens; laranja reservado a ações e tela atual, com cores próprias para status e prioridade; linhas das listas como painéis; nota em `docs/estudos/38-refinamento-visual.md`. PR #40 integrado na `main` (merge `b68bf5c`) após CI verde.
+- Ticket 39 (`ticket/39-novo-login`, pós-v1): login e cadastro refeitos com fundo de ondas em SVG, logo em S (também no menu e na aba), slogan novo e botão brilhante adaptado de componente externo; nota em `docs/estudos/39-novo-login.md`. Publicação aguardando autorização.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
@@ -204,5 +205,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: v1 complete; ticket 38 (visual refinement) ready to publish; ticket 39 (new login) planned
+Stopped at: v1 complete; ticket 39 (new login) ready to publish
 Resume file: none
