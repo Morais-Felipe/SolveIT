@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 current_phase: 07
 current_phase_name: Polimento e Qualidade
 status: complete
-stopped_at: v1 complete; ticket 33 (visual identity) ready to publish
-last_updated: "2026-11-01T12:00:00.000Z"
-last_activity: 2026-11-01
-last_activity_desc: Ticket 33 implemented (black and orange theme, redesigned login and signup)
+stopped_at: v1 complete; ticket 34 (dashboard visual) ready to publish
+last_updated: "2026-11-02T12:00:00.000Z"
+last_activity: 2026-11-02
+last_activity_desc: Ticket 34 implemented (sidebar icons, dashboard cards, bars and recent tickets)
 state_head: 92d1879
 progress:
   total_phases: 7
@@ -172,7 +172,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - PR [#31](https://github.com/Morais-Felipe/SolveIT/pull/31) (ticket 29, plano 06-05) integrado em 2026-10-31 (80aca9e); Fase 6 concluída.
 - Ticket 30 (`ticket/30-docker-erros`, plano 07-01): PR #32 integrado na `main` (merge `16b41dd`) após CI verde.
 - Ticket 31 (`ticket/31-e2e-qualidade`, plano 07-02): PR #33 integrado na `main` (merge `1e0972a`) após CI verde (back-end, front-end e E2E).
-- Ticket 33 (`ticket/33-identidade-visual`, pós-v1): tema preto e laranja, login e cadastro redesenhados a partir de um template do 21st.dev, adaptado sem novas dependências; nota em `docs/estudos/33-identidade-visual.md`. Publicação aguardando autorização.
+- Ticket 33 (`ticket/33-identidade-visual`, pós-v1): tema preto e laranja, login e cadastro redesenhados a partir de um template do 21st.dev, adaptado sem novas dependências; nota em `docs/estudos/33-identidade-visual.md`. PR #35 integrado na `main` (merge `8e2c8e4`) após CI verde.
+- Ticket 34 (`ticket/34-dashboard-visual`, pós-v1): menu lateral com ícones; dashboard com cards, barras e chamados recentes, usando só dados reais da API; nota em `docs/estudos/34-dashboard-visual.md`. Publicação aguardando autorização.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
@@ -199,5 +200,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: v1 complete; ticket 33 (identidade visual) ready to publish
+Stopped at: v1 complete; ticket 34 (dashboard visual) ready to publish
 Resume file: none
