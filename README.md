@@ -263,7 +263,7 @@ Os números usam a mesma regra de visibilidade da lista de chamados: o ADMIN vê
 | CI | GitHub Actions | Implementado — back-end, front-end e E2E a cada PR |
 | Notificações | JavaMailSender via SMTP, eventos após commit, `@Async` | Implementado |
 | Front-end | React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, React Router, Axios | Implementado |
-| Testes de interface | Vitest e React Testing Library (77 testes); Playwright para as jornadas E2E | Implementado |
+| Testes de interface | Vitest e React Testing Library (78 testes); Playwright para as jornadas E2E | Implementado |
 | Entrega | Docker Compose (API, nginx, MySQL, Mailpit) | Implementado |
 
 Segredos de banco, JWT e SMTP vêm do ambiente ou de um cofre de segredos; não são versionados em arquivos de configuração.
