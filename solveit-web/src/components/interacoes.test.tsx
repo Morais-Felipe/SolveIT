@@ -14,7 +14,7 @@ describe('feedback de interação', () => {
     render(<AvisoPagina texto="Usuário salvo." />)
 
     expect(screen.getByRole('alert')).toHaveTextContent('Usuário salvo.')
-    expect(rolar).toHaveBeenCalledWith({ block: 'nearest' })
+    expect(rolar).toHaveBeenCalledWith({ block: 'nearest', behavior: 'instant' })
   })
 
   it('esqueleto anuncia o carregamento e esconde os blocos dos leitores de tela', () => {

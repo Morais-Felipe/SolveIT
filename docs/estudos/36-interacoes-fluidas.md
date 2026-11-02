@@ -44,6 +44,8 @@ A correção atacou a causa:
 - Tela nova começa no topo.
 - O E2E agora exige `toBeInViewport` para o aviso.
 
+No CI, esse teste novo falhou: a página ficou parada no fim da lista. Em 14 rodadas locais, com e sem limite de CPU, a falha não se repetiu, então a causa exata não foi provada. A correção trocou a rolagem suave pela instantânea, que elimina a única parte assíncrona do caminho. Uma rolagem animada dura vários quadros e a lista recarrega ao mesmo tempo.
+
 **Para levar:** um comportamento bom que existe por acidente some quando você muda algo sem relação aparente. Ao ver um teste falhar, pergunte o que ele revela antes de ajustá-lo.
 
 ## 6. Acessibilidade do movimento

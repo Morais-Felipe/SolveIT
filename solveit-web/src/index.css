@@ -210,10 +210,6 @@
   a {
     transition: color var(--duracao-rapida) var(--curva-saida);
   }
-
-  html {
-    scroll-behavior: smooth;
-  }
 }
 
 /* Quem pede menos movimento ao sistema vê cada estado direto, inclusive nas linhas do fundo. */
@@ -225,6 +221,5 @@
     animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }
