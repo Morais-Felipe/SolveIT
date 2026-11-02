@@ -175,6 +175,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Ticket 33 (`ticket/33-identidade-visual`, pós-v1): tema preto e laranja, login e cadastro redesenhados a partir de um template do 21st.dev, adaptado sem novas dependências; nota em `docs/estudos/33-identidade-visual.md`. PR #35 integrado na `main` (merge `8e2c8e4`) após CI verde.
 - Ticket 34 (`ticket/34-dashboard-visual`, pós-v1): menu lateral com ícones; dashboard com cards, barras e chamados recentes, usando só dados reais da API; nota em `docs/estudos/34-dashboard-visual.md`. PR #36 integrado na `main` (merge `4d96c27`) após CI verde.
 - Ticket 35 (`ticket/35-grafico-semanal`, pós-v1): `GET /api/dashboard/resumo` ganha `semanas` (8 janelas móveis de 7 dias) e o dashboard ganha gráfico com Recharts, carregado sob demanda; substitui a decisão D-2 da Fase 5 ("sem gráficos"); nota em `docs/estudos/35-grafico-semanal.md`. Publicação aguardando autorização.
+- Ticket 37 (`ticket/37-teste-login-confiavel`, pós-v1): teste de login instável no CI; o cache de contextos dos testes passa a guardar 1 contexto, e pools sem banco deixam de escrever no log; nenhuma asserção mudou; mutação detectada; nota em `docs/estudos/37-teste-login-confiavel.md`. Publicação aguardando autorização.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
