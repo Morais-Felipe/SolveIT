@@ -128,3 +128,49 @@
     @apply font-sans;
     }
 }
+
+/* Grade do fundo das telas de entrada: as linhas se desenham uma vez ao abrir a página. */
+.fundo-linha-h,
+.fundo-linha-v {
+  position: absolute;
+  background: color-mix(in oklch, var(--primary) 16%, transparent);
+  animation-duration: 0.85s;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+.fundo-linha-h {
+  right: 0;
+  left: 0;
+  height: 1px;
+  animation-name: desenhar-linha-h;
+}
+
+.fundo-linha-v {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform-origin: 50% 0;
+  animation-name: desenhar-linha-v;
+}
+
+@keyframes desenhar-linha-h {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+}
+
+@keyframes desenhar-linha-v {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fundo-linha-h,
+  .fundo-linha-v {
+    animation: none;
+  }
+}
