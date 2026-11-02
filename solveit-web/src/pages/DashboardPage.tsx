@@ -1,13 +1,26 @@
-import { useEffect, useState } from 'react'
+import { CircleCheck, Headset, Hourglass, TriangleAlert, type LucideIcon } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { SeloPrioridade } from '@/components/Selos'
+import { useAuth } from '@/auth/useAuth'
+import { SeloPrioridade, SeloStatus } from '@/components/Selos'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { buscarResumo } from '@/lib/admin'
 import { toApiError } from '@/lib/api'
-import { PRIORIDADES } from '@/lib/chamados'
-import type { ResumoDashboard } from '@/lib/types'
+import { formatarData, listarChamados, PRIORIDADES } from '@/lib/chamados'
+import type { Chamado, Prioridade, ResumoDashboard } from '@/lib/types'
 import { cn } from '@/lib/utils'
+
+const TOTAL_RECENTES = 5
+
+const PAINEL = 'rounded-xl bg-card p-4 ring-1 ring-foreground/10'
+
+const COR_BARRA_PRIORIDADE: Record<Prioridade, string> = {
+  BAIXA: 'bg-muted-foreground',
+  MEDIA: 'bg-foreground',
+  ALTA: 'bg-primary',
+  CRITICA: 'bg-destructive',
+}
 
 type Resultado =
   | { tipo: 'carregando' }
@@ -15,11 +28,12 @@ type Resultado =
   | { tipo: 'pronto'; resumo: ResumoDashboard }
 
 /**
- * Painel do ADMIN e do atendente (D-2): cards e tabelas, sem gráficos. Os números vêm
- * prontos da API, já no escopo do perfil; cada card leva à lista com o mesmo filtro,
+ * Painel do ADMIN e do atendente (D-2): cards, tabelas com barras e chamados recentes. Os números
+ * vêm prontos da API, já no escopo do perfil; cada card leva à lista com o mesmo filtro,
  * para que a pessoa confira de onde o número saiu.
  */
 export function DashboardPage() {
+  const { sessao } = useAuth()
   const [busca, setBusca] = useState<{ tentativa: number; resultado: Resultado } | null>(null)
   const [tentativa, setTentativa] = useState(0)
   const estado: Resultado = busca?.tentativa === tentativa ? busca.resultado : { tipo: 'carregando' }
@@ -36,9 +50,17 @@ export function DashboardPage() {
     return () => controle.abort()
   }, [tentativa])
 
+  const escopo =
+    sessao.status === 'autenticado' && sessao.usuario.perfil === 'ATENDENTE'
+      ? 'Resumo da fila e dos seus chamados.'
+      : 'Resumo de toda a operação.'
+
   return (
     <section className="grid gap-6">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <header className="grid gap-1">
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">{escopo}</p>
+      </header>
 
       {estado.tipo === 'carregando' && (
         <p role="status" className="text-muted-foreground">
@@ -62,36 +84,75 @@ export function DashboardPage() {
   )
 }
 
+type CardIndicador = {
+  rotulo: string
+  valor: number
+  descricao: string
+  para: string
+  icone: LucideIcon
+  alerta?: boolean
+}
+
 function Indicadores({ resumo }: { resumo: ResumoDashboard }) {
   const { totais } = resumo
-  const cards = [
-    { rotulo: 'Abertos', valor: totais.aberto, para: '/chamados?status=ABERTO' },
-    { rotulo: 'Em andamento', valor: totais.emAndamento, para: '/chamados?status=EM_ANDAMENTO' },
-    { rotulo: 'Resolvidos', valor: totais.resolvido, para: '/chamados?status=RESOLVIDO' },
+  const cards: CardIndicador[] = [
+    {
+      rotulo: 'Abertos',
+      valor: totais.aberto,
+      descricao: 'Aguardando um atendente',
+      para: '/chamados?status=ABERTO',
+      icone: Hourglass,
+    },
+    {
+      rotulo: 'Em andamento',
+      valor: totais.emAndamento,
+      descricao: 'Com um atendente responsável',
+      para: '/chamados?status=EM_ANDAMENTO',
+      icone: Headset,
+    },
+    {
+      rotulo: 'Resolvidos',
+      valor: totais.resolvido,
+      descricao: 'Aguardando o solicitante fechar',
+      para: '/chamados?status=RESOLVIDO',
+      icone: CircleCheck,
+    },
     {
       rotulo: 'Críticos abertos',
       valor: totais.criticaAberta,
+      descricao: 'Prioridade crítica sem atendente',
       para: '/chamados?status=ABERTO&prioridade=CRITICA',
+      icone: TriangleAlert,
       alerta: totais.criticaAberta > 0,
     },
   ]
 
+  const maiorPrioridade = Math.max(...PRIORIDADES.map((p) => resumo.abertosPorPrioridade[p] ?? 0))
+  const maiorCategoria = Math.max(0, ...resumo.porCategoria.map((c) => c.quantidade))
+  const maiorCarga = Math.max(0, ...resumo.cargaPorAtendente.map((a) => a.emAndamento))
+  const temCarga = resumo.cargaPorAtendente.length > 0
+
   return (
     <>
-      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((c) => (
           <li key={c.rotulo}>
             <Link
               to={c.para}
               className={cn(
-                'grid gap-1 rounded-lg border border-border p-4 transition-colors hover:border-primary hover:bg-muted/50',
-                c.alerta && 'border-destructive/50',
+                PAINEL,
+                'grid h-full gap-1 transition-colors hover:bg-muted/50 hover:ring-primary',
+                c.alerta && 'ring-destructive/50',
               )}
             >
-              <span className="text-sm text-muted-foreground">{c.rotulo}</span>
+              <span className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
+                {c.rotulo}
+                <c.icone aria-hidden="true" className={cn('size-4 shrink-0', c.alerta && 'text-destructive')} />
+              </span>
               <span className={cn('text-3xl font-semibold tabular-nums', c.alerta && 'text-destructive')}>
                 {c.valor}
               </span>
+              <span className="text-xs text-muted-foreground">{c.descricao}</span>
             </Link>
           </li>
         ))}
@@ -99,14 +160,18 @@ function Indicadores({ resumo }: { resumo: ResumoDashboard }) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Tabela titulo="Abertos por prioridade" colunas={['Prioridade', 'Abertos']}>
-          {PRIORIDADES.map((p) => (
-            <tr key={p} className="border-t border-border">
-              <td className="py-2">
-                <SeloPrioridade prioridade={p} />
-              </td>
-              <td className="py-2 text-right tabular-nums">{resumo.abertosPorPrioridade[p] ?? 0}</td>
-            </tr>
-          ))}
+          {PRIORIDADES.map((p) => {
+            const quantidade = resumo.abertosPorPrioridade[p] ?? 0
+            return (
+              <Linha
+                key={p}
+                rotulo={<SeloPrioridade prioridade={p} />}
+                valor={quantidade}
+                maximo={maiorPrioridade}
+                corBarra={COR_BARRA_PRIORIDADE[p]}
+              />
+            )
+          })}
         </Tabela>
 
         <Tabela titulo="Chamados por categoria" colunas={['Categoria', 'Chamados']}>
@@ -118,36 +183,108 @@ function Indicadores({ resumo }: { resumo: ResumoDashboard }) {
             </tr>
           ) : (
             resumo.porCategoria.map((c) => (
-              <tr key={c.categoriaId} className="border-t border-border">
-                <td className="py-2">
+              <Linha
+                key={c.categoriaId}
+                rotulo={
                   <Link to={`/chamados?categoriaId=${c.categoriaId}`} className="hover:text-primary hover:underline">
                     {c.nome}
                   </Link>
-                </td>
-                <td className="py-2 text-right tabular-nums">{c.quantidade}</td>
-              </tr>
+                }
+                valor={c.quantidade}
+                maximo={maiorCategoria}
+              />
             ))
           )}
         </Tabela>
 
-        {resumo.cargaPorAtendente.length > 0 && (
+        {temCarga && (
           <Tabela titulo="Carga por atendente" colunas={['Atendente', 'Em andamento']}>
             {resumo.cargaPorAtendente.map((a) => (
-              <tr key={a.atendenteId} className="border-t border-border">
-                <td className="py-2">{a.nome}</td>
-                <td className="py-2 text-right tabular-nums">{a.emAndamento}</td>
-              </tr>
+              <Linha key={a.atendenteId} rotulo={a.nome} valor={a.emAndamento} maximo={maiorCarga} />
             ))}
           </Tabela>
         )}
+
+        <ChamadosRecentes className={cn(!temCarga && 'lg:col-span-2')} />
       </div>
     </>
   )
 }
 
-function Tabela({ titulo, colunas, children }: { titulo: string; colunas: [string, string]; children: React.ReactNode }) {
+/**
+ * Usa a mesma listagem da tela de chamados, então respeita o que o perfil pode ver.
+ * Tem carregamento e erro próprios: uma falha aqui não derruba os indicadores.
+ */
+function ChamadosRecentes({ className }: { className?: string }) {
+  const [busca, setBusca] = useState<{ tentativa: number; chamados?: Chamado[]; erro?: string } | null>(null)
+  const [tentativa, setTentativa] = useState(0)
+  const atual = busca?.tentativa === tentativa ? busca : null
+
+  useEffect(() => {
+    const controle = new AbortController()
+    listarChamados({ page: 0 }, controle.signal)
+      .then((pagina) => setBusca({ tentativa, chamados: pagina.items.slice(0, TOTAL_RECENTES) }))
+      .catch((falha: unknown) => {
+        if (!controle.signal.aborted) {
+          setBusca({ tentativa, erro: toApiError(falha).message })
+        }
+      })
+    return () => controle.abort()
+  }, [tentativa])
+
   return (
-    <div className="rounded-lg border border-border p-4">
+    <div className={cn(PAINEL, 'grid content-start gap-3', className)}>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-medium">Chamados recentes</h2>
+        <Link to="/chamados" className="text-xs text-primary underline-offset-4 hover:underline">
+          Ver todos
+        </Link>
+      </div>
+
+      {!atual && (
+        <p role="status" className="text-sm text-muted-foreground">
+          Carregando chamados…
+        </p>
+      )}
+
+      {atual?.erro && (
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-destructive">
+          <span>{atual.erro}</span>
+          <Button variant="outline" size="sm" onClick={() => setTentativa((n) => n + 1)}>
+            Tentar novamente
+          </Button>
+        </div>
+      )}
+
+      {atual?.chamados?.length === 0 && <p className="text-sm text-muted-foreground">Nenhum chamado registrado.</p>}
+
+      {atual?.chamados && atual.chamados.length > 0 && (
+        <ol aria-label="Chamados recentes" className="grid gap-3">
+          {atual.chamados.map((c) => (
+            <li key={c.id} className="grid gap-1 border-t border-border pt-3 first:border-t-0 first:pt-0">
+              <div className="flex items-start justify-between gap-2">
+                <Link to={`/chamados/${c.id}`} className="min-w-0 text-sm font-medium break-words hover:text-primary hover:underline">
+                  {c.titulo}
+                </Link>
+                <SeloStatus status={c.status} />
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 text-xs text-muted-foreground">
+                <span>#{c.id}</span>
+                <span>{c.categoria.nome}</span>
+                <SeloPrioridade prioridade={c.prioridade} />
+                <span>{formatarData(c.criadoEm)}</span>
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  )
+}
+
+function Tabela({ titulo, colunas, children }: { titulo: string; colunas: [string, string]; children: ReactNode }) {
+  return (
+    <div className={PAINEL}>
       <table className="w-full text-sm">
         <caption className="mb-2 text-left font-medium">{titulo}</caption>
         <thead>
@@ -163,5 +300,33 @@ function Tabela({ titulo, colunas, children }: { titulo: string; colunas: [strin
         <tbody>{children}</tbody>
       </table>
     </div>
+  )
+}
+
+/** A barra só compara as linhas da mesma tabela: o maior valor ocupa a largura toda. O número é a informação. */
+function Linha({
+  rotulo,
+  valor,
+  maximo,
+  corBarra = 'bg-primary',
+}: {
+  rotulo: ReactNode
+  valor: number
+  maximo: number
+  corBarra?: string
+}) {
+  return (
+    <tr className="border-t border-border">
+      <td className="w-full py-2 pr-4">
+        {rotulo}
+        <div aria-hidden="true" className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+          <div
+            className={cn('h-full rounded-full', corBarra)}
+            style={{ width: `${maximo > 0 ? (valor / maximo) * 100 : 0}%` }}
+          />
+        </div>
+      </td>
+      <td className="py-2 text-right tabular-nums">{valor}</td>
+    </tr>
   )
 }
