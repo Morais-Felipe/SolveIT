@@ -129,6 +129,34 @@
     }
 }
 
+/* Cartão das telas de entrada: fios de luz nas bordas de cima e de baixo, e um halo discreto. */
+.cartao-entrada {
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--primary) 22%, transparent),
+    0 24px 80px -32px color-mix(in oklch, var(--primary) 45%, transparent);
+}
+
+.cartao-entrada::before,
+.cartao-entrada::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 12%;
+  height: 1px;
+}
+
+.cartao-entrada::before {
+  top: 0;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+.cartao-entrada::after {
+  bottom: 0;
+  inset-inline-start: 40%;
+  inset-inline-end: 4%;
+  background: linear-gradient(90deg, transparent, var(--primary));
+}
+
 /*
  * Botão brilhante: um gradiente cônico na borda gira porque estas variáveis são registradas com
  * tipo (@property). Sem o registro, o navegador não saberia animar um valor dentro de um gradiente.
