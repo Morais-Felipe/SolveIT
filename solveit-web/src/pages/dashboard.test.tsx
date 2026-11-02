@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
 import { AuthProvider } from '@/auth/AuthProvider'
 import { api, ApiError, tokenStorage } from '@/lib/api'
-import type { ResumoDashboard, Usuario } from '@/lib/types'
+import type { Chamado, ResumoDashboard, Usuario } from '@/lib/types'
 
 const ADMIN: Usuario = {
   id: 1,
@@ -27,11 +27,36 @@ const RESUMO: ResumoDashboard = {
   abertosPorPrioridade: { BAIXA: 1, MEDIA: 2, ALTA: 0, CRITICA: 1 },
 }
 
-function simularApi(usuario: Usuario, resumo: () => Promise<unknown>) {
+function chamado(id: number, titulo: string): Chamado {
+  return {
+    id,
+    titulo,
+    descricao: 'Descrição',
+    status: 'ABERTO',
+    prioridade: 'ALTA',
+    solicitante: { id: 2, nome: 'Sol' },
+    atendente: null,
+    categoria: { id: 10, nome: 'Rede', ativo: true },
+    criadoEm: '2026-10-30T10:00:00',
+    atualizadoEm: '2026-10-30T10:00:00',
+    resolvidoEm: null,
+    versao: 0,
+  }
+}
+
+function pagina(items: Chamado[]) {
+  return { data: { items, page: 0, size: 10, totalElements: items.length, totalPages: items.length ? 1 : 0 } }
+}
+
+function simularApi(
+  usuario: Usuario,
+  resumo: () => Promise<unknown>,
+  chamados: () => Promise<unknown> = async () => pagina([]),
+) {
   return vi.spyOn(api, 'get').mockImplementation(async (url: string) => {
     if (url === '/auth/me') return { data: usuario }
     if (url === '/dashboard/resumo') return resumo()
-    if (url === '/chamados') return { data: { items: [], page: 0, size: 10, totalElements: 0, totalPages: 0 } }
+    if (url === '/chamados') return chamados()
     if (url === '/categorias') return { data: { items: [], page: 0, size: 100, totalElements: 0, totalPages: 0 } }
     throw new Error(`GET inesperado: ${url}`)
   })
@@ -84,6 +109,47 @@ describe('dashboard', () => {
 
     await screen.findByRole('table', { name: 'Abertos por prioridade' })
     expect(screen.queryByRole('table', { name: 'Carga por atendente' })).not.toBeInTheDocument()
+  })
+
+  it('lista só os cinco chamados mais recentes, com link para o detalhe', async () => {
+    const seis = [6, 5, 4, 3, 2, 1].map((id) => chamado(id, `Chamado ${id}`))
+    const get = simularApi(ADMIN, async () => ({ data: RESUMO }), async () => pagina(seis))
+    renderApp('/dashboard')
+
+    const recentes = await screen.findByRole('list', { name: 'Chamados recentes' })
+    expect(within(recentes).getAllByRole('listitem')).toHaveLength(5)
+    expect(within(recentes).getByRole('link', { name: 'Chamado 6' })).toHaveAttribute('href', '/chamados/6')
+    expect(within(recentes).queryByRole('link', { name: 'Chamado 1' })).not.toBeInTheDocument()
+    expect(get).toHaveBeenCalledWith('/chamados', expect.objectContaining({ params: expect.objectContaining({ sort: 'criadoEm,desc' }) }))
+  })
+
+  it('mantém os indicadores quando os chamados recentes falham e permite tentar de novo', async () => {
+    const respostas = [
+      () => Promise.reject(new ApiError(0, 'NETWORK_ERROR', 'Falha ao buscar chamados.', {})),
+      async () => pagina([chamado(7, 'Voltou a funcionar')]),
+    ]
+    simularApi(ADMIN, async () => ({ data: RESUMO }), () => respostas.shift()!())
+    renderApp('/dashboard')
+
+    expect(await screen.findByText('Falha ao buscar chamados.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Abertoss*4/ })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }))
+    expect(await screen.findByRole('link', { name: 'Voltou a funcionar' })).toBeInTheDocument()
+  })
+
+  it('avisa quando não há chamados recentes', async () => {
+    simularApi(ADMIN, async () => ({ data: RESUMO }))
+    renderApp('/dashboard')
+
+    expect(await screen.findByText('Nenhum chamado registrado.')).toBeInTheDocument()
+  })
+
+  it('explica o escopo do atendente', async () => {
+    simularApi({ ...ADMIN, perfil: 'ATENDENTE' }, async () => ({ data: RESUMO }))
+    renderApp('/dashboard')
+
+    expect(await screen.findByText('Resumo da fila e dos seus chamados.')).toBeInTheDocument()
   })
 
   it('mostra o erro e tenta de novo', async () => {
