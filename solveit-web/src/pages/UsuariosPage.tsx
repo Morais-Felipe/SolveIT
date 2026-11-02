@@ -140,7 +140,7 @@ export function UsuariosPage() {
             {estado.pagina.items.map((u) => {
               const aberto = painel && painel.modo !== 'criar' && painel.usuario.id === u.id ? painel.modo : null
               return (
-                <li key={u.id} className="grid gap-3 rounded-lg border border-border p-4">
+                <li key={u.id} className="grid gap-3 rounded-lg border border-border bg-card p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="grid min-w-0 gap-1">
                       <p className="font-medium break-words">

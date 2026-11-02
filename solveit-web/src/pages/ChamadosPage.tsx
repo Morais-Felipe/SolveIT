@@ -192,7 +192,7 @@ export function ChamadosPage() {
 function ListaChamados({ chamados }: { chamados: Chamado[] }) {
   return (
     <>
-      <div className="entrada-suave hidden overflow-hidden rounded-lg border border-border md:block">
+      <div className="entrada-suave hidden overflow-hidden rounded-lg border border-border bg-card md:block">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-muted-foreground">
             <tr>
@@ -229,7 +229,7 @@ function ListaChamados({ chamados }: { chamados: Chamado[] }) {
 
       <ul className="entrada-suave grid gap-3 md:hidden">
         {chamados.map((c) => (
-          <li key={c.id} className="grid gap-2 rounded-lg border border-border p-4">
+          <li key={c.id} className="grid gap-2 rounded-lg border border-border bg-card p-4">
             <div className="flex items-start justify-between gap-2">
               <Link to={`/chamados/${c.id}`} className="font-medium hover:text-primary hover:underline">
                 {c.titulo}
