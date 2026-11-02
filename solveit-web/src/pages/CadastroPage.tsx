@@ -105,7 +105,7 @@ export function CadastroPage() {
             />
           </CardContent>
           <CardFooter className="mt-4 flex flex-col gap-3">
-            <Button type="submit" size="lg" className="h-10 w-full" disabled={enviando}>
+            <Button carregando={enviando} type="submit" size="lg" className="h-10 w-full" disabled={enviando}>
               {enviando ? 'Criando conta…' : 'Criar conta'}
             </Button>
             <p className="text-sm text-muted-foreground">

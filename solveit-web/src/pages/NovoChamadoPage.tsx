@@ -167,7 +167,7 @@ export function NovoChamadoPage() {
             <Link to="/chamados" className={cn(buttonVariants({ variant: 'outline' }), 'w-full sm:w-auto')}>
               Cancelar
             </Link>
-            <Button type="submit" className="w-full sm:w-auto" disabled={enviando || semCategorias}>
+            <Button carregando={enviando} type="submit" className="w-full sm:w-auto" disabled={enviando || semCategorias}>
               {enviando ? 'Enviando…' : 'Abrir chamado'}
             </Button>
           </CardFooter>

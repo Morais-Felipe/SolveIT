@@ -26,13 +26,13 @@ export function CampoAreaTexto({ id, rotulo, erro, maximo, value, className, ...
         aria-invalid={erro ? true : undefined}
         aria-describedby={erro ? idErro : maximo ? idContador : undefined}
         className={cn(
-          'w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30',
+          'w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none transition-[color,background-color,border-color,box-shadow] duration-(--duracao-rapida) ease-(--curva-saida) placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30',
           className,
         )}
         {...props}
       />
       {erro ? (
-        <p id={idErro} className="text-xs text-destructive">
+        <p id={idErro} className="entrada-suave text-xs text-destructive">
           {erro}
         </p>
       ) : (

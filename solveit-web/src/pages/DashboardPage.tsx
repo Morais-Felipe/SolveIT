@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { SeloPrioridade, SeloStatus } from '@/components/Selos'
+import { Bloco, Esqueleto, EsqueletoDashboard, EsqueletoLista } from '@/components/Esqueleto'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { buscarResumo } from '@/lib/admin'
@@ -69,9 +70,7 @@ export function DashboardPage() {
       </header>
 
       {estado.tipo === 'carregando' && (
-        <p role="status" className="text-muted-foreground">
-          Carregando indicadores…
-        </p>
+        <EsqueletoDashboard rotulo="Carregando indicadores…" />
       )}
 
       {estado.tipo === 'erro' && (
@@ -140,14 +139,14 @@ function Indicadores({ resumo }: { resumo: ResumoDashboard }) {
 
   return (
     <>
-      <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <ul className="entrada-suave grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((c) => (
           <li key={c.rotulo}>
             <Link
               to={c.para}
               className={cn(
                 PAINEL,
-                'grid h-full gap-1 transition-colors hover:bg-muted/50 hover:ring-primary',
+                'grid h-full gap-1 transition-[transform,background-color,box-shadow] duration-(--duracao-rapida) ease-(--curva-saida) hover:-translate-y-0.5 hover:bg-muted/50 hover:ring-primary active:translate-y-0',
                 c.alerta && 'ring-destructive/50',
               )}
             >
@@ -166,7 +165,7 @@ function Indicadores({ resumo }: { resumo: ResumoDashboard }) {
 
       <PainelSemanas semanas={resumo.semanas} />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="entrada-suave grid gap-6 lg:grid-cols-2">
         <Tabela titulo="Abertos por prioridade" colunas={['Prioridade', 'Abertos']}>
           {PRIORIDADES.map((p) => {
             const quantidade = resumo.abertosPorPrioridade[p] ?? 0
@@ -227,7 +226,7 @@ function PainelSemanas({ semanas }: { semanas: ResumoDashboard['semanas'] }) {
   const semDados = semanas.every((s) => s.novos === 0 && s.resolvidos === 0)
 
   return (
-    <div className={cn(PAINEL, 'grid min-w-0 gap-3')}>
+    <div className={cn(PAINEL, 'entrada-suave grid min-w-0 gap-3')}>
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
         <div className="grid gap-1">
           <h2 className="text-sm font-medium">Chamados por semana</h2>
@@ -253,9 +252,9 @@ function PainelSemanas({ semanas }: { semanas: ResumoDashboard['semanas'] }) {
         <>
           <Suspense
             fallback={
-              <p role="status" className="text-sm text-muted-foreground">
-                Carregando gráfico…
-              </p>
+              <Esqueleto rotulo="Carregando gráfico…">
+                <Bloco className="h-64 w-full" />
+              </Esqueleto>
             }
           >
             <GraficoSemanal semanas={semanas} />
@@ -316,9 +315,7 @@ function ChamadosRecentes({ className }: { className?: string }) {
       </div>
 
       {!atual && (
-        <p role="status" className="text-sm text-muted-foreground">
-          Carregando chamados…
-        </p>
+        <EsqueletoLista rotulo="Carregando chamados…" linhas={3} />
       )}
 
       {atual?.erro && (

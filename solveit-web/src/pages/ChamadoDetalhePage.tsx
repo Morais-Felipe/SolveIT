@@ -5,7 +5,8 @@ import { CampoAreaTexto } from '@/components/CampoAreaTexto'
 import { CampoSelecao } from '@/components/CampoSelecao'
 import { CampoTexto } from '@/components/CampoTexto'
 import { SeloPrioridade, SeloStatus } from '@/components/Selos'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { EsqueletoDetalhe } from '@/components/Esqueleto'
+import { AvisoPagina } from '@/components/AvisoPagina'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { acoesDisponiveis, DESTINO, type Acao } from '@/lib/acoes'
@@ -92,9 +93,7 @@ export function ChamadoDetalhePage() {
   // Durante uma recarga, os dados anteriores continuam na tela em vez de piscar "Carregando…".
   if (busca?.id !== id) {
     return (
-      <p role="status" className="text-muted-foreground">
-        Carregando chamado…
-      </p>
+      <EsqueletoDetalhe rotulo="Carregando chamado…" />
     )
   }
   if (busca.resultado.tipo === 'erro') {
@@ -179,16 +178,12 @@ export function ChamadoDetalhePage() {
   }
 
   return (
-    <article className="grid gap-6">
+    <article className="entrada-suave grid gap-6">
       <Link to="/chamados" className="text-sm text-primary underline-offset-4 hover:underline">
         ← Voltar para chamados
       </Link>
 
-      {aviso && (
-        <Alert variant={aviso.tipo === 'erro' ? 'destructive' : 'default'}>
-          <AlertDescription>{aviso.texto}</AlertDescription>
-        </Alert>
-      )}
+      {aviso && <AvisoPagina texto={aviso.texto} erro={aviso.tipo === 'erro'} />}
 
       {/*
         D-5: no desktop, duas colunas. No celular, as colunas viram "contents" (os filhos
@@ -315,7 +310,7 @@ function CabecalhoEDescricao({
               <Button type="button" variant="outline" onClick={() => setEditando(false)}>
                 Descartar
               </Button>
-              <Button type="submit" disabled={salvando}>
+              <Button carregando={salvando} type="submit" disabled={salvando}>
                 {salvando ? 'Salvando…' : 'Salvar'}
               </Button>
             </div>
@@ -397,7 +392,7 @@ function Conversa({
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
           />
-          <Button type="submit" className="justify-self-end" disabled={enviando || !texto.trim()}>
+          <Button carregando={enviando} type="submit" className="justify-self-end" disabled={enviando || !texto.trim()}>
             {enviando ? 'Enviando…' : 'Comentar'}
           </Button>
         </form>
@@ -480,7 +475,7 @@ function Acoes({
             <Button variant="outline" onClick={() => setEscolhida(null)} disabled={enviando}>
               Voltar
             </Button>
-            <Button
+            <Button carregando={enviando}
               variant={escolhida === 'CANCELAR' ? 'destructive' : 'default'}
               onClick={confirmar}
               disabled={enviando}
@@ -612,7 +607,7 @@ function Atribuir({ aoConfirmar }: { aoConfirmar: (atendente: Pessoa, observacao
           <Button variant="outline" onClick={() => setAberto(false)} disabled={enviando}>
             Voltar
           </Button>
-          <Button onClick={confirmar} disabled={enviando}>
+          <Button carregando={enviando} onClick={confirmar} disabled={enviando}>
             {enviando ? 'Enviando…' : 'Confirmar'}
           </Button>
         </div>

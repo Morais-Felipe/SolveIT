@@ -4,6 +4,8 @@ import { useAuth } from '@/auth/useAuth'
 import { CampoSelecao } from '@/components/CampoSelecao'
 import { CampoTexto } from '@/components/CampoTexto'
 import { Paginacao } from '@/components/Paginacao'
+import { EsqueletoLista } from '@/components/Esqueleto'
+import { AvisoPagina } from '@/components/AvisoPagina'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -96,11 +98,7 @@ export function UsuariosPage() {
         {painel?.modo !== 'criar' && <Button onClick={() => abrir({ modo: 'criar' })}>Novo usuário</Button>}
       </div>
 
-      {aviso && (
-        <Alert variant={aviso.tipo === 'erro' ? 'destructive' : 'default'}>
-          <AlertDescription>{aviso.texto}</AlertDescription>
-        </Alert>
-      )}
+      {aviso && <AvisoPagina texto={aviso.texto} erro={aviso.tipo === 'erro'} />}
 
       {painel?.modo === 'criar' && (
         <FormDados
@@ -116,9 +114,7 @@ export function UsuariosPage() {
       )}
 
       {estado.tipo === 'carregando' && (
-        <p role="status" className="text-muted-foreground">
-          Carregando usuários…
-        </p>
+        <EsqueletoLista rotulo="Carregando usuários…" />
       )}
 
       {estado.tipo === 'erro' && (
@@ -140,7 +136,7 @@ export function UsuariosPage() {
 
       {estado.tipo === 'pronto' && estado.pagina.items.length > 0 && (
         <>
-          <ul className="grid gap-3">
+          <ul className="entrada-suave grid gap-3">
             {estado.pagina.items.map((u) => {
               const aberto = painel && painel.modo !== 'criar' && painel.usuario.id === u.id ? painel.modo : null
               return (
@@ -312,7 +308,7 @@ function FormDados({
             <Button type="button" variant="outline" onClick={aoCancelar} disabled={enviando}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={enviando}>
+            <Button carregando={enviando} type="submit" disabled={enviando}>
               {enviando ? 'Salvando…' : rotuloEnviar}
             </Button>
           </div>
@@ -402,7 +398,7 @@ function FormOperacao({
           <Button variant="outline" onClick={aoCancelar} disabled={enviando}>
             Cancelar
           </Button>
-          <Button onClick={salvar} disabled={!mudou || enviando}>
+          <Button carregando={enviando} onClick={salvar} disabled={!mudou || enviando}>
             {enviando ? 'Salvando…' : 'Salvar perfil e situação'}
           </Button>
         </div>

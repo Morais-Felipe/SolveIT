@@ -11,6 +11,10 @@ afterEach(() => {
 // O jsdom não desenha em canvas e avisa a cada tentativa; null é o que o FundoAnimado já trata.
 HTMLCanvasElement.prototype.getContext = () => null
 
+// O jsdom não faz layout: rolar não tem efeito, e sem isto a chamada lançaria erro ou avisaria.
+window.scrollTo = () => {}
+Element.prototype.scrollIntoView = () => {}
+
 // O Recharts mede o espaço disponível; sem layout no jsdom, o gráfico só não é desenhado.
 globalThis.ResizeObserver = class {
   observe() {}

@@ -4,6 +4,8 @@ import { useAuth } from '@/auth/useAuth'
 import { CampoSelecao } from '@/components/CampoSelecao'
 import { Paginacao } from '@/components/Paginacao'
 import { SeloPrioridade, SeloStatus } from '@/components/Selos'
+import { EsqueletoLista } from '@/components/Esqueleto'
+import { AvisoPagina } from '@/components/AvisoPagina'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { toApiError } from '@/lib/api'
@@ -112,11 +114,7 @@ export function ChamadosPage() {
         )}
       </header>
 
-      {aviso && (
-        <Alert>
-          <AlertDescription>{aviso}</AlertDescription>
-        </Alert>
-      )}
+      {aviso && <AvisoPagina texto={aviso} />}
 
       <div className="grid gap-3 sm:grid-cols-3">
         <CampoSelecao id="filtro-status" rotulo="Status" value={status ?? ''} onChange={(e) => filtrar('status', e.target.value)}>
@@ -156,9 +154,7 @@ export function ChamadosPage() {
       </div>
 
       {estado.tipo === 'carregando' && (
-        <p role="status" className="text-muted-foreground">
-          Carregando chamados…
-        </p>
+        <EsqueletoLista rotulo="Carregando chamados…" />
       )}
 
       {estado.tipo === 'erro' && (
@@ -196,7 +192,7 @@ export function ChamadosPage() {
 function ListaChamados({ chamados }: { chamados: Chamado[] }) {
   return (
     <>
-      <div className="hidden overflow-hidden rounded-lg border border-border md:block">
+      <div className="entrada-suave hidden overflow-hidden rounded-lg border border-border md:block">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left text-muted-foreground">
             <tr>
@@ -231,7 +227,7 @@ function ListaChamados({ chamados }: { chamados: Chamado[] }) {
         </table>
       </div>
 
-      <ul className="grid gap-3 md:hidden">
+      <ul className="entrada-suave grid gap-3 md:hidden">
         {chamados.map((c) => (
           <li key={c.id} className="grid gap-2 rounded-lg border border-border p-4">
             <div className="flex items-start justify-between gap-2">

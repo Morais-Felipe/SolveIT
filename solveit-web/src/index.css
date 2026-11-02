@@ -168,9 +168,66 @@
   }
 }
 
+/*
+ * Movimento da interface: um só lugar para os tempos, de modo que tudo se comporte igual.
+ * Só transform e opacity se movem, porque o navegador os anima sem recalcular o layout.
+ */
+:root {
+  --duracao-rapida: 150ms;
+  --duracao-media: 220ms;
+  --curva-saida: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes entrada-suave {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+
+.entrada-suave {
+  animation: entrada-suave var(--duracao-media) var(--curva-saida) backwards;
+}
+
+/* Fica invisível, ocupando o espaço, até 150ms: respostas rápidas não mostram os blocos. */
+.esqueleto-atrasado {
+  animation: aparecer var(--duracao-media) var(--curva-saida) 150ms backwards;
+}
+
+@layer base {
+  /*
+   * Sem ancoragem de rolagem: quando a lista recarregada faz a página crescer, o navegador moveria
+   * a rolagem junto com o conteúdo e tiraria da tela o aviso que acabou de aparecer.
+   */
+  html {
+    overflow-anchor: none;
+  }
+
+  /* Painéis e avisos são montados na hora; na camada base, uma classe específica ainda prevalece. */
+  [data-slot='card'],
+  [data-slot='alert'] {
+    animation: entrada-suave var(--duracao-media) var(--curva-saida) backwards;
+  }
+
+  a {
+    transition: color var(--duracao-rapida) var(--curva-saida);
+  }
+}
+
+/* Quem pede menos movimento ao sistema vê cada estado direto, inclusive nas linhas do fundo. */
 @media (prefers-reduced-motion: reduce) {
-  .fundo-linha-h,
-  .fundo-linha-v {
-    animation: none;
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

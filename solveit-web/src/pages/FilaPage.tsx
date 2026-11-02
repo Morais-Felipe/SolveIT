@@ -4,6 +4,8 @@ import { useAuth } from '@/auth/useAuth'
 import { CampoSelecao } from '@/components/CampoSelecao'
 import { Paginacao } from '@/components/Paginacao'
 import { SeloPrioridade, SeloStatus } from '@/components/Selos'
+import { EsqueletoLista } from '@/components/Esqueleto'
+import { AvisoPagina } from '@/components/AvisoPagina'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { toApiError } from '@/lib/api'
@@ -152,16 +154,10 @@ export function FilaPage() {
         </div>
       )}
 
-      {aviso && (
-        <Alert variant="destructive">
-          <AlertDescription>{aviso}</AlertDescription>
-        </Alert>
-      )}
+      {aviso && <AvisoPagina texto={aviso} erro />}
 
       {estado.tipo === 'carregando' && (
-        <p role="status" className="text-muted-foreground">
-          Carregando chamados…
-        </p>
+        <EsqueletoLista rotulo="Carregando chamados…" />
       )}
 
       {estado.tipo === 'erro' && (
@@ -185,7 +181,7 @@ export function FilaPage() {
 
       {estado.tipo === 'pronto' && estado.pagina.items.length > 0 && (
         <>
-          <ul className="grid gap-3">
+          <ul className="entrada-suave grid gap-3">
             {estado.pagina.items.map((c) => (
               <li
                 key={c.id}
@@ -208,7 +204,7 @@ export function FilaPage() {
                   </div>
                 </div>
                 {aba === 'fila' && (
-                  <Button
+                  <Button carregando={assumindo === c.id}
                     aria-label={`Assumir ${c.titulo}`}
                     className="w-full sm:w-auto"
                     disabled={assumindo !== null}
