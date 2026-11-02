@@ -21,17 +21,14 @@ export function CampoTexto({ id, rotulo, erro, ajuda, icone: Icone, acao, classN
 
   return (
     <div className="grid gap-1.5">
-      <Label htmlFor={id}>{rotulo}</Label>
+      <Label htmlFor={id}>
+        {Icone && <Icone aria-hidden="true" className="size-4 text-muted-foreground" />}
+        {rotulo}
+      </Label>
       <div className="relative">
-        {Icone && (
-          <Icone
-            aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-        )}
         <Input
           id={id}
-          className={cn(Icone && 'pl-9', acao && 'pr-10', className)}
+          className={cn(acao && 'pr-10', className)}
           aria-invalid={erro ? true : undefined}
           aria-describedby={[idAjuda, idErro].filter(Boolean).join(' ') || undefined}
           {...props}

@@ -129,42 +129,249 @@
     }
 }
 
-/* Grade do fundo das telas de entrada: as linhas se desenham uma vez ao abrir a página. */
-.fundo-linha-h,
-.fundo-linha-v {
+/* Cartão das telas de entrada: fios de luz nas bordas de cima e de baixo, e um halo discreto. */
+.cartao-entrada {
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--primary) 22%, transparent),
+    0 24px 80px -32px color-mix(in oklch, var(--primary) 45%, transparent);
+}
+
+.cartao-entrada::before,
+.cartao-entrada::after {
+  content: "";
+  pointer-events: none;
   position: absolute;
-  background: color-mix(in oklch, var(--primary) 16%, transparent);
-  animation-duration: 0.85s;
-  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
-  animation-fill-mode: both;
-}
-
-.fundo-linha-h {
-  right: 0;
-  left: 0;
+  inset-inline: 12%;
   height: 1px;
-  animation-name: desenhar-linha-h;
 }
 
-.fundo-linha-v {
+.cartao-entrada::before {
   top: 0;
-  bottom: 0;
-  width: 1px;
-  transform-origin: 50% 0;
-  animation-name: desenhar-linha-v;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
 }
 
-@keyframes desenhar-linha-h {
-  from {
-    transform: scaleX(0);
-    opacity: 0;
+.cartao-entrada::after {
+  bottom: 0;
+  inset-inline-start: 40%;
+  inset-inline-end: 4%;
+  background: linear-gradient(90deg, transparent, var(--primary));
+}
+
+/*
+ * Botão brilhante: um gradiente cônico na borda gira porque estas variáveis são registradas com
+ * tipo (@property). Sem o registro, o navegador não saberia animar um valor dentro de um gradiente.
+ */
+@property --brilho-angulo {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --brilho-recuo {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --brilho-arco {
+  syntax: "<percentage>";
+  initial-value: 5%;
+  inherits: false;
+}
+
+@property --brilho-ponta {
+  syntax: "<color>";
+  initial-value: white;
+  inherits: false;
+}
+
+.botao-brilhante {
+  --brilho-giro: girar-brilho linear infinite;
+  --brilho-duracao: 3s;
+  --brilho-transicao: 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  height: 3rem;
+  padding-inline: 1.5rem;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  font-weight: 500;
+  color: white;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  outline-offset: 4px;
+  background:
+    linear-gradient(black, black) padding-box,
+    conic-gradient(
+      from calc(var(--brilho-angulo) - var(--brilho-recuo)),
+      transparent,
+      var(--primary) var(--brilho-arco),
+      var(--brilho-ponta) calc(var(--brilho-arco) * 2),
+      var(--primary) calc(var(--brilho-arco) * 3),
+      transparent calc(var(--brilho-arco) * 4)
+    ) border-box;
+  box-shadow: inset 0 0 0 1px #1a1818;
+  transition: var(--brilho-transicao);
+  transition-property: --brilho-recuo, --brilho-arco, --brilho-ponta;
+}
+
+.botao-brilhante::before,
+.botao-brilhante::after,
+.botao-brilhante > span::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 50%;
+  translate: -50% -50%;
+  z-index: -1;
+}
+
+.botao-brilhante:active {
+  translate: 0 1px;
+}
+
+.botao-brilhante:focus-visible {
+  outline: 2px solid var(--ring);
+}
+
+.botao-brilhante:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+/* Pontilhado que acompanha a luz por dentro da borda. */
+.botao-brilhante::before {
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  background: radial-gradient(circle at 2px 2px, white 0.5px, transparent 0) padding-box;
+  background-size: 4px 4px;
+  background-repeat: space;
+  mask-image: conic-gradient(from calc(var(--brilho-angulo) + 45deg), black, transparent 10% 90%, black);
+  border-radius: inherit;
+  opacity: 0.4;
+}
+
+/* Reflexo que atravessa o fundo enquanto o botão está em destaque. */
+.botao-brilhante::after {
+  --brilho-giro: girar-reflexo linear infinite;
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(-50deg, transparent, var(--primary), transparent);
+  mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+  opacity: 0.6;
+}
+
+.botao-brilhante > span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Brilho interno, escondido até o destaque. */
+.botao-brilhante > span::before {
+  width: calc(100% + 1rem);
+  height: calc(100% + 1rem);
+  box-shadow: inset 0 -1ex 2rem 4px var(--primary);
+  opacity: 0;
+  transition: opacity var(--brilho-transicao);
+  animation: calc(var(--brilho-duracao) * 1.5) pulsar-brilho linear infinite;
+}
+
+/* A segunda animação, pausada, soma velocidade ao giro quando o botão entra em destaque. */
+.botao-brilhante,
+.botao-brilhante::before,
+.botao-brilhante::after {
+  animation:
+    var(--brilho-giro) var(--brilho-duracao),
+    var(--brilho-giro) calc(var(--brilho-duracao) / 0.4) reverse paused;
+  animation-composition: add;
+}
+
+.botao-brilhante:disabled,
+.botao-brilhante:disabled::before,
+.botao-brilhante:disabled::after {
+  animation-play-state: paused;
+}
+
+/* O foco vale em qualquer aparelho. O hover, só com mouse: no toque, ele ficaria preso depois de tocar. */
+.botao-brilhante:focus-visible {
+  --brilho-arco: 20%;
+  --brilho-recuo: 95deg;
+  --brilho-ponta: oklch(0.78 0.15 55);
+}
+
+.botao-brilhante:focus-visible,
+.botao-brilhante:focus-visible::before,
+.botao-brilhante:focus-visible::after {
+  animation-play-state: running;
+}
+
+.botao-brilhante:focus-visible > span::before {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .botao-brilhante:hover:not(:disabled) {
+    --brilho-arco: 20%;
+    --brilho-recuo: 95deg;
+    --brilho-ponta: oklch(0.78 0.15 55);
+  }
+
+  .botao-brilhante:hover:not(:disabled),
+  .botao-brilhante:hover:not(:disabled)::before,
+  .botao-brilhante:hover:not(:disabled)::after {
+    animation-play-state: running;
+  }
+
+  .botao-brilhante:hover:not(:disabled) > span::before {
+    opacity: 1;
   }
 }
 
-@keyframes desenhar-linha-v {
-  from {
-    transform: scaleY(0);
-    opacity: 0;
+@keyframes girar-brilho {
+  to {
+    --brilho-angulo: 360deg;
+  }
+}
+
+@keyframes girar-reflexo {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes pulsar-brilho {
+  from,
+  to {
+    scale: 1;
+  }
+  50% {
+    scale: 1.2;
+  }
+}
+
+/* Parado, o arco de luz não bastaria para marcar o botão: a borda inteira fica laranja. */
+@media (prefers-reduced-motion: reduce) {
+  .botao-brilhante,
+  .botao-brilhante::before,
+  .botao-brilhante::after,
+  .botao-brilhante > span::before {
+    animation: none !important;
+  }
+
+  .botao-brilhante {
+    background:
+      linear-gradient(black, black) padding-box,
+      linear-gradient(var(--primary), var(--primary)) border-box;
+  }
+
+  .botao-brilhante::before,
+  .botao-brilhante::after,
+  .botao-brilhante > span::before {
+    opacity: 0 !important;
   }
 }
 
