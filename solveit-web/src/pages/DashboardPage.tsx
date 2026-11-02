@@ -268,7 +268,7 @@ function ChamadosRecentes({ className }: { className?: string }) {
                 </Link>
                 <SeloStatus status={c.status} />
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-3 text-sm text-muted-foreground">
                 <span>#{c.id}</span>
                 <span>{c.categoria.nome}</span>
                 <SeloPrioridade prioridade={c.prioridade} />
@@ -292,7 +292,7 @@ function Tabela({ titulo, colunas, children }: { titulo: string; colunas: [strin
             <th scope="col" className="pb-2 text-left font-normal">
               {colunas[0]}
             </th>
-            <th scope="col" className="pb-2 text-right font-normal">
+            <th scope="col" className="pb-2 text-right font-normal whitespace-nowrap">
               {colunas[1]}
             </th>
           </tr>
