@@ -7,3 +7,6 @@ import { afterEach } from 'vitest'
 afterEach(() => {
   cleanup()
 })
+
+// O jsdom não desenha em canvas e avisa a cada tentativa; null é o que o FundoAnimado já trata.
+HTMLCanvasElement.prototype.getContext = () => null

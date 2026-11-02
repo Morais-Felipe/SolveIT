@@ -26,7 +26,7 @@ test.beforeAll(() => {
 async function entrar(page: Page, email: string) {
   await page.goto('/login')
   await page.getByLabel('E-mail').fill(email)
-  await page.getByLabel('Senha').fill(SENHA_E2E)
+  await page.getByLabel('Senha', { exact: true }).fill(SENHA_E2E)
   await page.getByRole('button', { name: 'Entrar' }).click()
 }
 
@@ -84,7 +84,7 @@ test('solicitante se cadastra, abre um chamado e comenta', async ({ page, reques
   await page.getByRole('link', { name: 'Cadastre-se' }).click()
   await page.getByLabel('Nome').fill(solicitante.nome)
   await page.getByLabel('E-mail').fill(solicitante.email)
-  await page.getByLabel('Senha').fill(SENHA_E2E)
+  await page.getByLabel('Senha', { exact: true }).fill(SENHA_E2E)
   await page.getByRole('button', { name: 'Criar conta' }).click()
   await expect(page.getByRole('heading', { name: 'Meus chamados' })).toBeVisible()
   await semRolagemHorizontal(page)

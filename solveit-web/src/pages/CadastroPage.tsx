@@ -1,10 +1,13 @@
+import { Mail, User } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { rotaInicial, useAuth } from '@/auth/useAuth'
+import { CampoSenha } from '@/components/CampoSenha'
 import { CampoTexto } from '@/components/CampoTexto'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { AutenticacaoLayout } from '@/layout/AutenticacaoLayout'
 import { toApiError } from '@/lib/api'
 
 /** Mesma regra do back-end (@ValidPassword); a API continua sendo quem decide. */
@@ -55,11 +58,10 @@ export function CadastroPage() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background p-4 text-foreground">
-      <Card className="w-full max-w-sm">
+    <AutenticacaoLayout>
         <CardHeader>
           <CardTitle>
-            <h1 className="text-xl">Criar conta</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Criar conta</h1>
           </CardTitle>
           <CardDescription>Contas novas entram como solicitante.</CardDescription>
         </CardHeader>
@@ -73,6 +75,8 @@ export function CadastroPage() {
             <CampoTexto
               id="nome"
               rotulo="Nome"
+              icone={User}
+              className="h-10"
               autoComplete="name"
               value={nome}
               erro={erros.nome}
@@ -82,15 +86,17 @@ export function CadastroPage() {
               id="email"
               rotulo="E-mail"
               type="email"
+              icone={Mail}
+              className="h-10"
               autoComplete="email"
               value={email}
               erro={erros.email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <CampoTexto
+            <CampoSenha
               id="senha"
               rotulo="Senha"
-              type="password"
+              className="h-10"
               autoComplete="new-password"
               value={senha}
               erro={erros.senha}
@@ -99,7 +105,7 @@ export function CadastroPage() {
             />
           </CardContent>
           <CardFooter className="mt-4 flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={enviando}>
+            <Button type="submit" size="lg" className="h-10 w-full" disabled={enviando}>
               {enviando ? 'Criando conta…' : 'Criar conta'}
             </Button>
             <p className="text-sm text-muted-foreground">
@@ -110,7 +116,6 @@ export function CadastroPage() {
             </p>
           </CardFooter>
         </form>
-      </Card>
-    </div>
+    </AutenticacaoLayout>
   )
 }

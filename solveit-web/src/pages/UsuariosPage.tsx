@@ -157,7 +157,7 @@ export function UsuariosPage() {
                           className={cn(
                             'inline-flex rounded-full border px-2 py-0.5 text-xs',
                             u.ativo
-                              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                              ? 'border-primary/40 bg-primary/10 text-primary'
                               : 'border-border bg-muted text-muted-foreground',
                           )}
                         >
@@ -393,7 +393,7 @@ function FormOperacao({
           </CampoSelecao>
         </div>
         {deixaDeAtender && (
-          <p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
+          <p className="rounded-md border border-primary/40 bg-primary/10 p-3 text-sm text-foreground">
             Os chamados em andamento deste atendente voltarão para a fila, sem responsável. O histórico de cada um
             registra a devolução.
           </p>

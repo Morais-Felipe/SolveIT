@@ -3,7 +3,7 @@ import type { Prioridade, StatusChamado } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 const COR_STATUS: Record<StatusChamado, string> = {
-  ABERTO: 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+  ABERTO: 'border-foreground/30 bg-foreground/5 text-foreground',
   EM_ANDAMENTO: 'border-primary/40 bg-primary/10 text-primary',
   RESOLVIDO: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
   FECHADO: 'border-border bg-muted text-muted-foreground',
@@ -13,7 +13,7 @@ const COR_STATUS: Record<StatusChamado, string> = {
 const COR_PRIORIDADE: Record<Prioridade, string> = {
   BAIXA: 'text-muted-foreground',
   MEDIA: 'text-foreground',
-  ALTA: 'text-amber-600 dark:text-amber-400',
+  ALTA: 'text-primary',
   CRITICA: 'font-semibold text-destructive',
 }
 

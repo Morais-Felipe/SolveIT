@@ -1,10 +1,13 @@
+import { Mail } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { rotaInicial, useAuth } from '@/auth/useAuth'
+import { CampoSenha } from '@/components/CampoSenha'
 import { CampoTexto } from '@/components/CampoTexto'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { AutenticacaoLayout } from '@/layout/AutenticacaoLayout'
 import { toApiError } from '@/lib/api'
 
 export function LoginPage() {
@@ -35,11 +38,10 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background p-4 text-foreground">
-      <Card className="w-full max-w-sm">
+    <AutenticacaoLayout>
         <CardHeader>
           <CardTitle>
-            <h1 className="text-xl">
+            <h1 className="text-2xl font-semibold tracking-tight">
               Entrar no Solve<span className="text-primary">IT</span>
             </h1>
           </CardTitle>
@@ -56,21 +58,23 @@ export function LoginPage() {
               id="email"
               rotulo="E-mail"
               type="email"
+              icone={Mail}
+              className="h-10"
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <CampoTexto
+            <CampoSenha
               id="senha"
               rotulo="Senha"
-              type="password"
+              className="h-10"
               autoComplete="current-password"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
             />
           </CardContent>
           <CardFooter className="mt-4 flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={enviando}>
+            <Button type="submit" size="lg" className="h-10 w-full" disabled={enviando}>
               {enviando ? 'Entrando…' : 'Entrar'}
             </Button>
             <p className="text-sm text-muted-foreground">
@@ -81,7 +85,6 @@ export function LoginPage() {
             </p>
           </CardFooter>
         </form>
-      </Card>
-    </div>
+    </AutenticacaoLayout>
   )
 }
