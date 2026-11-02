@@ -181,7 +181,7 @@ export function CategoriasPage() {
         <>
           <ul className="entrada-suave grid gap-3">
             {estado.pagina.items.map((c) => (
-              <li key={c.id} className="grid gap-3 rounded-lg border border-border p-4">
+              <li key={c.id} className="grid gap-3 rounded-lg border border-border bg-card p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="grid min-w-0 gap-1">
                     <p className="flex flex-wrap items-center gap-2 font-medium break-words">

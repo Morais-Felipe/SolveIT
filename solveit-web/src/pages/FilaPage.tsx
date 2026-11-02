@@ -185,7 +185,7 @@ export function FilaPage() {
             {estado.pagina.items.map((c) => (
               <li
                 key={c.id}
-                className="flex flex-col gap-3 rounded-lg border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="grid min-w-0 gap-1">
                   <Link
