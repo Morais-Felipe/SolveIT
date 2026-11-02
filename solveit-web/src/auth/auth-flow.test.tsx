@@ -33,6 +33,7 @@ const RESUMO_VAZIO = {
   porCategoria: [],
   cargaPorAtendente: [],
   abertosPorPrioridade: {},
+  semanas: [],
 }
 
 /** /auth/me devolve o usuário; o dashboard e as listas das telas iniciais vêm vazios. */

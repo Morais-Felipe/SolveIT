@@ -89,6 +89,8 @@ export type ResumoDashboard = {
   porCategoria: { categoriaId: number; nome: string; quantidade: number }[]
   cargaPorAtendente: { atendenteId: number; nome: string; emAndamento: number }[]
   abertosPorPrioridade: Partial<Record<Prioridade, number>>
+  /** Sempre 8 janelas de 7 dias, da mais antiga para a mais nova; datas em UTC, como no resto da API. */
+  semanas: { inicio: string; fim: string; novos: number; resolvidos: number }[]
 }
 
 /** Espelha ComentarioDtos.Resposta. Comentários são imutáveis: não há edição nem exclusão. */
