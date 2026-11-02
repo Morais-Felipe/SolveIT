@@ -45,7 +45,7 @@ export function AppLayout() {
     <div className="flex min-h-svh flex-col bg-background text-foreground md:flex-row">
       <aside className="border-b border-border bg-sidebar md:w-60 md:shrink-0 md:border-r md:border-b-0">
         <div className="flex items-center justify-between gap-2 px-4 py-3 md:flex-col md:items-start md:py-5">
-          <span className="text-lg font-semibold">
+          <span className="text-lg font-semibold tracking-tight">
             Solve<span className="text-primary">IT</span>
           </span>
           <div className="text-right text-xs md:text-left">
@@ -62,7 +62,7 @@ export function AppLayout() {
               className={({ isActive }) =>
                 cn(
                   'rounded-md px-3 py-2 text-sm whitespace-nowrap transition-colors hover:bg-sidebar-accent',
-                  isActive && 'bg-primary/15 font-medium text-primary',
+                  isActive && 'bg-primary/15 font-medium text-primary md:shadow-[inset_2px_0_0_var(--primary)]',
                 )
               }
             >
