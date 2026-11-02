@@ -5,6 +5,7 @@ import { CampoSelecao } from '@/components/CampoSelecao'
 import { Paginacao } from '@/components/Paginacao'
 import { SeloPrioridade, SeloStatus } from '@/components/Selos'
 import { EsqueletoLista } from '@/components/Esqueleto'
+import { AvisoPagina } from '@/components/AvisoPagina'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { toApiError } from '@/lib/api'
@@ -153,11 +154,7 @@ export function FilaPage() {
         </div>
       )}
 
-      {aviso && (
-        <Alert variant="destructive">
-          <AlertDescription>{aviso}</AlertDescription>
-        </Alert>
-      )}
+      {aviso && <AvisoPagina texto={aviso} erro />}
 
       {estado.tipo === 'carregando' && (
         <EsqueletoLista rotulo="Carregando chamados…" />

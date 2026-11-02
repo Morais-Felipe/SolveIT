@@ -35,8 +35,9 @@ async function sair(page: Page) {
   await expect(page.getByRole('heading', { name: 'Entrar' })).toBeVisible()
 }
 
-/** Navega pelo menu, exigindo antes que todos os itens estejam inteiros na tela, sem rolagem (WEB-07). */
+/** Navega pelo menu a partir do topo, exigindo que todos os itens caibam inteiros na tela (WEB-07). */
 async function irPeloMenu(page: Page, item: string) {
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
   const menu = page.getByRole('navigation', { name: 'Menu principal' })
   for (const link of await menu.getByRole('link').all()) {
     await expect(link).toBeInViewport({ ratio: 1 })
@@ -68,7 +69,8 @@ test('ADMIN torna um usuário atendente e cria uma categoria', async ({ page, re
   await linhaAtendente.getByRole('button', { name: 'Perfil e situação' }).click()
   await linhaAtendente.getByLabel('Perfil').selectOption({ label: 'Atendente' })
   await linhaAtendente.getByRole('button', { name: 'Salvar perfil e situação' }).click()
-  await expect(page.getByText(`Perfil e situação de ${atendente.nome} atualizados.`)).toBeVisible()
+  // Mesmo salvando no fim da lista, o aviso precisa aparecer na área visível.
+  await expect(page.getByText(`Perfil e situação de ${atendente.nome} atualizados.`)).toBeInViewport()
   await semRolagemHorizontal(page)
 
   await irPeloMenu(page, 'Categorias')

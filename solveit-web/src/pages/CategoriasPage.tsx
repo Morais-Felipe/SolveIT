@@ -4,6 +4,7 @@ import { CampoAreaTexto } from '@/components/CampoAreaTexto'
 import { CampoTexto } from '@/components/CampoTexto'
 import { Paginacao } from '@/components/Paginacao'
 import { EsqueletoLista } from '@/components/Esqueleto'
+import { AvisoPagina } from '@/components/AvisoPagina'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -138,11 +139,7 @@ export function CategoriasPage() {
         ))}
       </div>
 
-      {aviso && (
-        <Alert variant={aviso.tipo === 'erro' ? 'destructive' : 'default'}>
-          <AlertDescription>{aviso.texto}</AlertDescription>
-        </Alert>
-      )}
+      {aviso && <AvisoPagina texto={aviso.texto} erro={aviso.tipo === 'erro'} />}
 
       {painel?.modo === 'criar' && (
         <FormCategoria

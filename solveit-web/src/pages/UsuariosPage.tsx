@@ -5,6 +5,7 @@ import { CampoSelecao } from '@/components/CampoSelecao'
 import { CampoTexto } from '@/components/CampoTexto'
 import { Paginacao } from '@/components/Paginacao'
 import { EsqueletoLista } from '@/components/Esqueleto'
+import { AvisoPagina } from '@/components/AvisoPagina'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -97,11 +98,7 @@ export function UsuariosPage() {
         {painel?.modo !== 'criar' && <Button onClick={() => abrir({ modo: 'criar' })}>Novo usuário</Button>}
       </div>
 
-      {aviso && (
-        <Alert variant={aviso.tipo === 'erro' ? 'destructive' : 'default'}>
-          <AlertDescription>{aviso.texto}</AlertDescription>
-        </Alert>
-      )}
+      {aviso && <AvisoPagina texto={aviso.texto} erro={aviso.tipo === 'erro'} />}
 
       {painel?.modo === 'criar' && (
         <FormDados

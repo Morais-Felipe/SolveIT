@@ -1,5 +1,6 @@
 import { CirclePlus, Inbox, LayoutDashboard, Tags, Ticket, Users, type LucideIcon } from 'lucide-react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
+import { NavLink, Outlet, useLocation, useNavigationType } from 'react-router-dom'
 import { useAuth } from '@/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import type { Perfil } from '@/lib/types'
@@ -46,6 +47,15 @@ function iniciais(nome: string): string {
 export function AppLayout() {
   const { sessao, sair } = useAuth()
   const { pathname } = useLocation()
+  const navegacao = useNavigationType()
+
+  // Tela nova começa no topo; "Voltar" (POP) deixa o navegador devolver a posição anterior.
+  useEffect(() => {
+    if (navegacao !== 'POP') {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
+  }, [pathname, navegacao])
+
   if (sessao.status !== 'autenticado') {
     return null
   }

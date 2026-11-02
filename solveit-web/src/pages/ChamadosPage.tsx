@@ -5,6 +5,7 @@ import { CampoSelecao } from '@/components/CampoSelecao'
 import { Paginacao } from '@/components/Paginacao'
 import { SeloPrioridade, SeloStatus } from '@/components/Selos'
 import { EsqueletoLista } from '@/components/Esqueleto'
+import { AvisoPagina } from '@/components/AvisoPagina'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { toApiError } from '@/lib/api'
@@ -113,11 +114,7 @@ export function ChamadosPage() {
         )}
       </header>
 
-      {aviso && (
-        <Alert>
-          <AlertDescription>{aviso}</AlertDescription>
-        </Alert>
-      )}
+      {aviso && <AvisoPagina texto={aviso} />}
 
       <div className="grid gap-3 sm:grid-cols-3">
         <CampoSelecao id="filtro-status" rotulo="Status" value={status ?? ''} onChange={(e) => filtrar('status', e.target.value)}>

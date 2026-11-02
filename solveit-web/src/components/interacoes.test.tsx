@@ -1,9 +1,22 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { AvisoPagina } from '@/components/AvisoPagina'
 import { EsqueletoLista } from '@/components/Esqueleto'
 import { Button } from '@/components/ui/button'
 
 describe('feedback de interação', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('aviso rola até ficar visível, sem mexer na página se já estiver', () => {
+    const rolar = vi.spyOn(Element.prototype, 'scrollIntoView')
+    render(<AvisoPagina texto="Usuário salvo." />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Usuário salvo.')
+    expect(rolar).toHaveBeenCalledWith({ block: 'nearest' })
+  })
+
   it('esqueleto anuncia o carregamento e esconde os blocos dos leitores de tela', () => {
     render(<EsqueletoLista rotulo="Carregando chamados…" linhas={2} />)
 

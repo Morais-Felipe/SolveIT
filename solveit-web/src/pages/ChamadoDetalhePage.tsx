@@ -6,6 +6,7 @@ import { CampoSelecao } from '@/components/CampoSelecao'
 import { CampoTexto } from '@/components/CampoTexto'
 import { SeloPrioridade, SeloStatus } from '@/components/Selos'
 import { EsqueletoDetalhe } from '@/components/Esqueleto'
+import { AvisoPagina } from '@/components/AvisoPagina'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -183,11 +184,7 @@ export function ChamadoDetalhePage() {
         ← Voltar para chamados
       </Link>
 
-      {aviso && (
-        <Alert variant={aviso.tipo === 'erro' ? 'destructive' : 'default'}>
-          <AlertDescription>{aviso.texto}</AlertDescription>
-        </Alert>
-      )}
+      {aviso && <AvisoPagina texto={aviso.texto} erro={aviso.tipo === 'erro'} />}
 
       {/*
         D-5: no desktop, duas colunas. No celular, as colunas viram "contents" (os filhos
