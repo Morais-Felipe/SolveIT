@@ -69,7 +69,7 @@ Legenda: ✅ permitido · ⛔ 403 · 🔗 depende da relação com o chamado · 
 | `GET /api/chamados/{id}/comentarios` | 401 | 🔗 | 🔗 | ✅ | `ComentarioHistoricoConsultaIntegrationTest.forbidsUsersWithoutRelationAndReturnsNotFoundForMissingTicket`, `commentAuthorshipDoesNotKeepReadAccess` |
 | `POST /api/chamados/{id}/comentarios` | 401 | 🔗 conversa aberta | 🔗 conversa aberta | ✅ conversa aberta | `ComentarioCriacaoIntegrationTest.everyoneWithCurrentAccessCommentsWhileTheConversationIsOpen`, `forbidsUsersWithoutCurrentRelation`, `accessIsCheckedBeforeTheClosedState`, `attendantWhoLostTheQueueCannotCommentAfterwards` |
 | `GET /api/chamados/{id}/historico` | 401 | 🔗 | 🔗 | ✅ | `ComentarioHistoricoConsultaIntegrationTest.historyFollowsTheSameAccessAsTheTicket` |
-| `GET /api/dashboard/resumo` | 401 | ⛔ | ✅ escopo próprio | ✅ tudo | `DashboardIntegrationTest.requesterIsForbiddenAndAnonymousIsUnauthorized`, `attendantSeesOnlyTheQueueAndTheirOwnTickets`, `adminSeesTheWholeOperation` |
+| `GET /api/dashboard/resumo` | 401 | ⛔ | ✅ escopo próprio | ✅ tudo | `DashboardIntegrationTest.requesterIsForbiddenAndAnonymousIsUnauthorized`, `attendantSeesOnlyTheQueueAndTheirOwnTickets`, `DashboardSemanasIntegrationTest.attendantOnlyCountsTheQueueAndTheirOwnTickets`, `adminSeesTheWholeOperation` |
 | `GET /api/usuarios` | 401 | ⛔ | ⛔ | ✅ | `UsuarioIntegrationTest.requiresBearerToListUsers`, `forbidsNonAdminProfilesFromListingAndReadingUsers` |
 | `GET /api/usuarios/{id}` | 401 | ⛔ | ⛔ | ✅ | `UsuarioIntegrationTest.forbidsNonAdminProfilesFromListingAndReadingUsers`, `returnsUserDetailsForAdminWithoutCredentials` |
 | `POST /api/usuarios` | 401 | ⛔ | ⛔ | ✅ | `UsuarioIntegrationTest.adminCreatesActiveUsersForEveryProfileWithBcryptHash`, `forbidsNonAdminFromCreatingAndEditingUsers` |
