@@ -69,7 +69,9 @@ test('ADMIN torna um usuário atendente e cria uma categoria', async ({ page, re
   await linhaAtendente.getByRole('button', { name: 'Perfil e situação' }).click()
   await linhaAtendente.getByLabel('Perfil').selectOption({ label: 'Atendente' })
   await linhaAtendente.getByRole('button', { name: 'Salvar perfil e situação' }).click()
-  // Mesmo salvando no fim da lista, o aviso precisa aparecer na área visível.
+  // Mesmo salvando no fim da lista, o aviso precisa continuar visível depois que a lista recarrega:
+  // é nesse momento que a página cresce e a rolagem poderia tirá-lo da tela.
+  await expect(linhaAtendente.getByText('Atendente', { exact: true })).toBeVisible()
   await expect(page.getByText(`Perfil e situação de ${atendente.nome} atualizados.`)).toBeInViewport()
   await semRolagemHorizontal(page)
 

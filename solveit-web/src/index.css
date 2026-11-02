@@ -201,6 +201,14 @@
 }
 
 @layer base {
+  /*
+   * Sem ancoragem de rolagem: quando a lista recarregada faz a página crescer, o navegador moveria
+   * a rolagem junto com o conteúdo e tiraria da tela o aviso que acabou de aparecer.
+   */
+  html {
+    overflow-anchor: none;
+  }
+
   /* Painéis e avisos são montados na hora; na camada base, uma classe específica ainda prevalece. */
   [data-slot='card'],
   [data-slot='alert'] {
