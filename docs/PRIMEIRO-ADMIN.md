@@ -2,6 +2,8 @@
 
 > **Status:** procedimento operacional **proposto**. Ele nunca é executado automaticamente pela aplicação. A primeira execução real em qualquer ambiente exige aprovação explícita do responsável.
 
+> **Modo demonstração:** o `docker-compose.demo.yml` traz contas prontas para testes locais e não usa este procedimento. Essas contas não existem no modo normal.
+
 ## Por que existe este procedimento
 
 O SolveIT não tem endpoint público, *runner* de inicialização nem senha padrão capazes de criar um administrador:
