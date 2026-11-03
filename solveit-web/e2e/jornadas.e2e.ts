@@ -55,6 +55,12 @@ async function semRolagemHorizontal(page: Page) {
 }
 
 test('ADMIN torna um usuário atendente e cria uma categoria', async ({ page, request }) => {
+  // As contas do modo demonstração não podem existir fora dele.
+  const contaDemo = await request.post('/api/auth/login', {
+    data: { email: 'admin@demo.solveit.test', senha: 'demo-solveit-2026' },
+  })
+  expect(contaDemo.status()).toBe(401)
+
   const cadastro = await request.post('/api/auth/register', {
     data: { nome: atendente.nome, email: atendente.email, senha: SENHA_E2E },
   })

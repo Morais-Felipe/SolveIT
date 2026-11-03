@@ -57,6 +57,27 @@ Tudo o que aparece como implementado neste README está coberto por testes; o [m
 
 O andamento só deve ser considerado entregue quando os artefatos de planejamento, os testes proporcionais e o histórico Git confirmarem a conclusão. O texto deste README deve evoluir junto com o estado real do repositório.
 
+## Testar em um comando
+
+Requer apenas Docker Desktop. O modo demonstração não precisa de `.env` e já traz chamados distribuídos em 8 semanas:
+
+```bash
+docker compose -f docker-compose.demo.yml up --build
+```
+
+O primeiro build leva alguns minutos. Depois, abra `http://localhost:8090` e entre com uma das contas, todas com a senha `demo-solveit-2026`:
+
+| Perfil | E-mail |
+| --- | --- |
+| Administrador | `admin@demo.solveit.test` |
+| Atendente | `atendente@demo.solveit.test` |
+| Solicitante | `solicitante@demo.solveit.test` |
+
+Os e-mails enviados pelo sistema aparecem em `http://localhost:8026`. Para encerrar e apagar os dados, rode `docker compose -f docker-compose.demo.yml down -v`; uma nova subida renova as datas.
+
+> [!WARNING]
+> Essas senhas e os segredos desse arquivo são públicos e valem apenas para este banco local. Não publique o modo demonstração na internet. O modo normal, descrito abaixo, não tem nenhuma conta pronta, e um teste E2E garante isso.
+
 ## Rodar tudo com Docker
 
 O caminho mais curto para ver o SolveIT funcionando: um comando sobe a API, o front-end, o MySQL 8.4 e o [Mailpit](https://mailpit.axllent.org/) (um SMTP falso com caixa de entrada web). Requer apenas Docker Desktop com o engine Linux; Java e Node não são necessários.
