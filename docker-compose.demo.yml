@@ -1,0 +1,66 @@
+# Modo demonstração: docker compose -f docker-compose.demo.yml up --build
+# Não precisa de .env e já traz contas e chamados de exemplo (veja o README).
+#
+# Os segredos abaixo são públicos de propósito e só servem neste banco local: as portas ficam em
+# 127.0.0.1 e os dados vêm de ./demo, que não entra na imagem da API. Nunca publique este modo na
+# internet. O docker-compose.yml normal continua sem nenhuma conta pronta.
+name: solveit-demo
+
+services:
+  mysql:
+    image: mysql:8.4.11
+    environment:
+      MYSQL_DATABASE: solveit
+      MYSQL_USER: solveit
+      MYSQL_PASSWORD: senha-do-banco-de-demonstracao
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  mailpit:
+    image: axllent/mailpit:v1.33.0
+    ports:
+      - "127.0.0.1:8026:8025"
+
+  api:
+    build: ./solveit-api
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:mysql://mysql:3306/solveit?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+      DB_USERNAME: solveit
+      DB_PASSWORD: senha-do-banco-de-demonstracao
+      # Base64 de um texto público; serve só para assinar tokens deste modo local.
+      SOLVEIT_JWT_SECRET: bW9kby1kZW1vbnN0cmFjYW8tc29sdmVpdC1jaGF2ZS1wdWJsaWNhLXNvbWVudGUtbG9jYWw=
+      SOLVEIT_MAIL_HOST: mailpit
+      SOLVEIT_MAIL_PORT: "1025"
+      SOLVEIT_MAIL_FROM: solveit@localhost
+      # Só aqui o Flyway lê ./demo, depois das migrations normais.
+      SPRING_FLYWAY_LOCATIONS: classpath:db/migration,filesystem:/demo
+    volumes:
+      - ./demo:/demo:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    restart: unless-stopped
+
+  web:
+    build: ./solveit-web
+    ports:
+      - "127.0.0.1:8090:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  mysql-data:

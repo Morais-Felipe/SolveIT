@@ -1,0 +1,38 @@
+# Modo demonstração: é o primeiro contato de quem testa o projeto, então não pode quebrar sem
+# ninguém perceber. Sobe docker-compose.demo.yml sem .env e confere as contas e o dashboard.
+name: Demonstração
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: demo-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  demo:
+    name: Modo demonstração (docker compose)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Subir a demonstração
+        run: docker compose -f docker-compose.demo.yml up --build -d
+
+      - name: Conferir contas e dashboard
+        run: bash demo/verificar.sh
+
+      - name: Logs da API
+        if: failure()
+        run: docker compose -f docker-compose.demo.yml logs --tail=100 api
+
+      - name: Encerrar
+        if: always()
+        run: docker compose -f docker-compose.demo.yml down -v
