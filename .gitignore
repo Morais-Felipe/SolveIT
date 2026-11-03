@@ -14,3 +14,6 @@ Thumbs.db
 
 # Maven build output
 solveit-api/target/
+
+# Local Claude Code data and worktrees
+.claude/
