@@ -25,11 +25,13 @@ Solicitantes abrem e acompanham chamados, atendentes conduzem o atendimento e ad
 | --- | --- |
 | ![Tela de login do SolveIT](docs/imagens/login.png) | <img src="docs/imagens/celular.png" alt="Dashboard em um celular" width="280"> |
 
-## Testar em um comando
+## Testar com Docker
 
-Requer apenas Docker Desktop. O modo demonstração não precisa de `.env` e já traz chamados distribuídos em 8 semanas:
+Requer Git e Docker Desktop aberto. O modo demonstração não precisa de `.env` e já traz chamados distribuídos em 8 semanas:
 
 ```bash
+git clone https://github.com/Morais-Felipe/SolveIT.git
+cd SolveIT
 docker compose -f docker-compose.demo.yml up --build
 ```
 
