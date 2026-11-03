@@ -4,7 +4,7 @@ Detalhes para quem quer rodar, estudar ou modificar o projeto. A visão geral es
 
 ## Rodar com Docker no modo normal
 
-Para só experimentar, o [modo demonstração](../README.md#testar-em-um-comando) é mais simples. Este é o modo normal, sem nenhuma conta pronta: um comando sobe a API, o front-end, o MySQL 8.4 e o [Mailpit](https://mailpit.axllent.org/) (um SMTP falso com caixa de entrada web). Requer apenas Docker Desktop com o engine Linux; Java e Node não são necessários.
+Para só experimentar, o [modo demonstração](../README.md#testar-com-docker) é mais simples. Este é o modo normal, sem nenhuma conta pronta: um comando sobe a API, o front-end, o MySQL 8.4 e o [Mailpit](https://mailpit.axllent.org/) (um SMTP falso com caixa de entrada web). Requer apenas Docker Desktop com o engine Linux; Java e Node não são necessários.
 
 1. Crie o `.env` a partir do modelo e preencha a senha do banco e a chave dos tokens:
 

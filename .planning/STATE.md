@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 current_phase: 07
 current_phase_name: Polimento e Qualidade
 status: complete
-stopped_at: v1 complete; ticket 41 (portfolio README) ready to publish
-last_updated: "2026-11-02T12:00:00.000Z"
-last_activity: 2026-11-02
-last_activity_desc: Ticket 41 implemented (portfolio README and technical documentation)
+stopped_at: v1 complete; ticket 42 (git clone in README) ready to publish
+last_updated: "2026-11-03T12:00:00.000Z"
+last_activity: 2026-11-03
+last_activity_desc: Ticket 42 implemented (clone steps in the README demo section)
 state_head: 92d1879
 progress:
   total_phases: 7
@@ -180,7 +180,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Ticket 38 (`ticket/38-refinamento-visual`, pós-v1): bordas e títulos ajustados por tokens; laranja reservado a ações e tela atual, com cores próprias para status e prioridade; linhas das listas como painéis; nota em `docs/estudos/38-refinamento-visual.md`. PR #40 integrado na `main` (merge `b68bf5c`) após CI verde.
 - Ticket 39 (`ticket/39-novo-login`, pós-v1): login e cadastro refeitos com fundo de ondas em SVG, logo em S (também no menu e na aba), slogan novo e botão brilhante adaptado de componente externo; nota em `docs/estudos/39-novo-login.md`. PR #41 integrado na `main` (merge `8fee27c`).
 - Ticket 40 (`ticket/40-modo-demonstracao`, pós-v1): `docker-compose.demo.yml` e `demo/` sobem o sistema sem `.env`, com contas e chamados de exemplo, fora da imagem da API; job de CI e E2E provam os dois modos; nota em `docs/estudos/40-modo-demonstracao.md`. PR #42 integrado na `main` (merge `f82fa3a`) após CI verde.
-- Ticket 41 (`ticket/41-readme-portfolio`, pós-v1): README reorganizado para portfólio, com capturas reais; detalhes movidos para `docs/DOCUMENTACAO-TECNICA.md`; nota em `docs/estudos/41-readme-portfolio.md`. Publicação aguardando autorização.
+- Ticket 41 (`ticket/41-readme-portfolio`, pós-v1): README reorganizado para portfólio, com capturas reais; detalhes movidos para `docs/DOCUMENTACAO-TECNICA.md`; nota em `docs/estudos/41-readme-portfolio.md`. PR #43 integrado na `main` (merge `9a21853`).
+- Ticket 42 (`ticket/42-readme-git-clone`, pós-v1): a seção de demonstração do README passou a incluir `git clone` e `cd`, encontrados como lacuna no teste a partir de um clone novo. Publicação aguardando autorização.
 - Decisão aprovada em 2026-09-10: cada plano de implementação da Fase 3 em diante terá ticket/branch/PR próprio, integração sequencial e modo pedagógico. Fonte: docs/GIT-WORKFLOW.md.
 
 ### Blockers/Concerns
@@ -207,5 +208,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-09-30T10:44:52.656Z
-Stopped at: v1 complete; ticket 41 (portfolio README) ready to publish
+Stopped at: v1 complete; ticket 42 (git clone in README) ready to publish
 Resume file: none
